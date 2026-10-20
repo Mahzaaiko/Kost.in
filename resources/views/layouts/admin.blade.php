@@ -55,10 +55,15 @@
                     @endif
                 </a>
 
-                {{-- Menu 3: Fasilitas (Route belum dibuat) --}}
-                <a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-stone-100 transition-colors">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>
-                    Fasilitas
+                {{-- Menu 3: Fasilitas --}}
+                <a href="{{ route('admin.fasilitas') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.fasilitas*') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
+                    <span class="flex items-center gap-3">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>
+                        Fasilitas
+                    </span>
+                    @if (request()->routeIs('admin.fasilitas*'))
+                        <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                    @endif
                 </a>
             </nav>
         </div>

@@ -63,7 +63,7 @@
                 <h2 class="text-base font-bold">Data Kos Terbaru</h2>
                 <p class="mt-0.5 text-xs text-muted">Pembaruan data kos terakhir</p>
             </div>
-            <a href="#" class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-brand-dark">
+            <a href="{{ route('admin.datakos') }}" class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-brand-dark">
                 Lihat semua
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-5-5l5 5-5 5"/></svg>
             </a>

@@ -27,5 +27,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             return view('admin.datakosEdit', ['id' => $id]);
         })->name('datakos.edit');
     });
+    Route::get('/fasilitas', function () {
+        return view('admin.fasilitas');
+    })->name('fasilitas');
     
 });
