@@ -45,12 +45,12 @@
                 </a>
 
                 {{-- Menu 2: Data Kos --}}
-                <a href="{{ route('admin.datakos') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.datakos') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
+                <a href="{{ route('admin.datakos') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.datakos*') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
                     <span class="flex items-center gap-3">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path stroke-linecap="round" d="M9 8h2m2 0h2M9 12h2m2 0h2M10 21v-4h4v4"/></svg>
                         Data Kos
                     </span>
-                    @if (request()->routeIs('admin.datakos'))
+                    @if (request()->routeIs('admin.datakos*'))
                         <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
                     @endif
                 </a>

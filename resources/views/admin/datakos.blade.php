@@ -29,6 +29,39 @@
     filterTipe: '',
     filterStatus: ''
 }">
+{{-- 
+      =======================================================
+      UI ALERT SUKSES 
+      ======================================================= 
+    --}}
+    <div 
+        x-data="{ showAlert: true }" 
+        x-show="showAlert" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 -translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2"
+        class="mb-6 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 shadow-sm"
+    >
+        <div class="flex items-center gap-3">
+            {{-- Ikon Ceklis --}}
+            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-200/50 text-emerald-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <div>
+                <h4 class="text-sm font-bold text-emerald-800">Berhasil!</h4>
+                <p class="text-xs text-emerald-600">Data kos berhasil disimpan dan diterbitkan.</p>
+            </div>
+        </div>
+        
+        {{-- Tombol Close Alert --}}
+        <button @click="showAlert = false" class="text-emerald-500 transition-colors hover:text-emerald-700">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+    {{-- END ALERT --}}
     
     {{-- Header Section --}}
     <div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -36,10 +69,10 @@
             <h2 class="text-2xl font-bold text-ink">Data Kos</h2>
             <p class="mt-1 text-sm text-slate-500">Kelola informasi kos yang tersedia di sekitar Sekolah Vokasi IPB University.</p>
         </div>
-        <button class="flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark">
+        <a href="{{ route('admin.datakos.tambah') }}" class="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             Tambah Kos
-        </button>
+        </a>
     </div>
 
     {{-- Tabel Container --}}

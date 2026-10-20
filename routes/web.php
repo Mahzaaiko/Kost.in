@@ -12,7 +12,14 @@ Route::get('/', function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', fn () => redirect()->route('admin.dasbor'));
     Route::get('/dasbor', [DasborController::class, 'index'])->name('dasbor');
-    Route::get('/datakos', function () {
-        return view('admin.datakos');
-    })->name('datakos');
+    // DATA KOS
+    Route::prefix('datakos')->group(function () {
+        Route::get('/', function () {
+            return view('admin.datakos');
+        })->name('datakos');
+        Route::get('/tambah', function () {
+            return view('admin.datakosTambah');
+        })->name('datakos.tambah');
+    });
+    
 });
