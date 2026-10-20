@@ -20,6 +20,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/tambah', function () {
             return view('admin.datakosTambah');
         })->name('datakos.tambah');
+        Route::get('/{id}', function ($id) {
+            return view('admin.datakosDetail', ['id' => $id]);
+        })->name('datakos.detail');
         Route::get('/{id}/edit', function ($id) {
             return view('admin.datakosEdit', ['id' => $id]);
         })->name('datakos.edit');
