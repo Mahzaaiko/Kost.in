@@ -33,18 +33,30 @@
             {{-- Menu --}}
             <p class="mt-10 mb-3 px-3 text-xs font-semibold tracking-wide text-muted">MENU UTAMA</p>
             <nav class="space-y-1">
-                <a href="{{ route('admin.dasbor') }}" class="flex items-center justify-between rounded-xl bg-brand-soft px-3 py-2.5 text-sm font-semibold text-brand-dark">
+                {{-- Menu 1: Dashboard --}}
+                <a href="{{ route('admin.dasbor') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.dasbor') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
                     <span class="flex items-center gap-3">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/></svg>
                         Dashboard
                     </span>
-                    <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                    @if (request()->routeIs('admin.dasbor'))
+                        <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                    @endif
                 </a>
-                <a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-stone-100">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path stroke-linecap="round" d="M9 8h2m2 0h2M9 12h2m2 0h2M10 21v-4h4v4"/></svg>
-                    Data Kos
+
+                {{-- Menu 2: Data Kos --}}
+                <a href="{{ route('admin.datakos') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.datakos') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
+                    <span class="flex items-center gap-3">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path stroke-linecap="round" d="M9 8h2m2 0h2M9 12h2m2 0h2M10 21v-4h4v4"/></svg>
+                        Data Kos
+                    </span>
+                    @if (request()->routeIs('admin.datakos'))
+                        <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                    @endif
                 </a>
-                <a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-stone-100">
+
+                {{-- Menu 3: Fasilitas (Route belum dibuat) --}}
+                <a href="#" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-stone-100 transition-colors">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>
                     Fasilitas
                 </a>
@@ -83,8 +95,8 @@
             <div class="flex items-center gap-4">
                 
                 {{-- WRAPPER NOTIFIKASI DENGAN ALPINE.JS --}}
-                <!-- Tambahkan unreadCount: 4 (Nanti angka ini bisa diganti dengan variabel {{ $jumlahNotif }} dari controller) -->
-                <div x-data="{ notifOpen: false, unreadCount: 4 }" class="relative">
+                {{-- Nanti angka ini bisa diganti dengan variabel dari controller --}}
+                <div x-data="{ notifOpen: false, unreadCount: {{ $jumlahNotif ?? 4 }} }" class="relative">
                     
                     {{-- Lonceng Notifikasi --}}
                     <button 
