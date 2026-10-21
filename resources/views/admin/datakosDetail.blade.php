@@ -39,7 +39,7 @@
             {{-- Tombol Edit --}}
             <a 
                 href="{{ route('admin.datakos.edit', 1) }}" 
-                class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#c57b5f] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#a6644b] sm:w-auto"
+                class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#B46C54] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#955844] sm:w-auto"
             >
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 Edit Data

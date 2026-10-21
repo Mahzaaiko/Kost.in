@@ -15,8 +15,12 @@
 
     {{-- Memanggil Tailwind v4 via Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
-<body class="bg-page font-sans text-ink antialiased">
+<body class="bg-[#fbfbfb] font-sans antialiased">
 <div class="flex h-screen overflow-hidden">
 
     {{-- ================= SIDEBAR ================= --}}
@@ -88,7 +92,8 @@
     </aside>
 
     {{-- ================= KONTEN ================= --}}
-    <div class="flex flex-1 flex-col overflow-y-auto bg-page relative">
+    {{-- PERBAIKAN: overflow-y-auto diubah menjadi overflow-y-scroll di sini --}}
+    <div class="flex flex-1 flex-col overflow-y-scroll bg-page relative">
 
         {{-- Header --}}
         <header class="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200 bg-white/80 px-6 py-4 backdrop-blur-md lg:px-8">
@@ -100,7 +105,6 @@
             <div class="flex items-center gap-4">
                 
                 {{-- WRAPPER NOTIFIKASI DENGAN ALPINE.JS --}}
-                {{-- Nanti angka ini bisa diganti dengan variabel dari controller --}}
                 <div x-data="{ notifOpen: false, unreadCount: {{ $jumlahNotif ?? 4 }} }" class="relative">
                     
                     {{-- Lonceng Notifikasi --}}
@@ -113,9 +117,10 @@
                     >
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>
                         
-                        {{-- Angka notifikasi merah (Hanya muncul jika unreadCount > 0) --}}
+                        {{-- Angka notifikasi merah --}}
                         <span 
                             x-show="unreadCount > 0" 
+                            x-cloak
                             x-text="unreadCount"
                             x-transition:leave="transition ease-in duration-200"
                             x-transition:leave-start="opacity-100 scale-100"
@@ -127,6 +132,7 @@
                     {{-- Dropdown Panel Notifikasi --}}
                     <div 
                         x-show="notifOpen" 
+                        x-cloak
                         @click.outside="notifOpen = false"
                         x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
@@ -195,7 +201,7 @@
                         </div>
 
                         {{-- STATE 2: Jika kosong/semua sudah dibaca (Muncul saat unreadCount == 0) --}}
-                        <div x-show="unreadCount === 0" style="display: none;" class="flex flex-col items-center justify-center px-4 py-10">
+                        <div x-show="unreadCount === 0" x-cloak style="display: none;" class="flex flex-col items-center justify-center px-4 py-10">
                             <span class="flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 text-slate-300">
                                 <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             </span>

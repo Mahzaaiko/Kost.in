@@ -20,7 +20,7 @@
             <a href="{{ route('admin.datakos') }}" class="flex w-full items-center justify-center rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-stone-50 hover:text-slate-800 sm:w-auto">
                 Batal
             </a>
-            <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#c57b5f] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#a6644b] sm:w-auto shadow-sm">
+            <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#B46C54] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#955844] sm:w-auto shadow-sm">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 Simpan Perubahan
             </button>
