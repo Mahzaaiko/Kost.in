@@ -81,9 +81,9 @@
                     <p class="truncate text-xs text-muted">admin@kosvokasi.id</p>
                 </div>
             </div>
-            <form method="POST" action="{{ url('/logout') }}" class="mt-4">
+            <form method="POST" action="{{ route('admin.logout') }}" class="mt-4">
                 @csrf
-                <button type="submit" class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-brand-dark">
+                <button type="submit" class="flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-[#B46C54]">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg>
                     Keluar
                 </button>

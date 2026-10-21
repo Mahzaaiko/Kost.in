@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DasborController;
 
@@ -7,9 +6,24 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
 // ADMIN
 Route::prefix('admin')->name('admin.')->group(function () {
+    // LOGIN (UBAH jika udah ada controller)
+    Route::get('/login', function () {
+        return view('admin.login'); 
+    })->name('login');
+
+    // Dummy POST untuk simulasi tombol "Masuk" ditekan
+    Route::post('/login', function () {
+        // Pura-puranya login berhasil, langsung lempar ke Dasbor
+        return redirect()->route('admin.dasbor'); 
+    })->name('login.submit');
+
+    // Dummy POST untuk simulasi tombol "Keluar" di sidebar
+    Route::post('/logout', function () {
+        return redirect()->route('admin.login');
+    })->name('logout');
+
     Route::get('/', fn () => redirect()->route('admin.dasbor'));
     Route::get('/dasbor', [DasborController::class, 'index'])->name('dasbor');
     // DATA KOS
