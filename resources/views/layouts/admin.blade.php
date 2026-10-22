@@ -26,11 +26,9 @@
     {{-- ================= SIDEBAR ================= --}}
     <aside class="hidden lg:flex w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-stone-200 bg-white px-4 py-6">
         <div>
-            {{-- Logo --}}
+            {{-- Logo PNG --}}
             <a href="{{ route('admin.dasbor') }}" class="flex items-center gap-3 px-2">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.686 7-11a7 7 0 10-14 0c0 5.314 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-                </span>
+                <img src="{{ asset('images/logo kost.in.png') }}" alt="Kost.in Logo" class="h-8 w-auto object-contain">
                 <span class="text-xl font-extrabold text-brand">Kost<span class="text-ink">.in</span></span>
             </a>
 

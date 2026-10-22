@@ -6,6 +6,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// PENGGUNA
+Route::prefix('pengguna')->name('pengguna.')->group(function () {
+    Route::get('/beranda', function () {
+        return view('pengguna.beranda');
+    })->name('beranda');
+    Route::get('/jelajah-kos', function () {
+        return view('pengguna.jelajahKos');
+    })->name('jelajahKos');
+});
+
 // ADMIN
 Route::prefix('admin')->name('admin.')->group(function () {
     // LOGIN (UBAH jika udah ada controller)
@@ -44,5 +54,4 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/fasilitas', function () {
         return view('admin.fasilitas');
     })->name('fasilitas');
-    
 });
