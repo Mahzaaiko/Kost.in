@@ -1,30 +1,22 @@
-<!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jelajah Kos | Kost.in</title>
+@extends('layouts.pengguna')
 
-    {{-- Font: Plus Jakarta Sans --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@section('title', 'Jelajah Kos | Kost.in')
+@section('body_class', 'bg-[#f7f5f2]')
 
-    {{-- Leaflet --}}
+{{-- Atur lebar navbar khusus halaman ini agar selebar konten --}}
+@section('nav_width', 'max-w-[1600px]')
+
+@push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-    {{-- Tailwind CSS via Vite --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <style>
         .leaflet-container { font-family: 'Plus Jakarta Sans', sans-serif; background: #ece8e3; }
         .leaflet-popup-content-wrapper { border-radius: 10px; }
         .scroll-thin::-webkit-scrollbar { width: 6px; }
         .scroll-thin::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 6px; }
     </style>
-</head>
-<body class="bg-[#f7f5f2] font-sans text-stone-800 antialiased selection:bg-[#B46C54] selection:text-white">
+@endpush
 
+@section('content')
 @php
     // Titik pusat: Kampus SV IPB (koordinat perkiraan, sesuaikan dengan titik yang tepat)
     $kampus = ['nama' => 'SV IPB', 'lat' => -6.5886, 'lng' => 106.8032];
@@ -75,48 +67,10 @@
     $hargaMax = 15000000;
 @endphp
 
-    {{-- ================= NAVBAR ================= --}}
-    @php
-        $menu = [
-            ['label' => 'Beranda',     'url' => route('pengguna.beranda'),                'aktif' => request()->routeIs('pengguna.beranda')],
-            ['label' => 'Peta Kos',    'url' => route('pengguna.beranda') . '#peta',      'aktif' => false],
-            ['label' => 'Tentang',     'url' => route('pengguna.beranda') . '#tentang',   'aktif' => false],
-            ['label' => 'Jelajah Kos', 'url' => route('pengguna.jelajahKos'),             'aktif' => request()->routeIs('pengguna.jelajahKos')],
-        ]; 
-    @endphp
-
-    <header class="sticky top-0 z-[2000] border-b border-stone-200 bg-white/95 backdrop-blur">
-        <nav class="mx-auto grid max-w-[1600px] grid-cols-1 items-center gap-y-3 px-6 py-4 md:grid-cols-[1fr_auto_1fr]">
-            {{-- Logo --}}
-            <a href="{{ route('pengguna.beranda') }}" class="flex items-center justify-center gap-2.5 md:justify-start">
-                <img src="{{ asset('images/logo kost.in.png') }}" alt="Kost.in" class="h-7 w-auto object-contain">
-                <span class="text-lg font-extrabold tracking-tight text-stone-900">Kost<span class="text-[#B46C54]">.in</span></span>
-            </a>
-
-            {{-- Menu tengah --}}
-            <ul class="flex items-center justify-center gap-1 text-sm">
-                @foreach ($menu as $item)
-                    <li>
-                        <a href="{{ $item['url'] }}"
-                           @if ($item['aktif']) aria-current="page" @endif
-                           class="relative block px-4 py-2 font-medium transition-colors {{ $item['aktif'] ? 'text-[#B46C54] font-bold' : 'text-stone-600 hover:text-stone-900' }}">
-                            {{ $item['label'] }}
-                            <span class="absolute inset-x-4 -bottom-[17px] h-0.5 rounded-full bg-[#B46C54] transition-opacity {{ $item['aktif'] ? 'opacity-100' : 'opacity-0' }}"></span>
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
-
-            {{-- Spacer agar menu tetap di tengah --}}
-            <div class="hidden md:block"></div>
-        </nav>
-    </header>
-
-    {{-- ================= KONTEN ================= --}}
-    <main class="mx-auto grid max-w-[1600px] gap-5 p-5 lg:h-[calc(100vh-69px)] lg:grid-cols-[300px_minmax(0,1fr)_330px]">
+    <main class="mx-auto grid max-w-[1600px] gap-4 p-3 sm:gap-5 sm:p-5 lg:h-[calc(100vh-69px)] lg:grid-cols-[300px_minmax(0,1fr)_330px]">
 
         {{-- ========== KOLOM KIRI: FILTER + DAFTAR ========== --}}
-        <aside class="scroll-thin flex min-h-0 flex-col gap-5 lg:overflow-y-auto lg:pr-1">
+        <aside class="scroll-thin order-3 flex min-h-0 flex-col gap-5 lg:order-none lg:overflow-y-auto lg:pr-1">
 
             {{-- Filter --}}
             <section class="shrink-0 rounded-2xl border border-stone-200 bg-white p-4">
@@ -162,6 +116,7 @@
                             <li class="dd-opt flex cursor-pointer items-center justify-between px-3 py-2.5 text-sm transition-colors" data-value="Campur" data-label="Kos Campur" role="option"><span class="flex items-center gap-2.5"><span class="dd-dot h-2 w-2 rounded-full bg-purple-400"></span>Kos Campur</span><svg class="dd-check hidden h-4 w-4 text-[#B46C54]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></li>
                         </ul>
                     </div>
+                </div>
 
                 {{-- Fasilitas --}}
                 <div class="mt-4">
@@ -204,7 +159,7 @@
         </aside>
 
         {{-- ========== TENGAH: PETA ========== --}}
-        <section class="relative isolate h-[520px] overflow-hidden rounded-2xl border border-stone-200 lg:h-full">
+        <section class="relative isolate order-1 h-[460px] overflow-hidden rounded-2xl border border-stone-200 sm:h-[540px] lg:order-none lg:h-full">
             <div id="peta" class="absolute inset-0 z-0"></div>
 
             {{-- Pencarian + chip tipe --}}
@@ -222,7 +177,7 @@
             </div>
 
             {{-- Legenda --}}
-            <div id="overlay-legenda" class="absolute bottom-4 left-4 z-[1000] rounded-xl border border-stone-200 bg-white p-3 text-xs shadow-sm">
+            <div id="overlay-legenda" class="absolute bottom-4 left-4 z-[1000] hidden rounded-xl border border-stone-200 bg-white p-3 text-xs shadow-sm sm:block">
                 <p class="mb-2 font-bold text-stone-900">Legenda</p>
                 <ul class="space-y-1.5 text-stone-600">
                     <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-pink-400"></span>Kos Putri</li>
@@ -234,15 +189,29 @@
         </section>
 
         {{-- ========== KANAN: DETAIL ========== --}}
-        <aside class="scroll-thin min-h-0 overflow-hidden rounded-2xl border border-stone-200 bg-white lg:overflow-y-auto">
+        <aside class="scroll-thin order-2 min-h-0 overflow-hidden rounded-2xl border border-stone-200 bg-white lg:order-none lg:overflow-y-auto">
             <div id="detail-kosong" class="flex h-full min-h-[240px] items-center justify-center p-8 text-center text-sm text-stone-500">
                 Pilih kos di daftar atau di peta untuk melihat detailnya.
             </div>
 
             <div id="detail" class="hidden">
-                <img id="d-foto-utama" src="" alt="" class="aspect-[16/10] w-full object-cover">
+                {{-- Galeri foto: panah < > + tombol perbesar --}}
+                <div id="galeri" class="group relative aspect-[16/10] w-full overflow-hidden bg-stone-100">
+                    <img id="d-foto-utama" src="" alt="" class="h-full w-full cursor-zoom-in select-none object-cover">
 
-                <div id="d-thumbs" class="grid grid-cols-4 gap-2 px-4 pt-3"></div>
+                    <button id="g-prev" type="button" aria-label="Foto sebelumnya" class="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow transition hover:bg-white hover:text-[#B46C54]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button id="g-next" type="button" aria-label="Foto berikutnya" class="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow transition hover:bg-white hover:text-[#B46C54]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+
+                    <button id="g-zoom" type="button" aria-label="Perbesar foto" class="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-stone-700 shadow transition hover:bg-white hover:text-[#B46C54]">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"/></svg>
+                    </button>
+
+                    <span id="g-hitung" class="absolute bottom-2 left-2 rounded-full bg-stone-900/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm"></span>
+                </div>
 
                 <div class="p-4">
                     <div class="flex items-start justify-between gap-3">
@@ -276,7 +245,33 @@
         </aside>
     </main>
 
-    {{-- ================= SCRIPT ================= --}}
+    {{-- ========== LIGHTBOX FOTO (pop up) ========== --}}
+    <div id="lightbox" class="fixed inset-0 z-[5000] hidden flex-col bg-black/90 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Foto kos">
+        <div class="flex items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-4">
+            <div class="min-w-0 text-white">
+                <p id="lb-nama" class="truncate text-sm font-bold sm:text-base"></p>
+                <p id="lb-hitung" class="text-xs text-white/70"></p>
+            </div>
+            <button id="lb-tutup" type="button" aria-label="Tutup" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/25 sm:h-11 sm:w-11">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+        </div>
+
+        <div id="lb-area" class="relative flex min-h-0 flex-1 items-center justify-center px-2 sm:px-16">
+            <button id="lb-prev" type="button" aria-label="Foto sebelumnya" class="absolute left-2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/30 sm:left-5 sm:h-12 sm:w-12">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <img id="lb-foto" src="" alt="" class="max-h-full max-w-full select-none rounded-lg object-contain">
+            <button id="lb-next" type="button" aria-label="Foto berikutnya" class="absolute right-2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/30 sm:right-5 sm:h-12 sm:w-12">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <div id="lb-dots" class="flex items-center justify-center gap-2 px-4 py-4 sm:py-5"></div>
+    </div>
+@endsection
+
+@push('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -459,21 +454,11 @@
             $('detail-kosong').classList.toggle('hidden', !!k);
             if (!k) return;
 
-            $('d-foto-utama').src = k.fotos[0];
-            $('d-foto-utama').alt = k.nama;
-            $('d-thumbs').innerHTML = '';
-            k.fotos.forEach((f, i) => {
-                const b = document.createElement('button');
-                b.type = 'button';
-                b.className = 'overflow-hidden rounded-lg border-2 ' + (i === 0 ? 'border-[#B46C54]' : 'border-transparent');
-                b.innerHTML = '<img src="' + f + '" alt="" class="aspect-square w-full object-cover">';
-                b.addEventListener('click', () => {
-                    $('d-foto-utama').src = f;
-                    [...$('d-thumbs').children].forEach(c => { c.classList.remove('border-[#B46C54]'); c.classList.add('border-transparent'); });
-                    b.classList.add('border-[#B46C54]'); b.classList.remove('border-transparent');
-                });
-                $('d-thumbs').appendChild(b);
-            });
+            // Galeri: reset ke foto pertama hanya bila kos berganti
+            if (galeri.kosId !== k.id) { galeri.kosId = k.id; galeri.idx = 0; }
+            galeri.fotos = k.fotos;
+            galeri.nama = k.nama;
+            tampilFoto();
 
             $('d-nama').textContent = k.nama;
             $('d-tipe').textContent = 'Kos ' + k.tipe;
@@ -501,8 +486,86 @@
         }
 
         function fitKeFilter(hasil) {
-            map.fitBounds(L.circle([KAMPUS.lat, KAMPUS.lng], { radius: state.jarak * 1000 }).getBounds(), { padding: [30, 30] });
+            map.fitBounds(L.latLng(KAMPUS.lat, KAMPUS.lng).toBounds(state.jarak * 2000), { padding: [30, 30] });
         }
+
+        // ---------- Galeri foto + lightbox ----------
+        const galeri = { kosId: null, idx: 0, fotos: [], nama: '' };
+        const lb = $('lightbox');
+        const lbBuka = () => !lb.classList.contains('hidden');
+
+        function tampilFoto() {
+            const n = galeri.fotos.length;
+            if (!n) return;
+            const src = galeri.fotos[galeri.idx];
+            $('d-foto-utama').src = src;
+            $('d-foto-utama').alt = galeri.nama + ' - foto ' + (galeri.idx + 1);
+            $('g-hitung').textContent = (galeri.idx + 1) + ' / ' + n;
+            $('g-prev').classList.toggle('hidden', n < 2);
+            $('g-next').classList.toggle('hidden', n < 2);
+
+            if (lbBuka()) {
+                $('lb-foto').src = src;
+                $('lb-foto').alt = galeri.nama + ' - foto ' + (galeri.idx + 1);
+                $('lb-hitung').textContent = 'Foto ' + (galeri.idx + 1) + ' dari ' + n;
+                [...$('lb-dots').children].forEach((d, i) => {
+                    d.className = 'h-2 rounded-full transition-all ' + (i === galeri.idx ? 'w-6 bg-white' : 'w-2 bg-white/40 hover:bg-white/70');
+                });
+                $('lb-prev').classList.toggle('hidden', n < 2);
+                $('lb-next').classList.toggle('hidden', n < 2);
+            }
+        }
+        function geserFoto(arah) {
+            const n = galeri.fotos.length;
+            if (n < 2) return;
+            galeri.idx = (galeri.idx + arah + n) % n;
+            tampilFoto();
+        }
+        function bukaLightbox() {
+            if (!galeri.fotos.length) return;
+            lb.classList.remove('hidden'); lb.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            $('lb-nama').textContent = galeri.nama;
+            $('lb-dots').innerHTML = '';
+            galeri.fotos.forEach((_, i) => {
+                const d = document.createElement('button');
+                d.type = 'button'; d.setAttribute('aria-label', 'Foto ' + (i + 1));
+                d.addEventListener('click', () => { galeri.idx = i; tampilFoto(); });
+                $('lb-dots').appendChild(d);
+            });
+            tampilFoto();
+            $('lb-tutup').focus();
+        }
+        function tutupLightbox() {
+            lb.classList.add('hidden'); lb.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        $('g-prev').addEventListener('click', () => geserFoto(-1));
+        $('g-next').addEventListener('click', () => geserFoto(1));
+        $('g-zoom').addEventListener('click', bukaLightbox);
+        $('d-foto-utama').addEventListener('click', bukaLightbox);
+        $('lb-prev').addEventListener('click', () => geserFoto(-1));
+        $('lb-next').addEventListener('click', () => geserFoto(1));
+        $('lb-tutup').addEventListener('click', tutupLightbox);
+        // klik area gelap (di luar foto & tombol) menutup
+        lb.addEventListener('click', e => { if (e.target === lb || e.target === $('lb-area')) tutupLightbox(); });
+        document.addEventListener('keydown', e => {
+            if (!lbBuka()) return;
+            if (e.key === 'Escape') tutupLightbox();
+            if (e.key === 'ArrowLeft') geserFoto(-1);
+            if (e.key === 'ArrowRight') geserFoto(1);
+        });
+        // geser jari (HP): di galeri & lightbox
+        [$('d-foto-utama'), $('lb-area')].forEach(el => {
+            let x0 = null;
+            el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+            el.addEventListener('touchend', e => {
+                if (x0 === null) return;
+                const dx = e.changedTouches[0].clientX - x0; x0 = null;
+                if (Math.abs(dx) > 50) geserFoto(dx < 0 ? 1 : -1);
+            });
+        });
 
         // ---------- Tombol rute (toggle garis kampus - kos) ----------
         function updateTombolRute() {
@@ -604,5 +667,4 @@
         setTimeout(() => map.invalidateSize(), 200);
     });
     </script>
-</body>
-</html>
+@endpush
