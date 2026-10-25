@@ -1,6 +1,8 @@
 <?php
-use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DasborController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,40 +20,37 @@ Route::prefix('pengguna')->name('pengguna.')->group(function () {
 
 // ADMIN
 Route::prefix('admin')->name('admin.')->group(function () {
-    // LOGIN (UBAH jika udah ada controller)
-    Route::get('/login', function () {
-        return view('admin.login'); 
-    })->name('login');
-
-    // Dummy POST untuk simulasi tombol "Masuk" ditekan
-    Route::post('/login', function () {
-        // Pura-puranya login berhasil, langsung lempar ke Dasbor
-        return redirect()->route('admin.dasbor'); 
-    })->name('login.submit');
-
-    // Dummy POST untuk simulasi tombol "Keluar" di sidebar
-    Route::post('/logout', function () {
-        return redirect()->route('admin.login');
-    })->name('logout');
-
-    Route::get('/', fn () => redirect()->route('admin.dasbor'));
-    Route::get('/dasbor', [DasborController::class, 'index'])->name('dasbor');
-    // DATA KOS
-    Route::prefix('datakos')->group(function () {
-        Route::get('/', function () {
-            return view('admin.datakos');
-        })->name('datakos');
-        Route::get('/tambah', function () {
-            return view('admin.datakosTambah');
-        })->name('datakos.tambah');
-        Route::get('/{id}', function ($id) {
-            return view('admin.datakosDetail', ['id' => $id]);
-        })->name('datakos.detail');
-        Route::get('/{id}/edit', function ($id) {
-            return view('admin.datakosEdit', ['id' => $id]);
-        })->name('datakos.edit');
+    // Login hanya untuk tamu; admin yang sudah login diarahkan ke dasbor.
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [AuthController::class, 'create'])->name('login');
+        Route::post('/login', [AuthController::class, 'store'])->name('login.submit');
     });
-    Route::get('/fasilitas', function () {
-        return view('admin.fasilitas');
-    })->name('fasilitas');
+
+    // Semua halaman admin di bawah ini wajib login.
+    Route::middleware('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+
+        Route::get('/', fn () => redirect()->route('admin.dasbor'));
+        Route::get('/dasbor', [DasborController::class, 'index'])->name('dasbor');
+
+        // DATA KOS (masih view statis, diganti controller di Fase Admin)
+        Route::prefix('datakos')->group(function () {
+            Route::get('/', function () {
+                return view('admin.datakos');
+            })->name('datakos');
+            Route::get('/tambah', function () {
+                return view('admin.datakosTambah');
+            })->name('datakos.tambah');
+            Route::get('/{id}', function ($id) {
+                return view('admin.datakosDetail', ['id' => $id]);
+            })->name('datakos.detail');
+            Route::get('/{id}/edit', function ($id) {
+                return view('admin.datakosEdit', ['id' => $id]);
+            })->name('datakos.edit');
+        });
+
+        Route::get('/fasilitas', function () {
+            return view('admin.fasilitas');
+        })->name('fasilitas');
+    });
 });

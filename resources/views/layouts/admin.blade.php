@@ -73,10 +73,10 @@
         {{-- Profil & keluar --}}
         <div class="mt-8 rounded-2xl bg-page p-4">
             <div class="flex items-center gap-3">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white">AD</span>
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white">{{ strtoupper(mb_substr(auth()->user()?->name ?? 'AD', 0, 2)) }}</span>
                 <div class="min-w-0">
-                    <p class="truncate text-sm font-semibold">Administrator</p>
-                    <p class="truncate text-xs text-muted">admin@kosvokasi.id</p>
+                    <p class="truncate text-sm font-semibold">{{ auth()->user()?->name ?? 'Administrator' }}</p>
+                    <p class="truncate text-xs text-muted">{{ auth()->user()?->email }}</p>
                 </div>
             </div>
             <form method="POST" action="{{ route('admin.logout') }}" class="mt-4">
