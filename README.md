@@ -51,3 +51,8 @@ Secara garis besar, alur interaksi pengguna pada Kost.in adalah sebagai berikut:
 │   Hubungi Pemilik Kos   │
 └─────────────────────────┘
 ```
+
+## Dokumentasi Backend
+
+- [Progres backend, keputusan teknis, dan alur kerja tim](docs/PROGRES-BACKEND.md)
+- [Setup di Windows](docs/SETUP-WINDOWS.md)
