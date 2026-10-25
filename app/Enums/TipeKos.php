@@ -17,4 +17,21 @@ enum TipeKos: string
             self::Campur => 'Campur',
         };
     }
+
+    public static function dariLabel(?string $label): ?self
+    {
+        foreach (self::cases() as $tipe) {
+            if ($tipe->label() === $label) {
+                return $tipe;
+            }
+        }
+
+        return null;
+    }
+
+    /** @return list<string> */
+    public static function labels(): array
+    {
+        return array_map(fn (self $t) => $t->label(), self::cases());
+    }
 }

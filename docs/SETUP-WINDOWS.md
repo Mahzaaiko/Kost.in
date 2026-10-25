@@ -34,9 +34,16 @@ Hasilnya: tabel `kos`, `fasilitas`, `fasilitas_kos`, `foto_kos`, 24 master
 fasilitas, dan satu akun admin.
 
 ## 4. Jalankan
+`composer run dev` tidak bisa dipakai di Windows karena ikut menjalankan
+`php artisan pail` yang butuh extension `pcntl` (tidak tersedia di Windows).
+Jalankan dua perintah ini di dua terminal terpisah:
+
 ```bash
-npm install
-composer run dev
+# Terminal 1
+php artisan serve
+
+# Terminal 2 (sekali saja sebelumnya: npm install)
+npm run dev
 ```
 Buka http://127.0.0.1:8000/admin/login dan masuk dengan email atau username admin.
 

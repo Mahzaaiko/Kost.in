@@ -2,32 +2,49 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StatusKos;
 use App\Http\Controllers\Controller;
+use App\Models\Fasilitas;
+use App\Models\Kos;
+use App\Support\Koordinat;
+use Illuminate\View\View;
 
 class DasborController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        // 1. Data statistik
+        $total = Kos::count();
+        $aktif = Kos::aktif()->count();
+        $bulanIni = Kos::where('created_at', '>=', now()->startOfMonth())->count();
+        $terpetakan = Kos::whereNotNull('lokasi')->count();
+        $belumTerpetakan = $total - $terpetakan;
+
         $stats = [
-            ['label' => 'Total Kos',         'value' => 128, 'unit' => 'kos',      'note' => '+8 bulan ini',   'icon' => 'building', 'primary' => true],
-            ['label' => 'Kos Aktif',         'value' => 115, 'unit' => 'kos',      'note' => '89,8% dari total', 'icon' => 'check'],
-            ['label' => 'Data Fasilitas',    'value' => 18,  'unit' => 'fasilitas', 'note' => 'Jenis fasilitas', 'icon' => 'sparkles'],
-            ['label' => 'Lokasi Terdaftar',  'value' => 128, 'unit' => 'lokasi',   'note' => 'Semua terpetakan', 'icon' => 'pin'],
+            ['label' => 'Total Kos', 'value' => $total, 'unit' => 'kos', 'note' => "+{$bulanIni} bulan ini", 'icon' => 'building', 'primary' => true],
+            ['label' => 'Kos Aktif', 'value' => $aktif, 'unit' => 'kos', 'note' => $total > 0 ? number_format($aktif / $total * 100, 1, ',', '.').'% dari total' : 'Belum ada data', 'icon' => 'check'],
+            ['label' => 'Data Fasilitas', 'value' => Fasilitas::count(), 'unit' => 'fasilitas', 'note' => 'Jenis fasilitas', 'icon' => 'sparkles'],
+            ['label' => 'Lokasi Terdaftar', 'value' => $terpetakan, 'unit' => 'lokasi', 'note' => $belumTerpetakan > 0 ? "{$belumTerpetakan} kos belum terpetakan" : 'Semua terpetakan', 'icon' => 'pin'],
         ];
 
-        // 2. Data tabel kos terbaru
-        $kosTerbaru = [
-            ['nama' => 'Kos Putri Melati',   'alamat' => 'Jl. Kemuning No. 12, Dramaga, Bogor', 'harga' => 'Rp700rb', 'waktu' => '2 menit lalu', 'foto' => 'https://placehold.co/88x88/6b4a3a/ffffff?text=K'],
-            ['nama' => 'Kos Putra Mandiri',  'alamat' => 'Jl. Raya Dramaga No. 45, Bogor',      'harga' => 'Rp550rb', 'waktu' => '2 hari lalu',  'foto' => 'https://placehold.co/88x88/2f2a28/ffffff?text=K'],
-            ['nama' => 'Kos Griya Sejahtera', 'alamat' => 'Jl. Babakan Raya No. 7, Bogor',      'harga' => 'Rp950rb', 'waktu' => '3 hari lalu',  'foto' => 'https://placehold.co/88x88/b9b0a4/ffffff?text=K'],
-            ['nama' => 'Kos Anggrek Indah',  'alamat' => 'Jl. Anggrek No. 3, Dramaga, Bogor',   'harga' => 'Rp800rb', 'waktu' => '4 hari lalu',  'foto' => 'https://placehold.co/88x88/4a403b/ffffff?text=K'],
-        ];
+        $kosTerbaru = Kos::with('fotoUtama')->latest('updated_at')->latest('id')->limit(4)->get();
 
-        // 3. Jumlah notifikasi yang belum dibaca (dikirim ke Alpine.js)
-        $jumlahNotif = 4;
+        // Titik untuk peta persebaran (draft ikut ditampilkan, dibedakan warnanya).
+        $titikKos = Kos::whereNotNull('lokasi')
+            ->get(['id', 'nama', 'status', 'lokasi'])
+            ->map(fn (Kos $k) => [
+                'nama' => $k->nama,
+                'aktif' => $k->status === StatusKos::Aktif,
+                'lat' => $k->lokasi->lat,
+                'lng' => $k->lokasi->lng,
+                'url' => route('admin.datakos.detail', $k),
+            ])
+            ->values();
 
-        // Kirim semua variabel ke view menggunakan compact()
-        return view('admin.dasbor', compact('stats', 'kosTerbaru', 'jumlahNotif'));
+        return view('admin.dasbor', [
+            'stats' => $stats,
+            'kosTerbaru' => $kosTerbaru,
+            'titikKos' => $titikKos,
+            'kampus' => Koordinat::kampus(),
+        ]);
     }
 }

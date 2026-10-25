@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\GeographyPoint;
+use App\Enums\PeriodeSewa;
 use App\Enums\StatusKos;
 use App\Enums\TipeKos;
 use App\Support\Koordinat;
@@ -33,7 +34,6 @@ class Kos extends Model
 
     protected $fillable = [
         'nama',
-        'nama_pemilik',
         'no_telepon',
         'alamat',
         'deskripsi',
@@ -88,12 +88,38 @@ class Kos extends Model
     /** Label periode minimal untuk UI, mengikuti pilihan di form admin. */
     public function labelPeriode(): ?string
     {
-        return match ($this->periode_minimal_bulan) {
-            1 => '1 Bulan',
-            3 => '3 Bulan',
-            6 => '6 Bulan',
-            12 => 'Tahunan',
-            default => null,
-        };
+        return PeriodeSewa::tryFrom((int) $this->periode_minimal_bulan)?->label();
+    }
+
+    /**
+     * Data yang masih kurang agar kos boleh berstatus Aktif.
+     * Kosong berarti kos sudah lengkap.
+     *
+     * @return list<string>
+     */
+    public function kekuranganUntukAktif(): array
+    {
+        $kurang = [];
+
+        if ($this->tipe === null) {
+            $kurang[] = 'tipe kos';
+        }
+        if ($this->harga_per_bulan === null) {
+            $kurang[] = 'harga per bulan';
+        }
+        if ($this->periode_minimal_bulan === null) {
+            $kurang[] = 'periode minimal sewa';
+        }
+        if (blank($this->alamat)) {
+            $kurang[] = 'alamat';
+        }
+        if ($this->lokasi === null) {
+            $kurang[] = 'titik lokasi';
+        }
+        if (! $this->foto()->exists()) {
+            $kurang[] = 'minimal 1 foto';
+        }
+
+        return $kurang;
     }
 }

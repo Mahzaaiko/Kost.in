@@ -103,7 +103,7 @@
             <div class="flex items-center gap-4">
                 
                 {{-- WRAPPER NOTIFIKASI DENGAN ALPINE.JS --}}
-                <div x-data="{ notifOpen: false, unreadCount: {{ $jumlahNotif ?? 4 }} }" class="relative">
+                <div x-data="{ notifOpen: false, unreadCount: {{ $jumlahNotif ?? 0 }} }" class="relative">
                     
                     {{-- Lonceng Notifikasi --}}
                     <button 
@@ -152,7 +152,9 @@
                             </button>
                         </div>
 
-                        {{-- STATE 1: Jika ada notifikasi (Muncul saat unreadCount > 0) --}}
+                        {{-- STATE 1: Jika ada notifikasi. Fitur notifikasi masih di backlog,
+                             jadi contoh item di bawah tidak dirender sampai $notifikasi tersedia. --}}
+                        @if (! empty($notifikasi))
                         <div x-show="unreadCount > 0" class="max-h-[300px] overflow-y-auto overscroll-contain">
                             {{-- Item 1 --}}
                             <a href="#" class="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-stone-50">
@@ -198,13 +200,15 @@
                             </a>
                         </div>
 
+                        @endif
+
                         {{-- STATE 2: Jika kosong/semua sudah dibaca (Muncul saat unreadCount == 0) --}}
                         <div x-show="unreadCount === 0" x-cloak style="display: none;" class="flex flex-col items-center justify-center px-4 py-10">
                             <span class="flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 text-slate-300">
                                 <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             </span>
-                            <p class="mt-3 text-[13px] font-semibold text-slate-500">Semua notifikasi sudah dibaca</p>
-                            <p class="text-[11px] text-slate-400">Kerja bagus, tidak ada pembaruan terlewat!</p>
+                            <p class="mt-3 text-[13px] font-semibold text-slate-500">Belum ada notifikasi</p>
+                            <p class="text-[11px] text-slate-400">Pembaruan data kos akan muncul di sini.</p>
                         </div>
 
                         {{-- Footer Dropdown (Tombol eksekusi yang mengubah nilai unreadCount jadi 0) --}}
@@ -222,10 +226,10 @@
 
                 <span class="hidden h-8 w-px bg-stone-200 sm:block"></span>
                 <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-xs font-bold text-brand-dark">AD</span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-xs font-bold text-brand-dark">{{ strtoupper(mb_substr(auth()->user()?->name ?? 'AD', 0, 2)) }}</span>
                     <div class="hidden leading-tight sm:block">
-                        <p class="text-sm font-semibold">Admin</p>
-                        <p class="text-xs text-muted">Super Admin</p>
+                        <p class="text-sm font-semibold">{{ auth()->user()?->name ?? 'Admin' }}</p>
+                        <p class="text-xs text-muted">Administrator</p>
                     </div>
                 </div>
             </div>

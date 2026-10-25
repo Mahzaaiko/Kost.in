@@ -5,22 +5,6 @@
 @section('breadcrumb', 'Admin / Dashboard')
 
 @section('content')
-@php
-    // Data contoh — nanti diganti dengan variabel dari DasborController
-    $stats = [
-        ['label' => 'Total Kos',         'value' => 128, 'unit' => 'kos',      'note' => '+8 bulan ini',   'icon' => 'building', 'primary' => true],
-        ['label' => 'Kos Aktif',         'value' => 115, 'unit' => 'kos',      'note' => '89,8% dari total', 'icon' => 'check'],
-        ['label' => 'Data Fasilitas',    'value' => 18,  'unit' => 'fasilitas', 'note' => 'Jenis fasilitas', 'icon' => 'sparkles'],
-        ['label' => 'Lokasi Terdaftar',  'value' => 128, 'unit' => 'lokasi',   'note' => 'Semua terpetakan', 'icon' => 'pin'],
-    ];
-
-    $kosTerbaru = [
-        ['nama' => 'Kos Putri Melati',   'alamat' => 'Jl. Kemuning No. 12, Dramaga, Bogor', 'harga' => 'Rp700rb', 'waktu' => '2 menit lalu', 'foto' => 'https://placehold.co/88x88/6b4a3a/ffffff?text=K'],
-        ['nama' => 'Kos Putra Mandiri',  'alamat' => 'Jl. Raya Dramaga No. 45, Bogor',      'harga' => 'Rp550rb', 'waktu' => '2 hari lalu',  'foto' => 'https://placehold.co/88x88/2f2a28/ffffff?text=K'],
-        ['nama' => 'Kos Griya Sejahtera', 'alamat' => 'Jl. Babakan Raya No. 7, Bogor',      'harga' => 'Rp950rb', 'waktu' => '3 hari lalu',  'foto' => 'https://placehold.co/88x88/b9b0a4/ffffff?text=K'],
-        ['nama' => 'Kos Anggrek Indah',  'alamat' => 'Jl. Anggrek No. 3, Dramaga, Bogor',   'harga' => 'Rp800rb', 'waktu' => '4 hari lalu',  'foto' => 'https://placehold.co/88x88/4a403b/ffffff?text=K'],
-    ];
-@endphp
 
 {{-- Kartu statistik --}}
 <section class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -70,20 +54,32 @@
         </div>
 
         <ul class="divide-y divide-stone-200 border-t border-stone-200">
-            @foreach ($kosTerbaru as $kos)
-                <li class="flex items-center gap-4 px-6 py-4">
-                    <img src="{{ $kos['foto'] }}" alt="Foto {{ $kos['nama'] }}" class="h-11 w-11 shrink-0 rounded-md object-cover">
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-bold">{{ $kos['nama'] }}</p>
-                        <p class="mt-0.5 truncate text-xs text-muted">{{ $kos['alamat'] }}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm font-bold">{{ $kos['harga'] }}</p>
-                        <p class="mt-0.5 text-xs text-muted">{{ $kos['waktu'] }}</p>
-                    </div>
-                    <span class="rounded-full bg-brand-soft px-3 py-1.5 text-xs font-semibold text-brand-dark">Aktif</span>
+            @forelse ($kosTerbaru as $kos)
+                <li>
+                    <a href="{{ route('admin.datakos.detail', $kos) }}" class="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-stone-50">
+                        @if ($kos->fotoUtama)
+                            <img src="{{ $kos->fotoUtama->url() }}" alt="Foto {{ $kos->nama }}" class="h-11 w-11 shrink-0 rounded-md object-cover">
+                        @else
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[#5d4a41] text-sm font-bold text-white">{{ mb_strtoupper(mb_substr($kos->nama, 0, 1)) }}</span>
+                        @endif
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-bold">{{ $kos->nama }}</p>
+                            <p class="mt-0.5 truncate text-xs text-muted">{{ $kos->alamat ?? 'Alamat belum diisi' }}</p>
+                        </div>
+                        <div class="hidden text-right sm:block">
+                            <p class="text-sm font-bold">{{ \App\Support\Format::rupiah($kos->harga_per_bulan) }}</p>
+                            <p class="mt-0.5 text-xs text-muted">{{ $kos->updated_at?->diffForHumans() }}</p>
+                        </div>
+                        @if ($kos->status === \App\Enums\StatusKos::Aktif)
+                            <span class="rounded-full bg-brand-soft px-3 py-1.5 text-xs font-semibold text-brand-dark">Aktif</span>
+                        @else
+                            <span class="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700">Draft</span>
+                        @endif
+                    </a>
                 </li>
-            @endforeach
+            @empty
+                <li class="px-6 py-10 text-center text-sm text-muted">Belum ada data kos.</li>
+            @endforelse
         </ul>
     </div>
 
@@ -94,27 +90,47 @@
             <p class="mt-0.5 text-xs text-muted">Area sekitar kampus</p>
         </div>
 
-        {{-- Peta ilustrasi (Nanti kita ganti dengan Leaflet sungguhan) --}}
-        <div class="relative min-h-[260px] flex-1 overflow-hidden border-t border-stone-200 bg-[#EFE4DF]">
-            {{-- Penanda kos --}}
-            @foreach ([['left-[32%]','top-[34%]'], ['left-[66%]','top-[20%]'], ['left-[88%]','top-[40%]'], ['left-[72%]','top-[60%]'], ['left-[26%]','top-[76%]']] as [$x, $y])
-                <span class="absolute {{ $x }} {{ $y }} flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md">
-                    <svg class="h-4 w-4 text-brand" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.686 7-11a7 7 0 10-14 0c0 5.314 7 11 7 11z"/><circle cx="12" cy="10" r="2"/></svg>
-                </span>
-            @endforeach
-
-            {{-- Penanda kampus --}}
-            <div class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-                <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-ink text-white shadow-lg">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-5 9 5-9 5-9-5zm4 3v4c0 1 2.2 2 5 2s5-1 5-2v-4"/></svg>
-                </span>
-                <span class="mt-1 whitespace-nowrap rounded bg-ink px-2 py-0.5 text-[11px] font-semibold text-white">Kampus SV IPB</span>
-            </div>
-        </div>
+        {{-- Peta persebaran: semua kos yang sudah punya titik --}}
+        <div id="peta-dasbor" class="relative z-0 min-h-[260px] flex-1 border-t border-stone-200 bg-[#EFE4DF]"></div>
 
         <div class="border-t border-stone-200 px-6 py-4 text-xs text-slate-600">
-            <span class="font-bold text-ink">128</span> titik lokasi
+            <span class="font-bold text-ink">{{ $titikKos->count() }}</span> titik lokasi
+            <span class="ml-3 inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-[#B46C54]"></span>Aktif</span>
+            <span class="ml-2 inline-flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>Draft</span>
         </div>
     </div>
 </section>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const KAMPUS = @js(['lat' => $kampus->lat, 'lng' => $kampus->lng, 'nama' => config('kostin.kampus.nama')]);
+    const TITIK = @js($titikKos);
+
+    const peta = L.map('peta-dasbor', { scrollWheelZoom: false }).setView([KAMPUS.lat, KAMPUS.lng], 14);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(peta);
+
+    L.marker([KAMPUS.lat, KAMPUS.lng], {
+        icon: L.divIcon({ className: '', html: '<span style="display:flex;width:22px;height:22px;border-radius:6px;background:#1c1917;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(0,0,0,.4)"></span>', iconSize: [0, 0] }),
+        interactive: false, keyboard: false
+    }).addTo(peta).bindTooltip(KAMPUS.nama, { direction: 'top', offset: [0, -12] });
+
+    const batas = [[KAMPUS.lat, KAMPUS.lng]];
+    TITIK.forEach(t => {
+        L.circleMarker([t.lat, t.lng], {
+            radius: 7, weight: 2, color: '#ffffff',
+            fillColor: t.aktif ? '#B46C54' : '#fbbf24', fillOpacity: 1
+        }).addTo(peta)
+          .bindTooltip(t.nama + (t.aktif ? '' : ' (Draft)'), { direction: 'top' })
+          .on('click', () => { window.location.href = t.url; });
+        batas.push([t.lat, t.lng]);
+    });
+    if (batas.length > 1) peta.fitBounds(batas, { padding: [30, 30], maxZoom: 16 });
+    setTimeout(() => peta.invalidateSize(), 200);
+});
+</script>
 @endsection

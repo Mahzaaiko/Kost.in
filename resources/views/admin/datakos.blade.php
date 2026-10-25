@@ -5,17 +5,6 @@
 @section('breadcrumb', 'Admin / Data kos')
 
 @section('content')
-@php
-    // Dummy data — Nanti dipindahkan ke Controller
-    $dataKos = [
-        ['nama' => 'Kos Putri Melati',   'alamat' => 'Jl. Kemuning No. 12, Dramaga, Bogor', 'tipe' => 'Putri',  'harga' => 'Rp700.000', 'jarak' => '1.2 km', 'fasilitas_utama' => 'Wi-Fi', 'fasilitas_plus' => '+3', 'status' => 'Aktif', 'foto' => 'https://placehold.co/88x88/6b4a3a/ffffff?text=K'],
-        ['nama' => 'Kos Putra Mandiri',  'alamat' => 'Jl. Raya Dramaga No. 45, Bogor',      'tipe' => 'Putra',  'harga' => 'Rp550.000', 'jarak' => '0.8 km', 'fasilitas_utama' => 'Wi-Fi', 'fasilitas_plus' => '+2', 'status' => 'Aktif', 'foto' => 'https://placehold.co/88x88/2f2a28/ffffff?text=K'],
-        ['nama' => 'Kos Griya Sejahtera', 'alamat' => 'Jl. Babakan Raya No. 7, Bogor',      'tipe' => 'Campur', 'harga' => 'Rp950.000', 'jarak' => '1.8 km', 'fasilitas_utama' => 'Wi-Fi', 'fasilitas_plus' => '+5', 'status' => 'Aktif', 'foto' => 'https://placehold.co/88x88/b9b0a4/ffffff?text=K'],
-        ['nama' => 'Kos Anggrek Indah',  'alamat' => 'Jl. Anggrek No. 3, Dramaga, Bogor',   'tipe' => 'Putri',  'harga' => 'Rp800.000', 'jarak' => '1.5 km', 'fasilitas_utama' => 'Wi-Fi', 'fasilitas_plus' => '+3', 'status' => 'Aktif', 'foto' => 'https://placehold.co/88x88/4a403b/ffffff?text=K'],
-        ['nama' => 'Kos Budi Jaya',      'alamat' => 'Jl. Kampus IPB No. 22, Bogor',        'tipe' => 'Putra',  'harga' => 'Rp450.000', 'jarak' => '0.5 km', 'fasilitas_utama' => 'Wi-Fi', 'fasilitas_plus' => '+1', 'status' => 'Draft', 'foto' => 'https://placehold.co/88x88/d3cdc4/ffffff?text=K'],
-        ['nama' => 'Kos Harmoni Vokasi', 'alamat' => 'Jl. Raya Ciampea No. 15, Bogor',      'tipe' => 'Campur', 'harga' => 'Rp1.200.000', 'jarak' => '2.1 km', 'fasilitas_utama' => 'Wi-Fi', 'fasilitas_plus' => '+6', 'status' => 'Aktif', 'foto' => 'https://placehold.co/88x88/a49d94/ffffff?text=K'],
-    ];
-@endphp
 
 {{-- 
   WRAPPER ALPINE UTAMA 
@@ -24,39 +13,50 @@
 <div x-data="{ 
     isDeleteModalOpen: false, 
     kosToDelete: '',
+    urlHapus: '',
     isFilterOpen: false,
     searchQuery: '',
     filterTipe: '',
     filterStatus: ''
 }">
 
-    {{-- ================= UI ALERT SUKSES (Ditambah x-cloak) ================= --}}
+    {{-- ================= UI ALERT (dari session) ================= --}}
+    @if (session('success'))
     <div 
         x-data="{ showAlert: true }" 
         x-show="showAlert" 
         x-cloak
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 -translate-y-2"
-        x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 -translate-y-2"
         class="mb-6 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 shadow-sm"
     >
         <div class="flex items-center gap-3">
-            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-200/50 text-emerald-600">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-200/50 text-emerald-600">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             </span>
             <div>
                 <h4 class="text-sm font-bold text-emerald-800">Berhasil!</h4>
-                <p class="text-xs text-emerald-600">Data kos berhasil disimpan dan diterbitkan.</p>
+                <p class="text-xs text-emerald-600">{{ session('success') }}</p>
             </div>
         </div>
-        
-        <button @click="showAlert = false" class="text-emerald-500 transition-colors hover:text-emerald-700">
+        <button type="button" @click="showAlert = false" class="text-emerald-500 transition-colors hover:text-emerald-700" aria-label="Tutup">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
     </div>
+    @endif
+
+    @if ($errors->any())
+    <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 shadow-sm">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        </span>
+        <div>
+            <h4 class="text-sm font-bold text-red-800">Belum bisa disimpan</h4>
+            <p class="text-xs text-red-600">{{ $errors->first() }}</p>
+        </div>
+    </div>
+    @endif
 
     {{-- ================= HEADER ================= --}}
     <div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -101,7 +101,7 @@
                     Filter
                 </button>
                 
-                <span class="text-sm font-medium text-slate-500">128 data kos</span>
+                <span class="text-sm font-medium text-slate-500">{{ $dataKos->count() }} data kos</span>
 
                 {{-- DROPDOWN MENU FILTER (Ditambah x-cloak) --}}
                 <div 
@@ -220,79 +220,94 @@
                     "
                 >
                     @foreach ($dataKos as $kos)
+                    @php
+                        $tipeLabel = $kos->tipe?->label() ?? '';
+                        $statusLabel = $kos->status->label();
+                        $fasPertama = $kos->fasilitas->first();
+                    @endphp
                     <tr class="data-row transition-colors hover:bg-stone-50/80"
                         x-show="
-                            ('{{ strtolower($kos['nama']) }}'.includes(searchQuery.toLowerCase())) &&
-                            (filterTipe === '' || '{{ $kos['tipe'] }}' === filterTipe) &&
-                            (filterStatus === '' || '{{ $kos['status'] }}' === filterStatus)
+                            (@js(mb_strtolower($kos->nama)).includes(searchQuery.toLowerCase())) &&
+                            (filterTipe === '' || @js($tipeLabel) === filterTipe) &&
+                            (filterStatus === '' || @js($statusLabel) === filterStatus)
                         "
                     >
                         {{-- Kolom 1: Kos (Rata Kiri) --}}
                         <td class="whitespace-nowrap px-6 py-4">
                             <div class="flex items-center gap-4">
-                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#5d4a41] text-lg font-bold text-white shadow-sm">
-                                    K
-                                </div>
+                                @if ($kos->fotoUtama)
+                                    <img src="{{ $kos->fotoUtama->url() }}" alt="" class="h-12 w-12 shrink-0 rounded-lg object-cover shadow-sm">
+                                @else
+                                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#5d4a41] text-lg font-bold text-white shadow-sm">
+                                        {{ mb_strtoupper(mb_substr($kos->nama, 0, 1)) }}
+                                    </div>
+                                @endif
                                 <div class="w-48">
-                                    <p class="truncate font-bold text-ink">{{ $kos['nama'] }}</p>
-                                    <p class="truncate text-xs text-slate-500">{{ $kos['alamat'] }}</p>
+                                    <p class="truncate font-bold text-ink">{{ $kos->nama }}</p>
+                                    <p class="truncate text-xs text-slate-500">{{ $kos->alamat ?? 'Alamat belum diisi' }}</p>
                                 </div>
                             </div>
                         </td>
                         
                         {{-- Kolom 2: Tipe --}}
                         <td class="whitespace-nowrap px-6 py-4 text-center font-medium text-slate-600">
-                            {{ $kos['tipe'] }}
+                            {{ $tipeLabel ?: '-' }}
                         </td>
                         
                         {{-- Kolom 3: Harga --}}
                         <td class="whitespace-nowrap px-6 py-4 text-center font-bold text-ink">
-                            {{ $kos['harga'] }}
+                            {{ \App\Support\Format::rupiah($kos->harga_per_bulan) }}
                         </td>
                         
-                        {{-- Kolom 4: Jarak --}}
+                        {{-- Kolom 4: Jarak (garis lurus ke kampus) --}}
                         <td class="whitespace-nowrap px-6 py-4 text-center text-slate-600">
-                            {{ $kos['jarak'] }}
+                            {{ \App\Support\Format::jarak($kos->jarak_m !== null ? (float) $kos->jarak_m : null) }}
                         </td>
                         
                         {{-- Kolom 5: Fasilitas --}}
                         <td class="whitespace-nowrap px-6 py-4">
                             <div class="flex items-center justify-center gap-1.5">
-                                <span class="rounded bg-[#fbf5f3] px-2 py-1 text-[11px] font-bold text-[#c57b5f]">{{ $kos['fasilitas_utama'] }}</span>
-                                <span class="text-xs font-medium text-slate-400">{{ $kos['fasilitas_plus'] }}</span>
+                                @if ($fasPertama)
+                                    <span class="rounded bg-[#fbf5f3] px-2 py-1 text-[11px] font-bold text-[#c57b5f]">{{ $fasPertama->nama }}</span>
+                                    @if ($kos->fasilitas->count() > 1)
+                                        <span class="text-xs font-medium text-slate-400">+{{ $kos->fasilitas->count() - 1 }}</span>
+                                    @endif
+                                @else
+                                    <span class="text-xs text-slate-400">-</span>
+                                @endif
                             </div>
                         </td>
                         
-                        {{-- Kolom 6: Status --}}
+                        {{-- Kolom 6: Status (klik untuk mengubah) --}}
                         <td class="whitespace-nowrap px-6 py-4">
-                            <div x-data="{ isActive: '{{ $kos['status'] }}' === 'Aktif' }" class="flex justify-center">
+                            @php $aktif = $kos->status === \App\Enums\StatusKos::Aktif; @endphp
+                            <form method="POST" action="{{ route('admin.datakos.status', $kos) }}" class="flex justify-center">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="{{ $aktif ? 'draft' : 'aktif' }}">
                                 <button 
-                                    type="button"
-                                    @click="isActive = !isActive"
-                                    :class="isActive ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'"
-                                    class="flex w-[86px] items-center gap-2 rounded-full p-1 pr-3 transition-colors focus:outline-none"
+                                    type="submit"
+                                    title="{{ $aktif ? 'Klik untuk mengubah ke Draft' : 'Klik untuk mengaktifkan' }}"
+                                    class="flex w-[86px] items-center gap-2 rounded-full p-1 pr-3 transition-colors focus:outline-none {{ $aktif ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600' }}"
                                 >
                                     <div class="relative flex h-5 w-9 shrink-0 items-center rounded-full bg-white shadow-sm">
-                                        <span 
-                                            :class="isActive ? 'translate-x-4 bg-emerald-500' : 'translate-x-1 bg-amber-500'"
-                                            class="inline-block h-3.5 w-3.5 transform rounded-full transition-all duration-200 ease-in-out"
-                                        ></span>
+                                        <span class="inline-block h-3.5 w-3.5 transform rounded-full transition-all duration-200 ease-in-out {{ $aktif ? 'translate-x-4 bg-emerald-500' : 'translate-x-1 bg-amber-500' }}"></span>
                                     </div>
-                                    <span class="text-xs font-bold" x-text="isActive ? 'Aktif' : 'Draft'"></span>
+                                    <span class="text-xs font-bold">{{ $statusLabel }}</span>
                                 </button>
-                            </div>
+                            </form>
                         </td>
 
                         {{-- Kolom 7: Aksi --}}
                         <td class="whitespace-nowrap px-6 py-4">
                             <div class="flex items-center justify-center gap-3 text-slate-400">
-                                <a href="{{ route('admin.datakos.detail', 1) }}" class="transition-colors hover:text-brand-dark" title="Lihat">
+                                <a href="{{ route('admin.datakos.detail', $kos) }}" class="transition-colors hover:text-brand-dark" title="Lihat">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
-                                <a href="{{ route('admin.datakos.edit', 1) }}" class="transition-colors hover:text-blue-600" title="Edit">
+                                <a href="{{ route('admin.datakos.edit', $kos) }}" class="transition-colors hover:text-blue-600" title="Edit">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </a>
-                                <button @click="isDeleteModalOpen = true; kosToDelete = '{{ $kos['nama'] }}'" class="transition-colors hover:text-red-500" title="Hapus">
+                                <button type="button" @click="isDeleteModalOpen = true; kosToDelete = @js($kos->nama); urlHapus = @js(route('admin.datakos.hapus', $kos))" class="transition-colors hover:text-red-500" title="Hapus">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </div>
@@ -300,8 +315,19 @@
                     </tr>
                     @endforeach
 
+                    @if ($dataKos->isEmpty())
+                    <tr>
+                        <td colspan="7" class="py-16">
+                            <div class="flex flex-col items-center justify-center text-center">
+                                <h3 class="text-sm font-bold text-ink">Belum ada data kos</h3>
+                                <p class="mt-1 text-xs text-slate-500">Klik "Tambah Kos" untuk menambahkan data pertama.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endif
+
                     {{-- Pesan Data Tidak Ditemukan (Ditambah x-cloak) --}}
-                    <tr x-show="!hasVisibleRows" x-cloak style="display: none;">
+                    <tr x-show="!hasVisibleRows && {{ $dataKos->isNotEmpty() ? 'true' : 'false' }}" x-cloak style="display: none;">
                         <td colspan="7" class="py-16">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <span class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-stone-50 text-slate-300">
@@ -316,36 +342,13 @@
             </table>
         </div>
 
-        {{-- Pagination / Footer Tabel (Dilengkungkan ke kotak utama) --}}
+        {{-- Footer Tabel --}}
         <div class="flex items-center justify-between bg-white px-6 py-4 border-t border-stone-100 rounded-b-2xl">
             <p class="text-sm text-slate-500">
-                Menampilkan <span class="font-bold text-slate-700">1&ndash;6</span> dari 128 data
+                Total <span class="font-bold text-slate-700">{{ $dataKos->count() }}</span> data kos
+                (<span class="font-semibold text-emerald-600">{{ $dataKos->where('status', \App\Enums\StatusKos::Aktif)->count() }} aktif</span>,
+                <span class="font-semibold text-amber-600">{{ $dataKos->where('status', \App\Enums\StatusKos::Draft)->count() }} draft</span>)
             </p>
-            
-            <div class="flex items-center gap-2">
-                {{-- Tombol Prev --}}
-                <button class="flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 bg-white text-slate-400 transition hover:bg-stone-50 hover:text-slate-600">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                
-                {{-- Halaman Aktif --}}
-                <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#c57b5f] text-sm font-bold text-white shadow-sm transition hover:bg-[#a6644b]">
-                    1
-                </button>
-                
-                {{-- Halaman Inaktif --}}
-                <button class="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-slate-600 transition hover:bg-stone-50">
-                    2
-                </button>
-                <button class="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-slate-600 transition hover:bg-stone-50">
-                    3
-                </button>
-                
-                {{-- Tombol Next --}}
-                <button class="flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 bg-white text-slate-400 transition hover:bg-stone-50 hover:text-slate-600">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </button>
-            </div>
         </div>
 
     </div>   {{-- END KOTAK UTAMA --}}
@@ -407,7 +410,7 @@
                 >
                     Batal
                 </button>
-                <form method="POST" action="#">
+                <form method="POST" :action="urlHapus">
                     @csrf
                     @method('DELETE')
                     <button 

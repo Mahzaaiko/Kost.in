@@ -23,7 +23,6 @@ class KosFactory extends Factory
 
         return [
             'nama' => 'Kos '.fake()->unique()->lastName(),
-            'nama_pemilik' => fake()->name(),
             'no_telepon' => '08'.fake()->numerify('##########'),
             'alamat' => fake()->streetAddress(),
             'deskripsi' => fake()->sentence(),

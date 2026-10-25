@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DasborController;
+use App\Http\Controllers\Admin\FasilitasController;
+use App\Http\Controllers\Admin\KosController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,24 +35,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', fn () => redirect()->route('admin.dasbor'));
         Route::get('/dasbor', [DasborController::class, 'index'])->name('dasbor');
 
-        // DATA KOS (masih view statis, diganti controller di Fase Admin)
-        Route::prefix('datakos')->group(function () {
-            Route::get('/', function () {
-                return view('admin.datakos');
-            })->name('datakos');
-            Route::get('/tambah', function () {
-                return view('admin.datakosTambah');
-            })->name('datakos.tambah');
-            Route::get('/{id}', function ($id) {
-                return view('admin.datakosDetail', ['id' => $id]);
-            })->name('datakos.detail');
-            Route::get('/{id}/edit', function ($id) {
-                return view('admin.datakosEdit', ['id' => $id]);
-            })->name('datakos.edit');
+        // DATA KOS
+        Route::prefix('datakos')->name('datakos')->controller(KosController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::get('/tambah', 'create')->name('.tambah');
+            Route::post('/', 'store')->name('.store');
+            Route::get('/{kos}', 'show')->whereNumber('kos')->name('.detail');
+            Route::get('/{kos}/edit', 'edit')->whereNumber('kos')->name('.edit');
+            Route::put('/{kos}', 'update')->whereNumber('kos')->name('.update');
+            Route::delete('/{kos}', 'destroy')->whereNumber('kos')->name('.hapus');
+            Route::patch('/{kos}/status', 'status')->whereNumber('kos')->name('.status');
         });
 
-        Route::get('/fasilitas', function () {
-            return view('admin.fasilitas');
-        })->name('fasilitas');
+        // FASILITAS
+        Route::prefix('fasilitas')->name('fasilitas')->controller(FasilitasController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store')->name('.store');
+            Route::put('/{fasilitas}', 'update')->whereNumber('fasilitas')->name('.update');
+            Route::delete('/{fasilitas}', 'destroy')->whereNumber('fasilitas')->name('.hapus');
+        });
     });
 });

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class FotoKos extends Model
 {
@@ -25,9 +24,12 @@ class FotoKos extends Model
         return $this->belongsTo(Kos::class, 'kos_id');
     }
 
-    /** URL publik file foto (disk "public", butuh php artisan storage:link). */
+    /**
+     * URL publik file foto (disk "public", butuh php artisan storage:link).
+     * Pakai asset() supaya mengikuti host yang sedang dibuka, bukan APP_URL.
+     */
     public function url(): string
     {
-        return Storage::disk('public')->url($this->path);
+        return asset('storage/'.$this->path);
     }
 }
