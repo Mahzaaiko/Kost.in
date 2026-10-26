@@ -2,7 +2,7 @@
 
 Dokumen ini mencatat apa yang sudah dikerjakan di backend, keputusan teknis yang sudah disepakati, dan alur kerja tim. Baca ini dulu sebelum mulai mengerjakan apa pun di repo.
 
-Terakhir diperbarui: 26 Oktober 2026 (selesai Fase Pengguna)
+Terakhir diperbarui: 26 Oktober 2026 (kode Fase Routing selesai, menunggu import data jalan asli)
 
 ---
 
@@ -14,7 +14,7 @@ Terakhir diperbarui: 26 Oktober 2026 (selesai Fase Pengguna)
 | Fondasi (database, model, login admin) | 26–28 Okt | Selesai |
 | Admin (CRUD kos, foto, fasilitas, dasbor, import) | 29 Okt–1 Nov | Selesai |
 | Pengguna (API Jelajah, filter, rekomendasi, Beranda) | 2–4 Nov | Selesai |
-| Routing (OSM + pgRouting, tombol Lihat Rute) | 5–8 Nov | Belum |
+| Routing (OSM + pgRouting, tombol Lihat Rute) | 5–8 Nov | Kode selesai 26 Okt, import data OSM asli belum |
 | Deploy percobaan (VPS) | 8–9 Nov | Belum |
 | Locality (jalan tikus, validasi jarak) | 9–11 Nov | Belum |
 | Finishing (blackbox testing, bug, dokumentasi, deploy final) | 11–14 Nov | Belum |
@@ -79,7 +79,19 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 - **API `POST /api/kos/{id}/dilihat`**: menambah jumlah dilihat, sekali per IP per kos dalam 6 jam.
 - **Halaman Jelajah**: data dari API, filter dan urutan berjalan di server, ada opsi urutan "Rekomendasi" dengan skor, fasilitas di filter hanya yang dimiliki kos aktif, bisa dibuka dengan `?q=` dan `?kos={id}`.
 - **Beranda**: jumlah kos, 3 kos yang paling sering dilihat, dan peta radius dari data asli.
-- Tombol "Lihat Rute" masih garis lurus. Rute jalan menyusul di Fase Routing.
+
+### Fase Routing
+- **Tabel `ruas_jalan`**: satu baris = satu ruas jalan di antara dua simpul (persimpangan atau ujung jalan), geometri `LineString` 4326, panjang dalam meter, `sumber` (`osm` atau `survei` untuk jalan tikus nanti), dan `utama` (ruas yang terhubung ke jaringan terbesar).
+- **Perintah `jalan:import-osm`** (lihat bagian 7): mengambil jalan pejalan kaki dari OpenStreetMap lewat Overpass API dalam radius 15 km dari kampus (sama dengan batas validasi titik kos, jadi semua kos yang bisa disimpan admin bisa dirutekan). Jalan tol dan jalan bertanda `foot=no` atau `access=no` dibuang. Jalan dipotong di setiap persimpangan, lalu komponen terhubung terbesar ditandai `utama` dengan `pgr_connectedComponents`.
+- **Perhitungan rute** (`app/Services/Routing/RuteService.php`):
+  1. Titik kos dan titik kampus ditempelkan ke ruas `utama` terdekat. Karena hanya ruas utama yang dipakai, rute selalu bisa ditemukan.
+  2. `pgr_dijkstra` (tidak berarah, pejalan kaki boleh melawan arah jalan satu arah) dihitung dari kedua ujung ruas kos ke kedua ujung ruas kampus, lalu dipilih total terpendek.
+  3. Graf dibatasi ke area sekitar kedua titik supaya cepat. Bila tidak ketemu, dihitung ulang dengan seluruh jaringan.
+  4. Panjang rute = jarak kos ke jalan + jarak di jaringan + jarak jalan ke kampus. Waktu tempuh memakai 4,8 km/jam.
+  5. Hasil disimpan di cache 30 hari. Setiap import ulang mengganti versi jaringan, jadi cache lama otomatis tidak dipakai.
+- **API `GET /api/kos/{id}/rute`**: hanya kos Aktif. Isinya `tersedia`, `panjang_m`, `durasi_menit`, `jarak_ke_jalan_m`, `catatan` (bila titik kos lebih dari 50 m dari jalan terpetakan), dan `geometri` (GeoJSON LineString).
+- **Halaman Jelajah**: tombol "Lihat Rute" menggambar rute yang mengikuti jalan dengan label jarak dan waktu. Bila rute tidak tersedia, kembali ke garis lurus dengan keterangan.
+- **Perintah `rute:cek`**: mengecek semua kos bisa dirutekan dan membandingkan panjang rute dengan garis lurus (bahan tabel validasi jarak di laporan).
 
 ### Perbaikan pada tampilan lama
 - Checkbox fasilitas di form Tambah dulu tidak terkirim (tidak punya `name`).
@@ -100,13 +112,15 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | Controller admin | `app/Http/Controllers/Admin/` (Auth, Dasbor, Kos, Fasilitas) |
 | Validasi | `app/Http/Requests/Admin/` |
 | Logika simpan kos dan foto | `app/Services/KosService.php` |
-| Import spreadsheet | `app/Console/Commands/ImportKos.php`, `app/Services/Import/NormalisasiKos.php` |
+| Import spreadsheet | `app/Services/Import/NormalisasiKos.php` |
 | Pencarian dan rekomendasi | `app/Services/PencarianKosService.php`, `app/Services/RekomendasiService.php` |
 | API pengguna | `app/Http/Controllers/Api/KosController.php`, `routes/api.php` |
+| Routing (import jalan dan rute) | `app/Services/Routing/ImportJaringanJalan.php`, `app/Services/Routing/RuteService.php` |
+| Perintah artisan | `app/Console/Commands/` (`kos:import`, `jalan:import-osm`, `rute:cek`) |
 | Halaman pengguna | `app/Http/Controllers/BerandaController.php`, `JelajahController.php` |
 | Utilitas | `app/Support/Koordinat.php`, `Format.php`, `PlusCode.php` |
 | Ikon fasilitas | `resources/views/components/ikon-fasilitas.blade.php` |
-| Test | `tests/Feature`, `tests/Unit` (105 test) |
+| Test | `tests/Feature`, `tests/Unit` (126 test) |
 
 ### Route admin
 
@@ -128,8 +142,10 @@ Ikuti `docs/SETUP-WINDOWS.md`, lalu:
 ```
 php artisan migrate --seed
 php artisan storage:link
+php artisan jalan:import-osm
 php artisan test
 ```
+`jalan:import-osm` butuh internet dan memakan beberapa menit. Tanpa ini, tombol Lihat Rute memakai garis lurus.
 
 ### Setiap kali mulai bekerja
 ```
@@ -183,9 +199,35 @@ Hasil import data asli (25 Okt): 85 baris menjadi 84 kos Draft. Baru 4 kos yang 
 
 ---
 
-## 7. Yang belum dikerjakan dan batasan yang diketahui
+## 7. Import jaringan jalan OSM
 
-- Routing, jalan tikus, dan deploy belum dikerjakan.
+```
+php artisan jalan:import-osm --dry-run
+php artisan jalan:import-osm
+php artisan rute:cek --semua
+```
+- `--dry-run` mengambil data dan menampilkan jumlah ruas tanpa mengubah tabel.
+- `--radius=5` untuk mencoba area lebih kecil (default 15 km, diatur di `.env` lewat `KOSTIN_ROUTING_RADIUS_KM`).
+- Area dipecah menjadi kotak 3 x 3 km dan diambil satu per satu dengan jeda 1 detik, supaya tidak membebani server publik Overpass.
+- Kalau Overpass sedang sibuk (HTTP 429/502/504) atau koneksi putus, kotak itu dicoba ulang 3 kali, lalu dilewati dan dicoba sekali lagi di akhir setelah jeda 30 detik.
+- Kotak yang berhasil diunduh disimpan sementara di `storage/app/private/osm-cache`. Kalau import tetap gagal, tabel `ruas_jalan` tidak diubah, dan menjalankan ulang perintah yang sama hanya mengunduh kotak yang belum ada. Simpanan ini dihapus otomatis setelah import berhasil. Pakai `--segarkan` untuk mengabaikan simpanan dan mengunduh ulang semuanya.
+- Aman dijalankan ulang: semua ruas `osm` diganti data terbaru, ruas `survei` (jalan tikus) tidak disentuh.
+- Setelah progress bar 100%, masih ada tahap pengolahan di database (memotong jalan, menyimpan ruas, mencari jaringan utama). Tiap tahap ditampilkan di layar dan butuh sekitar satu sampai beberapa menit untuk area 15 km.
+- Kalau perintah dihentikan paksa (Ctrl+C) saat tahap pengolahan, query di PostgreSQL bisa tetap berjalan dan mengunci tabel `ruas_jalan`. Hentikan dengan SQL berikut di pgAdmin (database `kostin`), atau restart service PostgreSQL:
+  ```sql
+  SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+  WHERE datname = 'kostin' AND pid <> pg_backend_pid();
+  ```
+- `rute:cek` harus berakhir dengan "Berhasil dirutekan: N dari N kos". Kos yang lebih dari 50 m dari jalan terpetakan diberi catatan: cek lagi titiknya, atau catat sebagai kandidat survei jalan tikus.
+- Data jalan © kontributor OpenStreetMap (lisensi ODbL). Atribusi sudah tampil di pojok peta.
+
+---
+
+## 8. Yang belum dikerjakan dan batasan yang diketahui
+
+- Import data OSM asli belum dijalankan di laptop tim, jadi panjang rute di data asli belum diverifikasi. Test memakai jaringan jalan buatan yang panjangnya bisa dihitung manual.
+- Jalan tikus dan deploy belum dikerjakan.
+- Jalan di OSM bisa belum lengkap (gang kecil sering belum terpetakan). Inilah yang akan ditutup survei jalan tikus di Fase Locality.
 - Tabel Data Kos di admin perlu digeser ke samping di layar kecil. Perapian responsif dijadwalkan di Fase Finishing.
 - Notifikasi admin ditunda.
 - Sebagian kos sudah Aktif. Kos lain masih Draft karena titik lokasi atau foto belum lengkap, menunggu survei lapangan.
@@ -197,7 +239,7 @@ Hasil import data asli (25 Okt): 85 baris menjadi 84 kos Draft. Baru 4 kos yang 
 
 ---
 
-## 8. Riwayat
+## 9. Riwayat
 
 | Tanggal | Perubahan |
 |---|---|
@@ -205,3 +247,6 @@ Hasil import data asli (25 Okt): 85 baris menjadi 84 kos Draft. Baru 4 kos yang 
 | 25 Okt 2026 | Fase Fondasi selesai: PostGIS, skema kos, seeder, login admin |
 | 25 Okt 2026 | Fase Admin selesai: CRUD kos, foto, fasilitas, dasbor, import spreadsheet |
 | 26 Okt 2026 | Fase Pengguna selesai: API Jelajah, filter buffer PostGIS, rekomendasi SAW, penghitung view, Beranda |
+| 26 Okt 2026 | Kode Fase Routing selesai: import jalan OSM, rute pgr_dijkstra, API rute, Lihat Rute di Jelajah, `rute:cek` |
+| 26 Okt 2026 | Import jalan OSM bisa dilanjutkan bila Overpass gagal di tengah jalan (simpanan kotak + coba ulang di akhir) |
+| 26 Okt 2026 | Pemotongan jalan OSM dipercepat (uji 141 ribu jalan: lebih dari 21 menit menjadi sekitar 40 detik) |

@@ -8,6 +8,7 @@ use App\Http\Requests\Api\FilterKosRequest;
 use App\Http\Resources\KosResource;
 use App\Models\Kos;
 use App\Services\PencarianKosService;
+use App\Services\Routing\RuteService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -48,5 +49,13 @@ class KosController extends Controller
             'jumlah_dilihat' => $kos->fresh()->jumlah_dilihat,
             'dihitung' => $baru,
         ]);
+    }
+
+    /** Rute jalan kaki dari kos ke kampus (pgRouting). */
+    public function rute(Kos $kos, RuteService $rute): JsonResponse
+    {
+        abort_unless($kos->status === StatusKos::Aktif, 404);
+
+        return response()->json($rute->untukKos($kos));
     }
 }

@@ -39,7 +39,25 @@ return [
     // Routing pejalan kaki.
     'routing' => [
         'kecepatan_jalan_kmh' => 4.8,
+
+        // Jarak maksimal ujung jalan tikus hasil survei ditempelkan ke jalan OSM (Fase Locality).
         'toleransi_snapping_m' => 15,
+
+        // Radius area jalan OSM yang diimpor dari titik kampus. Disamakan dengan
+        // radius_validasi_km supaya setiap kos yang bisa disimpan admin bisa dirutekan.
+        'radius_import_km' => (float) env('KOSTIN_ROUTING_RADIUS_KM', 15),
+
+        // Area import dipecah menjadi kotak-kotak kecil supaya tiap permintaan ke Overpass ringan.
+        'ukuran_tile_km' => 3,
+
+        'overpass_url' => env('KOSTIN_OVERPASS_URL', 'https://overpass-api.de/api/interpreter'),
+
+        // Hasil rute disimpan di cache. Cache otomatis tidak dipakai lagi setelah import ulang.
+        'cache_hari' => 30,
+
+        // Kos yang lebih jauh dari ini ke jalan terpetakan diberi catatan
+        // (kandidat survei jalan tikus di Fase Locality).
+        'peringatan_jarak_ke_jalan_m' => 50,
     ],
 
     // Akun admin pertama, dibaca AdminSeeder. Isi lewat .env.

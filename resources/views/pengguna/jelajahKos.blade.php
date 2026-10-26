@@ -202,6 +202,7 @@
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7L13.4 21a2 2 0 01-2.8 0l-4.3-4.3a8 8 0 1111.4 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span id="d-rute-teks">Lihat Rute</span>
                     </button>
+                    <p id="d-rute-info" class="mt-2 hidden text-center text-[11px] leading-relaxed text-stone-500"></p>
                 </div>
             </div>
         </aside>
@@ -244,6 +245,7 @@
         const AWAL = @json($awal);
         const URL_API = @json(route('api.kos.index'));
         const URL_DILIHAT = id => @json(url('/api/kos')) + '/' + id + '/dilihat';
+        const URL_RUTE = id => @json(url('/api/kos')) + '/' + id + '/rute';
         const WARNA = { 'Putri': '#f472b6', 'Putra': '#38bdf8', 'Campur': '#a78bfa' };
         const BADGE = {
             'Putri':  'border-pink-300 text-pink-600',
@@ -422,21 +424,68 @@
             }
         }
 
+        // ---------- Rute jalan kaki ----------
+        // Rute diambil dari API (pgRouting) dan disimpan per kos selama halaman terbuka.
+        // Bila rute tidak tersedia, ditampilkan garis lurus sebagai cadangan.
+        const ruteKos = {};          // id -> hasil API, atau { gagal: true }
         let garisTerpilih = null;
-        function tampilkanGarisTerpilih() {
+
+        const labelPeta = teks => L.divIcon({
+            className: '',
+            html: '<span style="display:inline-block;transform:translate(-50%,-50%);background:#fff;color:#955844;font:700 11px/1 \'Plus Jakarta Sans\',sans-serif;padding:5px 8px;border-radius:8px;border:1px solid #ead9d2;box-shadow:0 1px 3px rgba(0,0,0,.15);white-space:nowrap">' + esc(teks) + '</span>',
+            iconSize: [0, 0]
+        });
+
+        function infoRute(teks) {
+            $('d-rute-info').textContent = teks || '';
+            $('d-rute-info').classList.toggle('hidden', !teks);
+        }
+
+        function tampilkanGarisTerpilih(fit) {
             if (garisTerpilih) { map.removeLayer(garisTerpilih); garisTerpilih = null; }
             const k = cariKos(state.terpilih);
-            if (!k || !state.rute) return;
-            const garis = L.polyline([[KAMPUS.lat, KAMPUS.lng], [k.lat, k.lng]], { color: COKLAT, weight: 2.5, dashArray: '2 7', lineCap: 'round' });
-            const label = L.marker([(KAMPUS.lat + k.lat) / 2, (KAMPUS.lng + k.lng) / 2], {
-                icon: L.divIcon({
-                    className: '',
-                    html: '<span style="display:inline-block;transform:translate(-50%,-50%);background:#fff;color:#955844;font:700 11px/1 \'Plus Jakarta Sans\',sans-serif;padding:5px 8px;border-radius:8px;border:1px solid #ead9d2;box-shadow:0 1px 3px rgba(0,0,0,.15);white-space:nowrap">' + jarakTeks(k.jarak_m) + '</span>',
-                    iconSize: [0, 0]
-                }),
-                interactive: false, keyboard: false
-            });
-            garisTerpilih = L.layerGroup([garis, label]).addTo(map);
+            if (!k || !state.rute) { infoRute(''); return; }
+
+            const r = ruteKos[k.id];
+            if (!r || r.memuat) { infoRute('Memuat rute...'); if (!r) muatRute(k.id, fit); return; }
+
+            let lapisan, batas;
+            if (r.tersedia) {
+                const titik = r.geometri.coordinates.map(c => [c[1], c[0]]);
+                const tengah = titik[Math.floor(titik.length / 2)];
+                const garis = L.polyline(titik, { color: COKLAT, weight: 5, opacity: 0.9, lineJoin: 'round' });
+                lapisan = [
+                    L.polyline(titik, { color: '#fff', weight: 9, opacity: 0.9, lineJoin: 'round' }),
+                    garis,
+                    L.marker(tengah, { icon: labelPeta(jarakTeks(r.panjang_m) + ' · ' + r.durasi_menit + ' menit'), interactive: false, keyboard: false })
+                ];
+                batas = garis.getBounds();
+                infoRute('Rute jalan kaki ' + jarakTeks(r.panjang_m) + ', sekitar ' + r.durasi_menit + ' menit.' + (r.catatan ? ' ' + r.catatan : ''));
+            } else {
+                const garis = L.polyline([[KAMPUS.lat, KAMPUS.lng], [k.lat, k.lng]], { color: COKLAT, weight: 2.5, dashArray: '2 7', lineCap: 'round' });
+                lapisan = [
+                    garis,
+                    L.marker([(KAMPUS.lat + k.lat) / 2, (KAMPUS.lng + k.lng) / 2], { icon: labelPeta(jarakTeks(k.jarak_m) + ' (garis lurus)'), interactive: false, keyboard: false })
+                ];
+                batas = garis.getBounds();
+                infoRute('Rute jalan belum tersedia, ditampilkan garis lurus.');
+            }
+            garisTerpilih = L.layerGroup(lapisan).addTo(map);
+            if (fit) map.fitBounds(batas, { padding: [70, 70], maxZoom: 17 });
+        }
+
+        async function muatRute(id, fit) {
+            if (ruteKos[id] && ruteKos[id].memuat) return;
+            ruteKos[id] = { memuat: true };
+            try {
+                const res = await fetch(URL_RUTE(id), { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                ruteKos[id] = await res.json();
+            } catch (err) {
+                ruteKos[id] = { tersedia: false };
+                setTimeout(() => { delete ruteKos[id]; }, 30000); // boleh dicoba lagi setelah 30 detik
+            }
+            if (state.terpilih === id && state.rute) tampilkanGarisTerpilih(fit);
         }
 
         function tampilkanDetail() {
@@ -573,7 +622,7 @@
             });
         });
 
-        // ---------- Tombol rute (sementara garis lurus; rute jalan menyusul di Fase Routing) ----------
+        // ---------- Tombol rute ----------
         function updateTombolRute() {
             const b = $('d-rute');
             if (!b) return;
@@ -582,16 +631,15 @@
             b.classList.toggle('text-white', !state.rute);
             b.classList.toggle('bg-white', state.rute);
             b.classList.toggle('text-[#B46C54]', state.rute);
+            b.classList.toggle('hover:bg-[#955844]', !state.rute);
+            b.classList.toggle('hover:bg-[#fbf5f3]', state.rute);
         }
         $('d-rute').addEventListener('click', () => {
             const k = cariKos(state.terpilih);
             if (!k) return;
             state.rute = !state.rute;
-            tampilkanGarisTerpilih();
             updateTombolRute();
-            if (state.rute) {
-                map.fitBounds([[KAMPUS.lat, KAMPUS.lng], [k.lat, k.lng]], { padding: [90, 90], maxZoom: 16 });
-            }
+            tampilkanGarisTerpilih(true);
         });
 
         // ---------- Dropdown custom ----------

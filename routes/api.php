@@ -7,4 +7,5 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('throttle:60,1')->name('api.')->group(function () {
     Route::get('/kos', [KosController::class, 'index'])->name('kos.index');
     Route::post('/kos/{kos}/dilihat', [KosController::class, 'dilihat'])->whereNumber('kos')->name('kos.dilihat');
+    Route::get('/kos/{kos}/rute', [KosController::class, 'rute'])->whereNumber('kos')->name('kos.rute');
 });
