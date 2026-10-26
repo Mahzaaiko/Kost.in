@@ -18,53 +18,8 @@
 
 @section('content')
 @php
-    // Titik pusat: Kampus SV IPB (koordinat perkiraan, sesuaikan dengan titik yang tepat)
-    $kampus = ['nama' => 'SV IPB', 'lat' => -6.5886, 'lng' => 106.8032];
-
-    $hitungJarak = function ($lat1, $lng1, $lat2, $lng2) {
-        $r = 6371000;
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLng = deg2rad($lng2 - $lng1);
-        $a = sin($dLat / 2) ** 2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
-        return 2 * $r * asin(sqrt($a));
-    };
-
-    $foto = [
-        'photo-1554995207-c18c203602cb',
-        'photo-1505691938895-1758d7feb511',
-        'photo-1598928506311-c55ded91a20c',
-        'photo-1522708323590-d24dbb6b0267',
-    ];
-
-    // DATA DUMMY. Nanti ganti dengan data dari database lewat controller.
-    $kosList = collect([
-        ['id' => 1, 'nama' => 'Kos Putri Melati',    'tipe' => 'Putri',  'harga' => 700000, 'periode' => '1 Bulan', 'telepon' => '0812-3456-7890', 'alamat' => 'Jl. Kemuning No. 12, Babakan, Bogor Tengah', 'fasilitas' => ['Wi-Fi', 'AC', 'Kamar Mandi Dalam'],            'lat' => -6.5990, 'lng' => 106.8085],
-        ['id' => 2, 'nama' => 'Kos Putra Mandiri',   'tipe' => 'Putra',  'harga' => 550000, 'periode' => '1 Bulan', 'telepon' => '0813-1111-2222', 'alamat' => 'Jl. Kumbang No. 5, Babakan, Bogor Tengah',    'fasilitas' => ['Wi-Fi', 'Parkir'],                          'lat' => -6.5850, 'lng' => 106.8000],
-        ['id' => 3, 'nama' => 'Kos Griya Sejahtera', 'tipe' => 'Campur', 'harga' => 950000, 'periode' => '3 Bulan', 'telepon' => '0856-7777-8888', 'alamat' => 'Jl. Pajajaran No. 20, Baranangsiang, Bogor',  'fasilitas' => ['Wi-Fi', 'AC', 'Parkir', 'Dapur', 'Keamanan 24 Jam'],           'lat' => -6.5800, 'lng' => 106.8150],
-        ['id' => 4, 'nama' => 'Kos Putri Anggrek',   'tipe' => 'Putri',  'harga' => 800000, 'periode' => '1 Bulan', 'telepon' => '0821-2222-3333', 'alamat' => 'Jl. Anggrek No. 3, Bogor Selatan',             'fasilitas' => ['Wi-Fi', 'AC', 'Kamar Mandi Dalam', 'Laundry'],            'lat' => -6.6050, 'lng' => 106.7950],
-        ['id' => 5, 'nama' => 'Kos Putra Harapan',   'tipe' => 'Putra',  'harga' => 600000, 'periode' => '6 Bulan', 'telepon' => '0857-4444-5555', 'alamat' => 'Jl. Harapan No. 8, Tanah Sareal',            'fasilitas' => ['Wi-Fi', 'Parkir', 'Dapur'],                  'lat' => -6.5700, 'lng' => 106.8030],
-        ['id' => 6, 'nama' => 'Kos Campur Bersama',  'tipe' => 'Campur', 'harga' => 650000, 'periode' => 'Tahunan', 'telepon' => '0812-9999-0000', 'alamat' => 'Jl. Bersama No. 1, Bogor Selatan',             'fasilitas' => ['Wi-Fi', 'Dapur'],                            'lat' => -6.6150, 'lng' => 106.8100],
-    ])->map(function ($k, $i) use ($kampus, $hitungJarak, $foto) {
-        $k['jarak_m'] = (int) round($hitungJarak($kampus['lat'], $kampus['lng'], $k['lat'], $k['lng']));
-        // 4 foto per kos (dummy: foto digeser agar tiap kos berbeda)
-        $k['fotos'] = collect(range(0, 3))->map(fn ($n) => 'https://images.unsplash.com/' . $foto[($i + $n) % 4] . '?auto=format&fit=crop&w=900&q=80')->all();
-        return $k;
-    })->values();
-
-    $semuaFasilitas = ['Wi-Fi', 'AC', 'Kamar Mandi Dalam', 'Parkir', 'Dapur', 'Laundry', 'Keamanan 24 Jam'];
-    // Ikon fasilitas (sama dengan halaman Data Fasilitas admin)
-    $ikonFasilitas = [
-        'Wi-Fi' => '<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>',
-        'AC' => '<svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#B46C54"><path d="M800-480H160q-33 0-56.5-23.5T80-560v-240q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v240q0 33-23.5 56.5T800-480ZM160-200v-80q50 0 85-35t35-85h80q0 83-58.5 141.5T160-200Zm640 0q-83 0-141.5-58.5T600-400h80q0 50 35 85t85 35v80Zm-360 40v-240h80v240h-80Zm360-400H160h640Zm-560 0v-80q0-33 23.5-56.5T320-720h320q33 0 56.5 23.5T720-640v80h-80v-80H320v80h-80Zm-80 0h640v-240H160v240Z"/></svg>',
-        'Kamar Mandi Dalam' => '<svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#B46C54"><path d="M320-240q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm160 0q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm160 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240ZM200-400v-80q0-106 68-184t172-92v-84h80v84q104 14 172 92t68 184v80H200Zm80-80h400q0-83-58.5-141.5T480-680q-83 0-141.5 58.5T280-480Zm40 360q-17 0-28.5-11.5T280-160q0-17 11.5-28.5T320-200q17 0 28.5 11.5T360-160q0 17-11.5 28.5T320-120Zm160 0q-17 0-28.5-11.5T440-160q0-17 11.5-28.5T480-200q17 0 28.5 11.5T520-160q0 17-11.5 28.5T480-120Zm160 0q-17 0-28.5-11.5T600-160q0-17 11.5-28.5T640-200q17 0 28.5 11.5T680-160q0 17-11.5 28.5T640-120ZM480-480Z"/></svg>',
-        'Parkir' => '<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 8h2.5a2.5 2.5 0 010 5H10V8zm0 8v-3m11-1a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-        'Dapur' => '<svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#B46C54"><path d="M320-640v-120h80v120h-80Zm0 360v-200h80v200h-80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h480q33 0 56.5 23.5T800-800v640q0 33-23.5 56.5T720-80H240Zm0-80h480v-360H240v360Zm0-440h480v-200H240v200Z"/></svg>',
-        'Laundry' => '<svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#B46C54"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h480q33 0 56.5 23.5T800-800v640q0 33-23.5 56.5T720-80H240Zm0-80h480v-640H240v640Zm381.5-98.5Q680-317 680-400t-58.5-141.5Q563-600 480-600t-141.5 58.5Q280-483 280-400t58.5 141.5Q397-200 480-200t141.5-58.5ZM480-268q-26 0-50.5-9.5T386-306l188-188q19 19 28.5 43.5T612-400q0 55-38.5 93.5T480-268ZM320-680q17 0 28.5-11.5T360-720q0-17-11.5-28.5T320-760q-17 0-28.5 11.5T280-720q0 17 11.5 28.5T320-680Zm148.5-11.5Q480-703 480-720t-11.5-28.5Q457-760 440-760t-28.5 11.5Q400-737 400-720t11.5 28.5Q423-680 440-680t28.5-11.5ZM240-160v-640 640Z"/></svg>',
-        'Keamanan 24 Jam' => '<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>',
-    ];
-
-    $hargaMin = 500000;
-    $hargaMax = 15000000;
+    // Data berasal dari JelajahController; daftar kos diambil lewat API /api/kos.
+    $fmtRingkas = fn ($n) => $n >= 1_000_000 ? 'Rp '.rtrim(rtrim(number_format($n / 1_000_000, 1, ',', '.'), '0'), ',').'jt' : 'Rp '.number_format($n / 1000, 0, ',', '.').'rb';
 @endphp
 
     <main class="mx-auto grid max-w-[1600px] gap-4 p-3 sm:gap-5 sm:p-5 lg:h-[calc(100vh-69px)] lg:grid-cols-[300px_minmax(0,1fr)_330px]">
@@ -85,20 +40,20 @@
                 <div class="mt-4">
                     <div class="flex items-center justify-between text-xs">
                         <label for="f-harga" class="font-semibold text-stone-800">Harga per bulan</label>
-                        <span id="f-harga-label" class="rounded-md bg-[#fbf5f3] px-2 py-1 font-semibold text-[#B46C54]">Rp 15.000.000</span>
+                        <span id="f-harga-label" class="rounded-md bg-[#fbf5f3] px-2 py-1 font-semibold text-[#B46C54]">Rp {{ number_format($hargaMax, 0, ',', '.') }}</span>
                     </div>
                     <input id="f-harga" type="range" min="{{ $hargaMin }}" max="{{ $hargaMax }}" step="50000" value="{{ $hargaMax }}" class="mt-3 w-full accent-[#B46C54]">
-                    <div class="flex justify-between text-[11px] text-stone-500"><span>Rp 500rb</span><span>Rp 15jt</span></div>
+                    <div class="flex justify-between text-[11px] text-stone-500"><span>{{ $fmtRingkas($hargaMin) }}</span><span>{{ $fmtRingkas($hargaMax) }}</span></div>
                 </div>
 
                 {{-- Jarak --}}
                 <div class="mt-4">
                     <div class="flex items-center justify-between text-xs">
                         <label for="f-jarak" class="font-semibold text-stone-800">Jarak ke Kampus</label>
-                        <span id="f-jarak-label" class="rounded-md bg-[#fbf5f3] px-2 py-1 font-semibold text-[#B46C54]">10 km</span>
+                        <span id="f-jarak-label" class="rounded-md bg-[#fbf5f3] px-2 py-1 font-semibold text-[#B46C54]">{{ $jarakMaks }} km</span>
                     </div>
-                    <input id="f-jarak" type="range" min="0.5" max="10" step="0.5" value="10" class="mt-3 w-full accent-[#B46C54]">
-                    <div class="flex justify-between text-[11px] text-stone-500"><span>0 km</span><span>10 km</span></div>
+                    <input id="f-jarak" type="range" min="0.5" max="{{ $jarakMaks }}" step="0.5" value="{{ $jarakMaks }}" class="mt-3 w-full accent-[#B46C54]">
+                    <div class="flex justify-between text-[11px] text-stone-500"><span>0,5 km</span><span>{{ $jarakMaks }} km</span></div>
                 </div>
 
                 {{-- Tipe --}}
@@ -122,12 +77,14 @@
                 <div class="mt-4">
                     <p class="text-xs font-semibold text-stone-800">Fasilitas</p>
                     <div class="mt-2 grid grid-cols-2 gap-x-3 gap-y-2">
-                        @foreach ($semuaFasilitas as $fas)
+                        @forelse ($fasilitasFilter as $fas)
                             <label class="flex cursor-pointer items-start gap-2 text-xs text-stone-600">
-                                <input type="checkbox" value="{{ $fas }}" class="f-fasilitas mt-0.5 h-4 w-4 shrink-0 rounded border-stone-300 accent-[#B46C54]">
-                                <span>{{ $fas }}</span>
+                                <input type="checkbox" value="{{ $fas->id }}" class="f-fasilitas mt-0.5 h-4 w-4 shrink-0 rounded border-stone-300 accent-[#B46C54]">
+                                <span>{{ $fas->nama }}</span>
                             </label>
-                        @endforeach
+                        @empty
+                            <p class="col-span-2 text-xs text-stone-400">Belum ada data fasilitas.</p>
+                        @endforelse
                     </div>
                 </div>
 
@@ -141,12 +98,13 @@
             <section class="rounded-2xl border border-stone-200 bg-white p-4">
                 <div class="flex items-center justify-between gap-2">
                     <p class="text-sm text-stone-600"><strong id="jumlah-kos" class="text-stone-900">0</strong> Kos ditemukan</p>
-                    <div id="dd-urut" class="dd relative" data-value="jarak">
+                    <div id="dd-urut" class="dd relative" data-value="rekomendasi">
                         <button type="button" class="dd-btn flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs text-stone-700 transition hover:border-stone-300 focus:border-[#B46C54] focus:outline-none" aria-haspopup="listbox">
-                            <span class="dd-label">Terdekat</span>
+                            <span class="dd-label">Rekomendasi</span>
                             <svg class="dd-chev h-3.5 w-3.5 text-stone-400 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                         <ul class="dd-menu absolute right-0 z-30 mt-1.5 hidden w-40 overflow-hidden rounded-xl border border-stone-200 bg-white py-1 shadow-lg" role="listbox">
+                            <li class="dd-opt flex cursor-pointer items-center justify-between px-3 py-2 text-xs transition-colors" data-value="rekomendasi" data-label="Rekomendasi" role="option"><span>Rekomendasi</span><svg class="dd-check hidden h-3.5 w-3.5 text-[#B46C54]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></li>
                             <li class="dd-opt flex cursor-pointer items-center justify-between px-3 py-2 text-xs transition-colors" data-value="jarak" data-label="Terdekat" role="option"><span>Terdekat</span><svg class="dd-check hidden h-3.5 w-3.5 text-[#B46C54]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></li>
                             <li class="dd-opt flex cursor-pointer items-center justify-between px-3 py-2 text-xs transition-colors" data-value="murah" data-label="Termurah" role="option"><span>Termurah</span><svg class="dd-check hidden h-3.5 w-3.5 text-[#B46C54]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></li>
                             <li class="dd-opt flex cursor-pointer items-center justify-between px-3 py-2 text-xs transition-colors" data-value="mahal" data-label="Termahal" role="option"><span>Termahal</span><svg class="dd-check hidden h-3.5 w-3.5 text-[#B46C54]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></li>
@@ -155,6 +113,7 @@
                 </div>
                 <ul id="daftar-kos" class="mt-3 space-y-2.5"></ul>
                 <p id="kosong" class="hidden py-6 text-center text-sm text-stone-500">Tidak ada kos yang cocok dengan filter.</p>
+                <p id="ket-skor" class="mt-3 hidden text-[11px] leading-relaxed text-stone-400">Skor rekomendasi (0 sampai 1) dihitung dari jarak ke kampus (50%), harga per bulan (30%), dan jumlah fasilitas (20%), relatif terhadap kos yang tampil.</p>
             </section>
         </aside>
 
@@ -165,7 +124,7 @@
             {{-- Pencarian + chip tipe --}}
             <div id="overlay-atas" class="absolute left-4 top-4 z-[1000] w-[calc(100%-6.5rem)] max-w-sm">
                 <div class="relative">
-                    <input id="f-cari" type="text" placeholder="Cari lokasi atau nama kos..." class="block w-full rounded-xl border border-stone-200 bg-white py-3 pl-4 pr-10 text-sm shadow-sm placeholder:text-stone-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]">
+                    <input id="f-cari" type="text" value="{{ $awal['q'] }}" maxlength="100" placeholder="Cari nama kos atau alamat..." class="block w-full rounded-xl border border-stone-200 bg-white py-3 pl-4 pr-10 text-sm shadow-sm placeholder:text-stone-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]">
                     <svg class="pointer-events-none absolute right-3 top-3.5 h-4 w-4 text-stone-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z"/></svg>
                 </div>
                 <div class="mt-3 flex flex-wrap gap-2" id="chip-tipe">
@@ -224,6 +183,9 @@
 
                     <hr class="my-4 border-stone-200">
 
+                    <p id="d-deskripsi" class="hidden whitespace-pre-line text-xs leading-relaxed text-stone-600"></p>
+                    <hr id="d-deskripsi-hr" class="my-4 hidden border-stone-200">
+
                     <p class="text-xs font-bold text-stone-900">Fasilitas</p>
                     <div id="d-fasilitas" class="mt-3 grid grid-cols-4 gap-x-2 gap-y-3"></div>
 
@@ -276,10 +238,12 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const KAMPUS = @json($kampus);
-        const IKON = @json($ikonFasilitas);
-        const IKON_DEFAULT = '<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
-        const SEMUA_KOS = @json($kosList);
+        const IKON = @json($ikonSvg);
         const HARGA_MAX = {{ $hargaMax }};
+        const JARAK_MAKS = {{ $jarakMaks }};
+        const AWAL = @json($awal);
+        const URL_API = @json(route('api.kos.index'));
+        const URL_DILIHAT = id => @json(url('/api/kos')) + '/' + id + '/dilihat';
         const WARNA = { 'Putri': '#f472b6', 'Putra': '#38bdf8', 'Campur': '#a78bfa' };
         const BADGE = {
             'Putri':  'border-pink-300 text-pink-600',
@@ -287,11 +251,13 @@
             'Campur': 'border-purple-300 text-purple-600'
         };
         const COKLAT = '#B46C54';
-        const RING_KM = [1, 3, 5, 10];
+        const RING_KM = [1, 3, 5, 10].filter(km => km <= JARAK_MAKS);
 
-        const rupiah = n => 'Rp ' + n.toLocaleString('id-ID');
+        const rupiah = n => 'Rp ' + Number(n).toLocaleString('id-ID');
         const jarakTeks = m => m < 1000 ? (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
+        const skorTeks = s => s === null || s === undefined ? '' : Number(s).toFixed(2).replace('.', ',');
         const $ = id => document.getElementById(id);
+        const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
         // ---------- Peta ----------
         const map = L.map('peta', { zoomControl: false }).setView([KAMPUS.lat, KAMPUS.lng], 13);
@@ -308,9 +274,8 @@
         });
 
         // Buffer radius + label
-        const ring = {};
         RING_KM.forEach(km => {
-            ring[km] = L.circle([KAMPUS.lat, KAMPUS.lng], {
+            L.circle([KAMPUS.lat, KAMPUS.lng], {
                 radius: km * 1000, color: COKLAT, weight: 2, opacity: 0.55, dashArray: '10 8',
                 fillColor: COKLAT, fillOpacity: 0.03, interactive: false
             }).addTo(map);
@@ -331,7 +296,7 @@
                 html: '<div style="transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px">' +
                       '<span style="display:flex;width:36px;height:36px;border-radius:10px;background:#1c1917;color:#fff;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35)">' +
                       '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 21V9l8-5 8 5v12M9 21v-6h6v6"/></svg></span>' +
-                      '<span style="background:#1c1917;color:#fff;font:700 11px/1 \'Plus Jakarta Sans\',sans-serif;padding:5px 8px;border-radius:6px;white-space:nowrap">' + KAMPUS.nama + '</span></div>',
+                      '<span style="background:#1c1917;color:#fff;font:700 11px/1 \'Plus Jakarta Sans\',sans-serif;padding:5px 8px;border-radius:6px;white-space:nowrap">' + esc(KAMPUS.nama) + '</span></div>',
                 iconSize: [0, 0]
             }),
             zIndexOffset: 1000, keyboard: false
@@ -339,10 +304,15 @@
 
         // ---------- State ----------
         const state = {
-            harga: HARGA_MAX, jarak: 10, tipe: 'Semua', fasilitas: [], cari: '', urut: 'jarak', terpilih: null, rute: false
+            harga: HARGA_MAX, jarak: JARAK_MAKS, tipe: 'Semua', fasilitas: [], cari: AWAL.q || '',
+            urut: 'rekomendasi', terpilih: null, rute: false
         };
+        let daftar = [];            // hasil terakhir dari API
+        let permintaan = 0;         // untuk mengabaikan respons lama
+        const sudahDihitung = new Set();
         const markers = {};
         const layerKos = L.layerGroup().addTo(map);
+        const cariKos = id => daftar.find(x => x.id === id);
 
         function ikonKos(k, aktif) {
             const w = WARNA[k.tipe] || COKLAT;
@@ -356,45 +326,64 @@
             });
         }
 
-        function terfilter() {
-            const q = state.cari.trim().toLowerCase();
-            let hasil = SEMUA_KOS.filter(k =>
-                k.harga <= state.harga &&
-                k.jarak_m <= state.jarak * 1000 &&
-                (state.tipe === 'Semua' || k.tipe === state.tipe) &&
-                state.fasilitas.every(f => k.fasilitas.includes(f)) &&
-                (!q || k.nama.toLowerCase().includes(q) || k.alamat.toLowerCase().includes(q))
-            );
-            if (state.urut === 'jarak') hasil.sort((a, b) => a.jarak_m - b.jarak_m);
-            if (state.urut === 'murah') hasil.sort((a, b) => a.harga - b.harga);
-            if (state.urut === 'mahal') hasil.sort((a, b) => b.harga - a.harga);
-            return hasil;
+        // ---------- Ambil data dari API ----------
+        async function muat(opsi) {
+            const nomor = ++permintaan;
+            const params = new URLSearchParams();
+            if (state.harga < HARGA_MAX) params.set('harga_max', state.harga);
+            if (state.jarak < JARAK_MAKS) params.set('jarak_max_km', state.jarak);
+            if (state.tipe !== 'Semua') params.set('tipe', state.tipe.toLowerCase());
+            state.fasilitas.forEach(id => params.append('fasilitas[]', id));
+            if (state.cari.trim()) params.set('q', state.cari.trim());
+            params.set('urut', state.urut);
+
+            $('kosong').textContent = 'Memuat data kos...';
+            $('kosong').classList.remove('hidden');
+            try {
+                const res = await fetch(URL_API + '?' + params.toString(), { headers: { 'Accept': 'application/json' } });
+                const json = await res.json();
+                if (nomor !== permintaan) return; // sudah ada permintaan yang lebih baru
+                if (!res.ok) throw new Error(json.message || ('HTTP ' + res.status));
+                daftar = json.data;
+                $('kosong').textContent = 'Tidak ada kos yang cocok dengan filter.';
+                render(opsi);
+            } catch (err) {
+                if (nomor !== permintaan) return;
+                daftar = [];
+                render();
+                $('kosong').textContent = 'Gagal memuat data kos. Periksa koneksi lalu coba lagi.';
+                $('kosong').classList.remove('hidden');
+            }
         }
 
         // ---------- Render ----------
         function render(opsi) {
-            const hasil = terfilter();
-            $('jumlah-kos').textContent = hasil.length;
-            $('kosong').classList.toggle('hidden', hasil.length > 0);
+            $('jumlah-kos').textContent = daftar.length;
+            $('kosong').classList.toggle('hidden', daftar.length > 0);
+            $('ket-skor').classList.toggle('hidden', state.urut !== 'rekomendasi' || daftar.length === 0);
 
-            // Jika kos terpilih tersaring, batalkan pilihan
-            if (state.terpilih && !hasil.some(k => k.id === state.terpilih)) { state.terpilih = null; state.rute = false; }
+            if (opsi && opsi.pilih && cariKos(opsi.pilih)) state.terpilih = opsi.pilih;
+            if (state.terpilih && !cariKos(state.terpilih)) { state.terpilih = null; state.rute = false; }
+            if (!state.terpilih && daftar.length && !(opsi && opsi.tanpaPilihOtomatis)) state.terpilih = daftar[0].id;
 
             // Daftar
             const ul = $('daftar-kos');
             ul.innerHTML = '';
-            hasil.forEach(k => {
+            daftar.forEach((k, i) => {
                 const li = document.createElement('li');
                 const aktif = k.id === state.terpilih;
+                const skor = state.urut === 'rekomendasi'
+                    ? '<span class="ml-auto shrink-0 rounded-md bg-[#fbf5f3] px-1.5 py-0.5 text-[10px] font-bold text-[#B46C54]" title="Skor rekomendasi">#' + (i + 1) + ' · ' + skorTeks(k.skor) + '</span>'
+                    : '';
                 li.innerHTML =
                     '<button type="button" class="flex w-full gap-3 rounded-xl border p-2 text-left transition ' +
                     (aktif ? 'border-[#B46C54] bg-[#fbf5f3]' : 'border-stone-200 bg-white hover:border-stone-300') + '">' +
-                    '<img src="' + k.fotos[0] + '" alt="" class="h-[72px] w-[72px] shrink-0 rounded-lg object-cover">' +
+                    '<img src="' + esc(k.fotos[0] || '') + '" alt="" loading="lazy" class="h-[72px] w-[72px] shrink-0 rounded-lg bg-stone-100 object-cover">' +
                     '<span class="min-w-0 flex-1">' +
-                    '<span class="block truncate text-sm font-bold text-stone-900">' + k.nama + '</span>' +
+                    '<span class="flex items-start gap-2"><span class="block truncate text-sm font-bold text-stone-900">' + esc(k.nama) + '</span>' + skor + '</span>' +
                     '<span class="mt-0.5 block text-xs font-bold text-[#B46C54]">' + rupiah(k.harga) + ' <span class="font-medium text-stone-500">/ bulan</span></span>' +
                     '<span class="mt-0.5 block text-xs text-stone-500">' + jarakTeks(k.jarak_m) + ' dari kampus</span>' +
-                    '<span class="mt-1 block truncate text-[10px] text-stone-500">' + k.fasilitas.slice(0, 3).join(' · ') + '</span>' +
+                    '<span class="mt-1 block truncate text-[10px] text-stone-500">' + esc(k.fasilitas.slice(0, 3).map(f => f.nama).join(' · ')) + '</span>' +
                     '</span></button>';
                 li.firstChild.addEventListener('click', () => pilih(k.id, true));
                 ul.appendChild(li);
@@ -403,15 +392,14 @@
             // Marker
             layerKos.clearLayers();
             Object.keys(markers).forEach(id => delete markers[id]);
-            hasil.forEach(k => {
+            daftar.forEach(k => {
                 const m = L.marker([k.lat, k.lng], { icon: ikonKos(k, k.id === state.terpilih), zIndexOffset: k.id === state.terpilih ? 900 : 0 });
                 m.on('click', () => pilih(k.id, false));
-                m.bindTooltip(k.nama + ' · ' + jarakTeks(k.jarak_m), { direction: 'top', offset: [0, -18] });
+                m.bindTooltip(esc(k.nama) + ' · ' + jarakTeks(k.jarak_m), { direction: 'top', offset: [0, -18] });
                 markers[k.id] = m;
                 layerKos.addLayer(m);
             });
 
-            // Label "Kos dipilih" + garis jarak
             tampilkanGarisTerpilih();
 
             // Chip tipe
@@ -425,16 +413,19 @@
                 c.classList.toggle('border-stone-200', !on);
             });
 
-            // Detail
             tampilkanDetail();
 
-            if (opsi && opsi.fit) fitKeFilter(hasil);
+            if (opsi && opsi.fit) fitKeFilter();
+            if (opsi && opsi.pilih && cariKos(opsi.pilih)) {
+                const k = cariKos(opsi.pilih);
+                map.flyTo([k.lat, k.lng], Math.max(map.getZoom(), 15), { duration: 0.6 });
+            }
         }
 
         let garisTerpilih = null;
         function tampilkanGarisTerpilih() {
             if (garisTerpilih) { map.removeLayer(garisTerpilih); garisTerpilih = null; }
-            const k = SEMUA_KOS.find(x => x.id === state.terpilih);
+            const k = cariKos(state.terpilih);
             if (!k || !state.rute) return;
             const garis = L.polyline([[KAMPUS.lat, KAMPUS.lng], [k.lat, k.lng]], { color: COKLAT, weight: 2.5, dashArray: '2 7', lineCap: 'round' });
             const label = L.marker([(KAMPUS.lat + k.lat) / 2, (KAMPUS.lng + k.lng) / 2], {
@@ -449,12 +440,11 @@
         }
 
         function tampilkanDetail() {
-            const k = SEMUA_KOS.find(x => x.id === state.terpilih);
+            const k = cariKos(state.terpilih);
             $('detail').classList.toggle('hidden', !k);
             $('detail-kosong').classList.toggle('hidden', !!k);
             if (!k) return;
 
-            // Galeri: reset ke foto pertama hanya bila kos berganti
             if (galeri.kosId !== k.id) { galeri.kosId = k.id; galeri.idx = 0; }
             galeri.fotos = k.fotos;
             galeri.nama = k.nama;
@@ -464,29 +454,46 @@
             $('d-tipe').textContent = 'Kos ' + k.tipe;
             $('d-tipe').className = 'shrink-0 rounded-full border px-3 py-1 text-xs font-semibold ' + (BADGE[k.tipe] || '');
             $('d-harga').textContent = rupiah(k.harga);
-            $('d-alamat').textContent = k.alamat;
-            $('d-jarak').textContent = jarakTeks(k.jarak_m) + ' dari Kampus ' + KAMPUS.nama + ' (garis lurus)';
+            $('d-alamat').textContent = k.alamat || '';
+            $('d-jarak').textContent = jarakTeks(k.jarak_m) + ' dari ' + KAMPUS.nama + ' (garis lurus)';
+            $('d-deskripsi').textContent = k.deskripsi || '';
+            $('d-deskripsi').classList.toggle('hidden', !k.deskripsi);
+            $('d-deskripsi-hr').classList.toggle('hidden', !k.deskripsi);
             $('d-fasilitas').innerHTML = k.fasilitas.map(f =>
                 '<div class="flex flex-col items-center gap-1.5 text-center">' +
-                '<span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#fbf5f3] text-[#B46C54]">' + (IKON[f] || IKON_DEFAULT) + '</span>' +
-                '<span class="text-[11px] leading-tight text-stone-500">' + f + '</span></div>'
-            ).join('');
+                '<span class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#fbf5f3] text-[#B46C54]">' + (IKON[f.ikon] || IKON['default']) + '</span>' +
+                '<span class="text-[11px] leading-tight text-stone-500">' + esc(f.nama) + '</span></div>'
+            ).join('') || '<p class="col-span-4 text-xs text-stone-400">Belum ada data fasilitas.</p>';
             $('d-tipe-teks').textContent = 'Kos ' + k.tipe;
-            $('d-periode').textContent = k.periode;
-            $('d-telepon').textContent = k.telepon;
+            $('d-periode').textContent = k.periode || '-';
+            $('d-telepon').textContent = k.telepon || '-';
             updateTombolRute();
+            catatDilihat(k.id);
+        }
+
+        // Catat jumlah dilihat sekali per kos per kunjungan halaman.
+        function catatDilihat(id) {
+            if (sudahDihitung.has(id)) return;
+            sudahDihitung.add(id);
+            fetch(URL_DILIHAT(id), { method: 'POST', headers: { 'Accept': 'application/json' } }).catch(() => {});
         }
 
         function pilih(id, geser) {
             if (id !== state.terpilih) state.rute = false;
             state.terpilih = id;
             render();
-            const k = SEMUA_KOS.find(x => x.id === id);
+            const k = cariKos(id);
             if (k && geser) map.flyTo([k.lat, k.lng], Math.max(map.getZoom(), 15), { duration: 0.6 });
         }
 
-        function fitKeFilter(hasil) {
-            map.fitBounds(L.latLng(KAMPUS.lat, KAMPUS.lng).toBounds(state.jarak * 2000), { padding: [30, 30] });
+        // Filter jarak aktif: tampilkan lingkaran radiusnya. Tanpa filter jarak: sesuaikan dengan sebaran kos.
+        function fitKeFilter() {
+            if (state.jarak < JARAK_MAKS || daftar.length === 0) {
+                map.fitBounds(L.latLng(KAMPUS.lat, KAMPUS.lng).toBounds(state.jarak * 2000), { padding: [30, 30] });
+                return;
+            }
+            const batas = L.latLngBounds([[KAMPUS.lat, KAMPUS.lng], ...daftar.map(k => [k.lat, k.lng])]);
+            map.fitBounds(batas, { padding: [60, 60], maxZoom: 16 });
         }
 
         // ---------- Galeri foto + lightbox ----------
@@ -496,7 +503,8 @@
 
         function tampilFoto() {
             const n = galeri.fotos.length;
-            if (!n) return;
+            $('g-hitung').classList.toggle('hidden', n === 0);
+            if (!n) { $('d-foto-utama').removeAttribute('src'); return; }
             const src = galeri.fotos[galeri.idx];
             $('d-foto-utama').src = src;
             $('d-foto-utama').alt = galeri.nama + ' - foto ' + (galeri.idx + 1);
@@ -548,7 +556,6 @@
         $('lb-prev').addEventListener('click', () => geserFoto(-1));
         $('lb-next').addEventListener('click', () => geserFoto(1));
         $('lb-tutup').addEventListener('click', tutupLightbox);
-        // klik area gelap (di luar foto & tombol) menutup
         lb.addEventListener('click', e => { if (e.target === lb || e.target === $('lb-area')) tutupLightbox(); });
         document.addEventListener('keydown', e => {
             if (!lbBuka()) return;
@@ -556,7 +563,6 @@
             if (e.key === 'ArrowLeft') geserFoto(-1);
             if (e.key === 'ArrowRight') geserFoto(1);
         });
-        // geser jari (HP): di galeri & lightbox
         [$('d-foto-utama'), $('lb-area')].forEach(el => {
             let x0 = null;
             el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
@@ -567,7 +573,7 @@
             });
         });
 
-        // ---------- Tombol rute (toggle garis kampus - kos) ----------
+        // ---------- Tombol rute (sementara garis lurus; rute jalan menyusul di Fase Routing) ----------
         function updateTombolRute() {
             const b = $('d-rute');
             if (!b) return;
@@ -578,7 +584,7 @@
             b.classList.toggle('text-[#B46C54]', state.rute);
         }
         $('d-rute').addEventListener('click', () => {
-            const k = SEMUA_KOS.find(x => x.id === state.terpilih);
+            const k = cariKos(state.terpilih);
             if (!k) return;
             state.rute = !state.rute;
             tampilkanGarisTerpilih();
@@ -629,7 +635,7 @@
         // ---------- Kontrol filter ----------
         const inHarga = $('f-harga'), inJarak = $('f-jarak');
         const ddTipe = buatDropdown('dd-tipe');
-        const ddUrut = buatDropdown('dd-urut', v => { state.urut = v; render(); });
+        buatDropdown('dd-urut', v => { state.urut = v; muat(); });
 
         inHarga.addEventListener('input', () => { $('f-harga-label').textContent = rupiah(+inHarga.value); });
         inJarak.addEventListener('input', () => { $('f-jarak-label').textContent = (+inJarak.value).toString().replace('.', ',') + ' km'; });
@@ -638,32 +644,35 @@
             state.harga = +inHarga.value;
             state.jarak = +inJarak.value;
             state.tipe = ddTipe.get();
-            state.fasilitas = [...document.querySelectorAll('.f-fasilitas:checked')].map(c => c.value);
-            render({ fit: true });
+            state.fasilitas = [...document.querySelectorAll('.f-fasilitas:checked')].map(c => +c.value);
+            muat({ fit: true });
         }
         $('btn-terapkan').addEventListener('click', terapkan);
 
         $('btn-reset').addEventListener('click', () => {
-            inHarga.value = HARGA_MAX; inJarak.value = 10; ddTipe.set('Semua', true);
+            inHarga.value = HARGA_MAX; inJarak.value = JARAK_MAKS; ddTipe.set('Semua', true);
             document.querySelectorAll('.f-fasilitas').forEach(c => c.checked = false);
             $('f-cari').value = ''; state.cari = '';
             $('f-harga-label').textContent = rupiah(HARGA_MAX);
-            $('f-jarak-label').textContent = '10 km';
+            $('f-jarak-label').textContent = JARAK_MAKS + ' km';
             terapkan();
         });
 
         document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
             ddTipe.set(c.dataset.tipe, true);
             state.tipe = c.dataset.tipe;
-            render();
+            muat();
         }));
 
-        $('f-cari').addEventListener('input', e => { state.cari = e.target.value; render(); });
-        
+        let jedaCari = null;
+        $('f-cari').addEventListener('input', e => {
+            state.cari = e.target.value;
+            clearTimeout(jedaCari);
+            jedaCari = setTimeout(() => muat(), 300);
+        });
+
         // ---------- Awal ----------
-        const awal = terfilter();
-        if (awal.length) state.terpilih = awal[0].id;
-        render({ fit: true });
+        muat({ fit: true, pilih: AWAL.kos });
         setTimeout(() => map.invalidateSize(), 200);
     });
     </script>

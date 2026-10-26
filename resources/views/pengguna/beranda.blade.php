@@ -22,33 +22,6 @@
 
 @section('content')
     @php
-        // Titik pusat: Kampus SV IPB
-        $kampus = ['nama' => 'Kampus SV IPB', 'lat' => -6.5886, 'lng' => 106.8032];
-
-        // Jarak garis lurus (meter) dengan rumus haversine
-        $hitungJarak = function ($lat1, $lng1, $lat2, $lng2) {
-            $r = 6371000;
-            $dLat = deg2rad($lat2 - $lat1);
-            $dLng = deg2rad($lng2 - $lng1);
-            $a = sin($dLat / 2) ** 2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
-            return 2 * $r * asin(sqrt($a));
-        };
-        $formatJarak = fn ($m) => $m < 1000 ? round($m / 10) * 10 . ' m' : number_format($m / 1000, 1, ',', '.') . ' km';
-
-        $kosList = collect([
-            ['nama' => 'Kos Putri Melati',    'tipe' => 'Putri',  'harga' => 700000, 'fasilitas' => ['Wi-Fi', 'AC', 'Kamar mandi dalam'], 'foto' => 'photo-1554995207-c18c203602cb', 'lat' => -6.5990, 'lng' => 106.8085],
-            ['nama' => 'Kos Putra Mandiri',   'tipe' => 'Putra',  'harga' => 550000, 'fasilitas' => ['Wi-Fi', 'Kamar mandi luar'],       'foto' => 'photo-1505691938895-1758d7feb511', 'lat' => -6.5850, 'lng' => 106.8000],
-            ['nama' => 'Kos Griya Sejahtera', 'tipe' => 'Campur', 'harga' => 950000, 'fasilitas' => ['Wi-Fi', 'AC', 'Parkir motor'],    'foto' => 'photo-1598928506311-c55ded91a20c', 'lat' => -6.5800, 'lng' => 106.8150],
-            ['nama' => 'Kos Putri Anggrek',   'tipe' => 'Putri',  'harga' => 800000, 'fasilitas' => ['Wi-Fi', 'Laundry'],                'foto' => null, 'lat' => -6.6050, 'lng' => 106.7950],
-            ['nama' => 'Kos Putra Harapan',   'tipe' => 'Putra',  'harga' => 600000, 'fasilitas' => ['Wi-Fi', 'Parkir'],                 'foto' => null, 'lat' => -6.5700, 'lng' => 106.8030],
-            ['nama' => 'Kos Campur Bersama',  'tipe' => 'Campur', 'harga' => 650000, 'fasilitas' => ['Wi-Fi', 'Dapur'],                  'foto' => null, 'lat' => -6.6150, 'lng' => 106.8100],
-        ])->map(function ($k) use ($kampus, $hitungJarak, $formatJarak) {
-            $k['jarak_m'] = (int) round($hitungJarak($kampus['lat'], $kampus['lng'], $k['lat'], $k['lng']));
-            $k['jarak'] = $formatJarak($k['jarak_m']);
-            $k['harga_fmt'] = 'Rp' . number_format($k['harga'], 0, ',', '.');
-            return $k;
-        });
-        $kosKartu = $kosList->filter(fn ($k) => $k['foto'])->take(3);
         $warnaBadge = ['Putri' => 'text-pink-700', 'Putra' => 'text-blue-700', 'Campur' => 'text-purple-700'];
     @endphp
 
@@ -79,7 +52,7 @@
                 </form>
 
                 <div class="mt-6 flex flex-wrap gap-6 text-sm text-stone-500">
-                    <span class="flex items-center gap-1.5 font-medium text-stone-700">✓ 128+ Kos Terdaftar</span>
+                    <span class="flex items-center gap-1.5 font-medium text-stone-700">✓ {{ $jumlahKos }} Kos Terdaftar</span>
                     <span class="flex items-center gap-1.5 font-medium text-stone-700">✓ 100% Gratis Tanpa Biaya Admin</span>
                 </div>
             </div>
@@ -156,8 +129,8 @@
                             <path class="kec" d="M316.2,290.3 L311.9,284.1 L308.2,283.1 L295.1,283.5 L293.8,292.1 L295.4,296.1 L297.6,297.2 L299.8,303.5 L302.7,304.9 L302.5,307.7 L296.2,311.1 L293.8,309.7 L287.2,310.4 L275.5,307.9 L273.1,286.9 L266.5,290.5 L268.6,277.2 L266.2,273.4 L266.7,268.3 L263.6,269.6 L246.4,269.2 L246.9,263.9 L253.3,256.3 L253.7,250.6 L244.5,250.1 L243.1,248.8 L223.7,243.7 L220.8,247.5 L218.2,247.1 L218.8,243.9 L216.8,244.7 L215.9,242.2 L213.2,241.9 L212.5,236.5 L217.0,232.4 L220.8,230.9 L221.2,227.4 L225.1,220.5 L231.1,218.3 L232.1,215.2 L241.1,204.6 L239.8,198.8 L242.6,193.0 L240.9,181.2 L248.0,171.3 L243.4,161.1 L236.1,156.7 L233.9,145.8 L231.2,145.9 L223.4,140.9 L221.0,131.2 L221.5,127.7 L225.0,121.4 L224.5,119.8 L221.4,118.1 L235.7,109.8 L235.6,126.7 L241.4,126.5 L246.2,128.6 L246.4,127.0 L248.0,127.3 L248.0,124.1 L251.2,119.3 L251.5,114.4 L253.8,107.9 L262.1,105.7 L271.4,105.9 L275.2,104.2 L273.2,114.8 L274.6,118.0 L287.7,118.4 L289.0,121.1 L289.5,118.0 L291.0,117.6 L292.5,119.6 L292.9,126.7 L293.8,127.1 L297.6,122.2 L299.1,126.2 L298.3,132.7 L301.3,136.9 L307.9,141.2 L310.9,154.1 L309.3,157.7 L309.3,160.8 L311.5,164.7 L310.5,173.3 L318.0,180.8 L320.0,188.5 L322.9,189.8 L325.6,196.4 L328.8,217.6 L330.9,219.6 L332.7,226.6 L335.6,221.5 L335.9,218.0 L340.1,217.0 L316.2,290.3Z"><title>Kec. Bogor Utara</title></path>
                             
                             {{-- Titik Kampus SV IPB di Peta --}}
-                            <circle class="pin-kampus" cx="{{ round($px(106.8032), 1) }}" cy="{{ round($py(-6.5886), 1) }}" r="6"/>
-                            <text class="lbl" x="{{ round($px(106.8032) + 10, 1) }}" y="{{ round($py(-6.5886) + 4, 1) }}">SV IPB</text>
+                            <circle class="pin-kampus" cx="{{ round($px($kampus['lng']), 1) }}" cy="{{ round($py($kampus['lat']), 1) }}" r="6"/>
+                            <text class="lbl" x="{{ round($px($kampus['lng']) + 10, 1) }}" y="{{ round($py($kampus['lat']) + 4, 1) }}">SV IPB</text>
                         </svg>
                     </div>
                 </div>
@@ -179,10 +152,12 @@
         </div>
 
         <div class="no-scrollbar -mx-5 mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
-            @foreach ($kosKartu as $kos)
+            @forelse ($kosKartu as $kos)
                 <article class="group flex w-[85%] shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-stone-200 bg-white transition hover:border-stone-300 sm:w-auto shadow-sm">
                     <div class="aspect-[4/3] overflow-hidden bg-stone-100">
-                        <img src="https://images.unsplash.com/{{ $kos['foto'] }}?auto=format&fit=crop&w=800&q=80" alt="{{ $kos['nama'] }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                        @if ($kos['foto'])
+                            <img src="{{ $kos['foto'] }}" alt="{{ $kos['nama'] }}" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                        @endif
                     </div>
                     <div class="flex flex-1 flex-col p-5">
                         <div class="flex items-start justify-between gap-3">
@@ -194,11 +169,13 @@
 
                         <div class="mt-5 flex items-center justify-between border-t border-stone-100 pt-4">
                             <p class="font-bold text-stone-900 text-sm">{{ $kos['harga_fmt'] }} <span class="text-xs font-normal text-stone-500">/ bln</span></p>
-                            <a href="{{ route('pengguna.jelajahKos') }}" class="text-xs font-bold text-[#B46C54] hover:underline">Lihat Detail</a>
+                            <a href="{{ route('pengguna.jelajahKos', ['kos' => $kos['id']]) }}" class="text-xs font-bold text-[#B46C54] hover:underline">Lihat Detail</a>
                         </div>
                     </div>
                 </article>
-            @endforeach
+            @empty
+                <p class="col-span-full rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center text-sm text-stone-500">Belum ada kos yang ditampilkan. Data kos sedang dilengkapi.</p>
+            @endforelse
         </div>
     </section>
 

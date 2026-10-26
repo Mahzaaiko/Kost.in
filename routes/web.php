@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DasborController;
 use App\Http\Controllers\Admin\FasilitasController;
 use App\Http\Controllers\Admin\KosController;
+use App\Http\Controllers\BerandaController;
+use App\Http\Controllers\JelajahController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -12,12 +14,8 @@ Route::get('/', function () {
 
 // PENGGUNA
 Route::prefix('pengguna')->name('pengguna.')->group(function () {
-    Route::get('/beranda', function () {
-        return view('pengguna.beranda');
-    })->name('beranda');
-    Route::get('/jelajah-kos', function () {
-        return view('pengguna.jelajahKos');
-    })->name('jelajahKos');
+    Route::get('/beranda', BerandaController::class)->name('beranda');
+    Route::get('/jelajah-kos', JelajahController::class)->name('jelajahKos');
 });
 
 // ADMIN

@@ -2,7 +2,7 @@
 
 Dokumen ini mencatat apa yang sudah dikerjakan di backend, keputusan teknis yang sudah disepakati, dan alur kerja tim. Baca ini dulu sebelum mulai mengerjakan apa pun di repo.
 
-Terakhir diperbarui: 25 Oktober 2026 (selesai Fase Admin)
+Terakhir diperbarui: 26 Oktober 2026 (selesai Fase Pengguna)
 
 ---
 
@@ -13,7 +13,7 @@ Terakhir diperbarui: 25 Oktober 2026 (selesai Fase Admin)
 | Persiapan (audit, klarifikasi, rencana) | 25 Okt | Selesai |
 | Fondasi (database, model, login admin) | 26–28 Okt | Selesai |
 | Admin (CRUD kos, foto, fasilitas, dasbor, import) | 29 Okt–1 Nov | Selesai |
-| Pengguna (API Jelajah, filter, rekomendasi, Beranda) | 2–4 Nov | Belum |
+| Pengguna (API Jelajah, filter, rekomendasi, Beranda) | 2–4 Nov | Selesai |
 | Routing (OSM + pgRouting, tombol Lihat Rute) | 5–8 Nov | Belum |
 | Deploy percobaan (VPS) | 8–9 Nov | Belum |
 | Locality (jalan tikus, validasi jarak) | 9–11 Nov | Belum |
@@ -67,6 +67,20 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 - **Dasbor:** statistik, kos terbaru, dan peta persebaran dari database.
 - **Import spreadsheet:** perintah `kos:import` (lihat bagian 6).
 
+### Fase Pengguna
+- **API `GET /api/kos`** (publik, maks 60 request/menit): hanya kos Aktif yang punya titik lokasi. Parameter:
+  - `harga_max` (rupiah per bulan)
+  - `jarak_max_km` (0,1 sampai 10, buffer garis lurus `ST_DWithin`)
+  - `tipe` (`putri`, `putra`, `campur`, atau `semua`)
+  - `fasilitas[]` (id fasilitas, kos harus punya **semua** yang dipilih)
+  - `q` (cari di nama dan alamat)
+  - `urut` (`rekomendasi` default, `jarak`, `murah`, `mahal`)
+- **Rekomendasi SAW** (`app/Services/RekomendasiService.php`): skor 0 sampai 1 = 0,5 x jarak + 0,3 x harga + 0,2 x jumlah fasilitas, dinormalisasi min-max terhadap kos yang lolos filter. Contoh hitungan ada di `tests/Unit/RekomendasiServiceTest.php`.
+- **API `POST /api/kos/{id}/dilihat`**: menambah jumlah dilihat, sekali per IP per kos dalam 6 jam.
+- **Halaman Jelajah**: data dari API, filter dan urutan berjalan di server, ada opsi urutan "Rekomendasi" dengan skor, fasilitas di filter hanya yang dimiliki kos aktif, bisa dibuka dengan `?q=` dan `?kos={id}`.
+- **Beranda**: jumlah kos, 3 kos yang paling sering dilihat, dan peta radius dari data asli.
+- Tombol "Lihat Rute" masih garis lurus. Rute jalan menyusul di Fase Routing.
+
 ### Perbaikan pada tampilan lama
 - Checkbox fasilitas di form Tambah dulu tidak terkirim (tidak punya `name`).
 - Foto di form Tambah dulu tidak pernah terkirim ke server.
@@ -87,9 +101,12 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | Validasi | `app/Http/Requests/Admin/` |
 | Logika simpan kos dan foto | `app/Services/KosService.php` |
 | Import spreadsheet | `app/Console/Commands/ImportKos.php`, `app/Services/Import/NormalisasiKos.php` |
+| Pencarian dan rekomendasi | `app/Services/PencarianKosService.php`, `app/Services/RekomendasiService.php` |
+| API pengguna | `app/Http/Controllers/Api/KosController.php`, `routes/api.php` |
+| Halaman pengguna | `app/Http/Controllers/BerandaController.php`, `JelajahController.php` |
 | Utilitas | `app/Support/Koordinat.php`, `Format.php`, `PlusCode.php` |
 | Ikon fasilitas | `resources/views/components/ikon-fasilitas.blade.php` |
-| Test | `tests/Feature`, `tests/Unit` (86 test) |
+| Test | `tests/Feature`, `tests/Unit` (105 test) |
 
 ### Route admin
 
@@ -100,7 +117,7 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | `/admin/datakos` | Daftar kos (+ `/tambah`, `/{id}`, `/{id}/edit`, `/{id}/status`) |
 | `/admin/fasilitas` | Daftar dan kelola fasilitas |
 
-Halaman pengguna (`/pengguna/beranda`, `/pengguna/jelajah-kos`) **masih memakai data dummy**. Diganti di Fase Pengguna.
+Halaman pengguna: `/pengguna/beranda` dan `/pengguna/jelajah-kos` (bisa dengan `?q=` dan `?kos={id}`).
 
 ---
 
@@ -168,11 +185,10 @@ Hasil import data asli (25 Okt): 85 baris menjadi 84 kos Draft. Baru 4 kos yang 
 
 ## 7. Yang belum dikerjakan dan batasan yang diketahui
 
-- Halaman pengguna (Beranda, Jelajah) masih dummy.
 - Routing, jalan tikus, dan deploy belum dikerjakan.
 - Tabel Data Kos di admin perlu digeser ke samping di layar kecil. Perapian responsif dijadwalkan di Fase Finishing.
 - Notifikasi admin ditunda.
-- Belum ada kos Aktif karena titik lokasi dan foto belum lengkap. Menunggu survei lapangan.
+- Sebagian kos sudah Aktif. Kos lain masih Draft karena titik lokasi atau foto belum lengkap, menunggu survei lapangan.
 
 ### Backlog
 - Notifikasi di header admin
@@ -188,3 +204,4 @@ Hasil import data asli (25 Okt): 85 baris menjadi 84 kos Draft. Baru 4 kos yang 
 | 25 Okt 2026 | Audit repo, klarifikasi kebutuhan, rencana implementasi disetujui |
 | 25 Okt 2026 | Fase Fondasi selesai: PostGIS, skema kos, seeder, login admin |
 | 25 Okt 2026 | Fase Admin selesai: CRUD kos, foto, fasilitas, dasbor, import spreadsheet |
+| 26 Okt 2026 | Fase Pengguna selesai: API Jelajah, filter buffer PostGIS, rekomendasi SAW, penghitung view, Beranda |
