@@ -37,6 +37,12 @@ class PlusCodeTest extends TestCase
         $this->assertEqualsWithDelta($lng, $titik->lng, 2e-6);
     }
 
+    public function test_perkiraan_ketelitian_kode(): void
+    {
+        $this->assertEqualsWithDelta(13.8, PlusCode::presisiMeter('CR66+V3'), 0.1);
+        $this->assertEqualsWithDelta(3.5, PlusCode::presisiMeter('CR64+5M9'), 0.1);
+    }
+
     public function test_menemukan_plus_code_di_dalam_alamat(): void
     {
         $this->assertSame('CRG4+CJX', PlusCode::cariDiTeks('CRG4+CJX, Gg. Kananga, RT.03/RW.12, Bantarjati'));

@@ -363,12 +363,12 @@
             <p id="map-status" class="mb-4 hidden text-[11px] font-semibold leading-relaxed"></p>
 
             <div class="mb-4">
-                <label for="paste-koordinat" class="mb-1.5 block text-xs font-semibold text-slate-700">Tempel koordinat dari Google Maps</label>
+                <label for="paste-koordinat" class="mb-1.5 block text-xs font-semibold text-slate-700">Tempel koordinat atau Plus Code dari Google Maps</label>
                 <div class="flex gap-2">
-                    <input type="text" id="paste-koordinat" class="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-ink transition placeholder:text-slate-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]" placeholder="-6.5975, 106.7995">
+                    <input type="text" id="paste-koordinat" class="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-ink transition placeholder:text-slate-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]" placeholder="-6.5975, 106.7995 atau CR66+V3">
                     <button type="button" id="btn-pakai-koordinat" class="shrink-0 rounded-xl bg-[#fbf5f3] px-3 text-xs font-bold text-[#B46C54] transition hover:bg-[#B46C54] hover:text-white">Pakai</button>
                 </div>
-                <p class="mt-1.5 text-[11px] leading-relaxed text-slate-500">Klik kanan titik kos di Google Maps, klik angka koordinat untuk menyalin, lalu tempel di sini.</p>
+                <p class="mt-1.5 text-[11px] leading-relaxed text-slate-500">Klik kanan titik kos di Google Maps lalu klik angka koordinat untuk menyalin, atau salin Plus Code-nya (contoh CR66+V3) dari panel info tempat. Tempel di sini.</p>
             </div>
 
             <div class="space-y-4">
@@ -400,6 +400,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const KAMPUS = @js(['lat' => $kampus->lat, 'lng' => $kampus->lng, 'nama' => config('kostin.kampus.nama')]);
+    const URL_PLUS_CODE = @js(route('admin.plusCode'));
 
     const layerPeta = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -514,9 +515,29 @@ document.addEventListener('DOMContentLoaded', function () {
         return null;
     }
     const inputPaste = document.getElementById('paste-koordinat');
+    // Plus Code: 2-8 karakter, tanda +, lalu 2-3 karakter (contoh CR66+V3 atau 6P58CR66+V3).
+    const POLA_PLUS_CODE = /(^|[^A-Z0-9])([23456789CFGHJMPQRVWX]{2,8}\+[23456789CFGHJMPQRVWX]{2,3})(?![A-Z0-9])/i;
+
+    async function pakaiPlusCode(kode) {
+        showStatus('Mengubah Plus Code ' + kode.toUpperCase() + ' ke koordinat...', 'info');
+        try {
+            const res = await fetch(URL_PLUS_CODE + '?kode=' + encodeURIComponent(kode), { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+            if (!res.ok) { showStatus(data.pesan || 'Plus Code tidak dikenali. Contoh: CR66+V3', 'error'); return; }
+            setPosisi(L.latLng(data.lat, data.lng), 18);
+            showStatus('Pin dipindahkan ke Plus Code ' + data.kode + '. Ketelitian kode ini sekitar ' + data.presisi_m + ' m, geser pin bila kurang pas.', 'info');
+        } catch (err) {
+            showStatus('Gagal menghubungi server. Coba lagi, atau tempel koordinat angka.', 'error');
+        }
+    }
+
     function pakaiKoordinat() {
-        const ll = parseKoordinat(inputPaste.value.trim());
-        if (!ll) { showStatus('Format koordinat tidak dikenali. Contoh: -6.5975, 106.7995', 'error'); return; }
+        const teks = inputPaste.value.trim();
+        if (!teks) return;
+        const plus = teks.match(POLA_PLUS_CODE);
+        if (plus) { pakaiPlusCode(plus[2]); return; }
+        const ll = parseKoordinat(teks);
+        if (!ll) { showStatus('Format tidak dikenali. Contoh: -6.5975, 106.7995 atau CR66+V3', 'error'); return; }
         setPosisi(ll, 18);
         showStatus('Pin dipindahkan ke koordinat yang ditempel.', 'info');
     }

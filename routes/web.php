@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DasborController;
 use App\Http\Controllers\Admin\FasilitasController;
 use App\Http\Controllers\Admin\KosController;
+use App\Http\Controllers\Admin\PlusCodeController;
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\JelajahController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/', fn () => redirect()->route('admin.dasbor'));
         Route::get('/dasbor', [DasborController::class, 'index'])->name('dasbor');
+
+        // Ubah Plus Code Google Maps ke koordinat (dipakai form Tambah/Edit kos).
+        Route::get('/plus-code', PlusCodeController::class)->name('plusCode');
 
         // DATA KOS
         Route::prefix('datakos')->name('datakos')->controller(KosController::class)->group(function () {

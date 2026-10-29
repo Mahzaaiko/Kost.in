@@ -45,6 +45,22 @@ final class PlusCode
         return new Koordinat(lat: $lat, lng: $lng);
     }
 
+    /**
+     * Perkiraan ukuran sel kode dalam meter (sisi terpanjang).
+     * Contoh: 2 karakter setelah "+" sekitar 14 m, 3 karakter sekitar 3,5 m.
+     */
+    public static function presisiMeter(string $kode): float
+    {
+        $belakang = strlen(explode('+', strtoupper(trim($kode)).'+')[1]);
+        $resLat = $resLng = self::RESOLUSI_PASANGAN[4];
+        for ($i = 2; $i < $belakang; $i++) {
+            $resLat /= self::BARIS_GRID;
+            $resLng /= self::KOLOM_GRID;
+        }
+
+        return max($resLat, $resLng) * 110_574;
+    }
+
     private static function valid(string $kode): bool
     {
         if (substr_count($kode, '+') !== 1) {

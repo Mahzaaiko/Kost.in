@@ -2,7 +2,7 @@
 
 Dokumen ini mencatat apa yang sudah dikerjakan di backend, keputusan teknis yang sudah disepakati, dan alur kerja tim. Baca ini dulu sebelum mulai mengerjakan apa pun di repo.
 
-Terakhir diperbarui: 26 Oktober 2026 (kode Fase Routing selesai, menunggu import data jalan asli)
+Terakhir diperbarui: 29 Oktober 2026 (Fase Routing selesai, form kos menerima Plus Code)
 
 ---
 
@@ -14,7 +14,7 @@ Terakhir diperbarui: 26 Oktober 2026 (kode Fase Routing selesai, menunggu import
 | Fondasi (database, model, login admin) | 26–28 Okt | Selesai |
 | Admin (CRUD kos, foto, fasilitas, dasbor, import) | 29 Okt–1 Nov | Selesai |
 | Pengguna (API Jelajah, filter, rekomendasi, Beranda) | 2–4 Nov | Selesai |
-| Routing (OSM + pgRouting, tombol Lihat Rute) | 5–8 Nov | Kode selesai 26 Okt, import data OSM asli belum |
+| Routing (OSM + pgRouting, tombol Lihat Rute) | 5–8 Nov | Selesai 26 Okt |
 | Deploy percobaan (VPS) | 8–9 Nov | Belum |
 | Locality (jalan tikus, validasi jarak) | 9–11 Nov | Belum |
 | Finishing (blackbox testing, bug, dokumentasi, deploy final) | 11–14 Nov | Belum |
@@ -61,7 +61,7 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 ### Fase Admin
 - **Data kos:** tambah, lihat detail, edit, hapus. Form Tambah dan Edit memakai satu partial (`admin/partials/form-kos.blade.php`).
 - **Foto:** upload banyak foto (JPG/PNG, maks 3 MB, maks 10 per kos), pilih foto utama, hapus foto lama. File fisiknya ikut dihapus.
-- **Lokasi:** klik peta, cari alamat (Nominatim), GPS, atau tempel koordinat Google Maps. Titik yang lebih dari 15 km dari kampus ditolak.
+- **Lokasi:** klik peta, cari alamat (Nominatim), GPS, atau tempel koordinat / Plus Code dari Google Maps (contoh `CR66+V3`, diubah ke koordinat lewat `GET /admin/plus-code`). Titik yang lebih dari 15 km dari kampus ditolak.
 - **Status Draft/Aktif:** kos baru selalu Draft. Kos hanya bisa diaktifkan kalau tipe, harga, periode, alamat, titik lokasi, dan minimal 1 foto sudah lengkap. Kos Aktif tidak bisa disimpan dalam keadaan tidak lengkap.
 - **Fasilitas:** tambah, ubah nama dan ikon, hapus. Nama tidak boleh kembar (tidak membedakan huruf besar). Menghapus fasilitas melepasnya dari semua kos.
 - **Dasbor:** statistik, kos terbaru, dan peta persebaran dari database.
@@ -120,7 +120,7 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | Halaman pengguna | `app/Http/Controllers/BerandaController.php`, `JelajahController.php` |
 | Utilitas | `app/Support/Koordinat.php`, `Format.php`, `PlusCode.php` |
 | Ikon fasilitas | `resources/views/components/ikon-fasilitas.blade.php` |
-| Test | `tests/Feature`, `tests/Unit` (126 test) |
+| Test | `tests/Feature`, `tests/Unit` (132 test) |
 
 ### Route admin
 
@@ -130,6 +130,7 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | `/admin/dasbor` | Dasbor |
 | `/admin/datakos` | Daftar kos (+ `/tambah`, `/{id}`, `/{id}/edit`, `/{id}/status`) |
 | `/admin/fasilitas` | Daftar dan kelola fasilitas |
+| `/admin/plus-code?kode=` | Ubah Plus Code ke koordinat (JSON, dipakai form kos) |
 
 Halaman pengguna: `/pengguna/beranda` dan `/pengguna/jelajah-kos` (bisa dengan `?q=` dan `?kos={id}`).
 
@@ -225,7 +226,7 @@ php artisan rute:cek --semua
 
 ## 8. Yang belum dikerjakan dan batasan yang diketahui
 
-- Import data OSM asli belum dijalankan di laptop tim, jadi panjang rute di data asli belum diverifikasi. Test memakai jaringan jalan buatan yang panjangnya bisa dihitung manual.
+- Import OSM data asli (26 Okt): 75.190 jalan menjadi 143.477 ruas (9.444,7 km), 99,7% ruas ada di jaringan utama. `rute:cek --semua`: 5 dari 5 kos berhasil dirutekan. Rute Griya Malabar (880 m) cocok dengan jalan yang biasa dilewati penghuninya. Kost Dito Ekonomis II memutar jauh (rasio 2,52), menjadi prioritas survei jalan tikus.
 - Jalan tikus dan deploy belum dikerjakan.
 - Jalan di OSM bisa belum lengkap (gang kecil sering belum terpetakan). Inilah yang akan ditutup survei jalan tikus di Fase Locality.
 - Tabel Data Kos di admin perlu digeser ke samping di layar kecil. Perapian responsif dijadwalkan di Fase Finishing.
@@ -250,3 +251,4 @@ php artisan rute:cek --semua
 | 26 Okt 2026 | Kode Fase Routing selesai: import jalan OSM, rute pgr_dijkstra, API rute, Lihat Rute di Jelajah, `rute:cek` |
 | 26 Okt 2026 | Import jalan OSM bisa dilanjutkan bila Overpass gagal di tengah jalan (simpanan kotak + coba ulang di akhir) |
 | 26 Okt 2026 | Pemotongan jalan OSM dipercepat (uji 141 ribu jalan: lebih dari 21 menit menjadi sekitar 40 detik) |
+| 29 Okt 2026 | Form Tambah/Edit kos menerima Plus Code dari Google Maps |
