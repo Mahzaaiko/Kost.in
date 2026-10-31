@@ -2,7 +2,7 @@
 
 Dokumen ini mencatat apa yang sudah dikerjakan di backend, keputusan teknis yang sudah disepakati, dan alur kerja tim. Baca ini dulu sebelum mulai mengerjakan apa pun di repo.
 
-Terakhir diperbarui: 29 Oktober 2026 (Fase Routing selesai, form kos menerima Plus Code)
+Terakhir diperbarui: 30 Oktober 2026 (kode Fase Locality selesai, menunggu rekaman gang dari lapangan)
 
 ---
 
@@ -15,8 +15,8 @@ Terakhir diperbarui: 29 Oktober 2026 (Fase Routing selesai, form kos menerima Pl
 | Admin (CRUD kos, foto, fasilitas, dasbor, import) | 29 Okt–1 Nov | Selesai |
 | Pengguna (API Jelajah, filter, rekomendasi, Beranda) | 2–4 Nov | Selesai |
 | Routing (OSM + pgRouting, tombol Lihat Rute) | 5–8 Nov | Selesai 26 Okt |
+| Locality (gang hasil survei, validasi jarak) | 9–11 Nov | Kode selesai 30 Okt, menunggu rekaman gang |
 | Deploy percobaan (VPS) | 8–9 Nov | Belum |
-| Locality (jalan tikus, validasi jarak) | 9–11 Nov | Belum |
 | Finishing (blackbox testing, bug, dokumentasi, deploy final) | 11–14 Nov | Belum |
 
 Tenggat: **15 November 2026**.
@@ -24,7 +24,7 @@ Tenggat: **15 November 2026**.
 Pekerjaan lapangan yang berjalan paralel (target 5 November):
 - Survei titik lokasi semua kos (GPS di HP atau pin di form admin)
 - Foto kos
-- Rekam jalan tikus (GPX dari HP atau gambar GeoJSON)
+- Rekam gang yang belum ada di peta OSM (GPX dari HP), lalu unggah di halaman admin Jaringan Jalan
 
 ---
 
@@ -37,7 +37,9 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | Peta | Leaflet + OpenStreetMap, bukan Google Maps | Saran dosen: fungsi spasial sendiri, bisa dicek, bisa menambah jalan tikus. Rute Google wajib tampil di Google Map dan butuh billing |
 | Titik kampus | Jl. Kumbang No.14 (Plus Code `CR64+5M9`) = `-6.5895875, 106.8067344` | Satu titik untuk pusat buffer dan tujuan rute |
 | Filter jarak dan rekomendasi | Jarak garis lurus dari titik kampus | Bogor Tengah padat permukiman, garis lurus cukup mewakili |
-| Rute "Lihat Rute" | Jalur pejalan kaki dari pgRouting (OSM + jalan tikus hasil survei) | Aspek locality yang diminta dosen |
+| Rute "Lihat Rute" | Jalur pejalan kaki dari pgRouting (OSM + gang hasil survei) | Aspek locality yang diminta dosen |
+| Gang hasil survei | Tidak terikat ke kos, langsung dipakai rute semua kos. Gang buntu boleh. Di Jelajah tidak dibedakan, bukti locality ada di halaman admin Jaringan Jalan dan tabel validasi | Bagi mahasiswa gang itu jalan biasa. Dosen melihat perbandingan di sisi admin |
+| Jarak aktual GPS | Tidak dibuat di sistem | Data gang sudah hasil jalan kaki dengan GPS. Validasi banyak sampel ditulis sebagai batasan dan saran |
 | Rekomendasi | SAW, normalisasi min-max, bobot Jarak 50 / Harga 30 / Fasilitas 20 | Transparan dan mudah dijelaskan di laporan |
 | Harga | Disimpan sebagai **harga per bulan** + periode minimal sewa (1/3/6/12 bulan) | Harga tahunan dibagi 12 supaya bisa dibandingkan |
 | Nama pemilik | Tidak disimpan | Datanya sulit didapat |
@@ -81,7 +83,7 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 - **Beranda**: jumlah kos, 3 kos yang paling sering dilihat, dan peta radius dari data asli.
 
 ### Fase Routing
-- **Tabel `ruas_jalan`**: satu baris = satu ruas jalan di antara dua simpul (persimpangan atau ujung jalan), geometri `LineString` 4326, panjang dalam meter, `sumber` (`osm` atau `survei` untuk jalan tikus nanti), dan `utama` (ruas yang terhubung ke jaringan terbesar).
+- **Tabel `ruas_jalan`**: satu baris = satu ruas jalan di antara dua simpul (persimpangan atau ujung jalan), geometri `LineString` 4326, panjang dalam meter, `sumber` (`osm`, `survei` untuk gang hasil survei, atau `sambungan`), `utama` (ruas yang terhubung ke jaringan terbesar), dan `terpecah` (ruas yang sudah dipotong oleh sambungan gang).
 - **Perintah `jalan:import-osm`** (lihat bagian 7): mengambil jalan pejalan kaki dari OpenStreetMap lewat Overpass API dalam radius 15 km dari kampus (sama dengan batas validasi titik kos, jadi semua kos yang bisa disimpan admin bisa dirutekan). Jalan tol dan jalan bertanda `foot=no` atau `access=no` dibuang. Jalan dipotong di setiap persimpangan, lalu komponen terhubung terbesar ditandai `utama` dengan `pgr_connectedComponents`.
 - **Perhitungan rute** (`app/Services/Routing/RuteService.php`):
   1. Titik kos dan titik kampus ditempelkan ke ruas `utama` terdekat. Karena hanya ruas utama yang dipakai, rute selalu bisa ditemukan.
@@ -92,6 +94,24 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 - **API `GET /api/kos/{id}/rute`**: hanya kos Aktif. Isinya `tersedia`, `panjang_m`, `durasi_menit`, `jarak_ke_jalan_m`, `catatan` (bila titik kos lebih dari 50 m dari jalan terpetakan), dan `geometri` (GeoJSON LineString).
 - **Halaman Jelajah**: tombol "Lihat Rute" menggambar rute yang mengikuti jalan dengan label jarak dan waktu. Bila rute tidak tersedia, kembali ke garis lurus dengan keterangan.
 - **Perintah `rute:cek`**: mengecek semua kos bisa dirutekan dan membandingkan panjang rute dengan garis lurus (bahan tabel validasi jarak di laporan).
+
+### Fase Locality (kode)
+- **Tabel `rekaman_jalan`**: satu baris = satu gang yang diunggah (nama, catatan, nama file, jumlah titik, panjang, jumlah ujung yang tersambung, pengunggah, geometri).
+- **Menu admin Jaringan Jalan** (`/admin/jaringan-jalan`):
+  - Unggah file GPX dari aplikasi GPS, atau GeoJSON berisi satu garis. Satu file untuk satu gang.
+  - Daftar gang dengan tombol hapus.
+  - Peta: gang hasil survei (cokelat), gang yang tidak tersambung (merah putus-putus), dan pembanding rute satu kos: rute OSM saja (abu-abu putus-putus) dan rute OSM + survei (biru).
+  - Tabel validasi semua kos yang punya titik lokasi: garis lurus, rute OSM, rute OSM + survei, selisih, dan rasio (rute dibagi garis lurus). Bisa diunduh CSV untuk laporan (pemisah titik koma, desimal koma, langsung rapi di Excel berbahasa Indonesia).
+- **Cara gang disambungkan** (`app/Services/Routing/JaringanSurvei.php`):
+  1. Titik GPS dirapikan dengan toleransi 3 m (`ST_SimplifyPreserveTopology` di proyeksi UTM 48S), jadi titik yang goyang dibuang.
+  2. Setiap ujung gang ditempelkan ke ruas jalan terdekat dalam 15 m. Ujung yang tidak dekat jalan dibiarkan sebagai gang buntu, tapi minimal satu ujung harus tersambung.
+  3. Bila ujung menempel di tengah ruas, ruas itu dipotong menjadi dua ruas `sambungan`. Ruas aslinya tidak dihapus, hanya ditandai `terpecah`, sehingga rute "OSM saja" tetap bisa dihitung.
+  4. Gang boleh menempel ke gang survei lain yang diunggah lebih dulu.
+  5. Komponen jaringan utama dihitung ulang dan versi jaringan diganti, jadi cache rute lama tidak dipakai.
+- **Rute**: dihitung di jaringan lengkap dan di jaringan OSM saja, lalu dipilih yang lebih pendek. Ini mencegah gang yang lewat dekat titik kampus atau kos membuat rute lain sedikit memutar. Jadi gang survei tidak pernah membuat rute lebih panjang.
+- **Hapus gang**: ruasnya ikut terhapus, lalu semua gang lain disambungkan ulang (gang yang menempel ke gang terhapus menyesuaikan).
+- **Import ulang OSM**: semua gang otomatis disambungkan ulang ke ruas OSM yang baru. Gang yang tidak lagi tersambung diberi tanda merah di halaman admin.
+- **Kecepatan** (uji jaringan buatan 143 ribu ruas, setara data asli): unggah gang sekitar 0,8 detik, hapus sekitar 0,8 detik, satu rute 0,05 sampai 0,3 detik. Penandaan jaringan utama sekarang hanya menulis ruas yang berubah (sebelumnya 8,6 detik, sekarang 0,8 detik), jadi import OSM juga ikut lebih cepat.
 
 ### Perbaikan pada tampilan lama
 - Checkbox fasilitas di form Tambah dulu tidak terkirim (tidak punya `name`).
@@ -107,20 +127,21 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | Bagian | Lokasi |
 |---|---|
 | Konfigurasi domain (kampus, bobot, batas foto) | `config/kostin.php` |
-| Model | `app/Models/Kos.php`, `Fasilitas.php`, `FotoKos.php` |
+| Model | `app/Models/Kos.php`, `Fasilitas.php`, `FotoKos.php`, `RekamanJalan.php` |
 | Enum | `app/Enums/TipeKos.php`, `StatusKos.php`, `PeriodeSewa.php` |
-| Controller admin | `app/Http/Controllers/Admin/` (Auth, Dasbor, Kos, Fasilitas) |
+| Controller admin | `app/Http/Controllers/Admin/` (Auth, Dasbor, Kos, Fasilitas, PlusCode, JaringanJalan) |
 | Validasi | `app/Http/Requests/Admin/` |
 | Logika simpan kos dan foto | `app/Services/KosService.php` |
 | Import spreadsheet | `app/Services/Import/NormalisasiKos.php` |
 | Pencarian dan rekomendasi | `app/Services/PencarianKosService.php`, `app/Services/RekomendasiService.php` |
 | API pengguna | `app/Http/Controllers/Api/KosController.php`, `routes/api.php` |
 | Routing (import jalan dan rute) | `app/Services/Routing/ImportJaringanJalan.php`, `app/Services/Routing/RuteService.php` |
+| Gang hasil survei dan validasi jarak | `app/Services/Routing/BacaRekamanGps.php`, `JaringanSurvei.php`, `ValidasiJarak.php`, `app/Http/Controllers/Admin/JaringanJalanController.php` |
 | Perintah artisan | `app/Console/Commands/` (`kos:import`, `jalan:import-osm`, `rute:cek`) |
 | Halaman pengguna | `app/Http/Controllers/BerandaController.php`, `JelajahController.php` |
 | Utilitas | `app/Support/Koordinat.php`, `Format.php`, `PlusCode.php` |
 | Ikon fasilitas | `resources/views/components/ikon-fasilitas.blade.php` |
-| Test | `tests/Feature`, `tests/Unit` (132 test) |
+| Test | `tests/Feature`, `tests/Unit` (145 test) |
 
 ### Route admin
 
@@ -131,6 +152,9 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | `/admin/datakos` | Daftar kos (+ `/tambah`, `/{id}`, `/{id}/edit`, `/{id}/status`) |
 | `/admin/fasilitas` | Daftar dan kelola fasilitas |
 | `/admin/plus-code?kode=` | Ubah Plus Code ke koordinat (JSON, dipakai form kos) |
+| `/admin/jaringan-jalan` | Unggah dan hapus gang hasil survei, peta pembanding, tabel validasi |
+| `/admin/jaringan-jalan/bandingkan/{id}` | Rute OSM dan OSM + survei satu kos (JSON) |
+| `/admin/jaringan-jalan/ekspor` | Unduh tabel validasi jarak (CSV) |
 
 Halaman pengguna: `/pengguna/beranda` dan `/pengguna/jelajah-kos` (bisa dengan `?q=` dan `?kos={id}`).
 
@@ -212,7 +236,7 @@ php artisan rute:cek --semua
 - Area dipecah menjadi kotak 3 x 3 km dan diambil satu per satu dengan jeda 1 detik, supaya tidak membebani server publik Overpass.
 - Kalau Overpass sedang sibuk (HTTP 429/502/504) atau koneksi putus, kotak itu dicoba ulang 3 kali, lalu dilewati dan dicoba sekali lagi di akhir setelah jeda 30 detik.
 - Kotak yang berhasil diunduh disimpan sementara di `storage/app/private/osm-cache`. Kalau import tetap gagal, tabel `ruas_jalan` tidak diubah, dan menjalankan ulang perintah yang sama hanya mengunduh kotak yang belum ada. Simpanan ini dihapus otomatis setelah import berhasil. Pakai `--segarkan` untuk mengabaikan simpanan dan mengunduh ulang semuanya.
-- Aman dijalankan ulang: semua ruas `osm` diganti data terbaru, ruas `survei` (jalan tikus) tidak disentuh.
+- Aman dijalankan ulang: semua ruas `osm` diganti data terbaru, lalu gang hasil survei disambungkan ulang ke ruas yang baru.
 - Setelah progress bar 100%, masih ada tahap pengolahan di database (memotong jalan, menyimpan ruas, mencari jaringan utama). Tiap tahap ditampilkan di layar dan butuh sekitar satu sampai beberapa menit untuk area 15 km.
 - Kalau perintah dihentikan paksa (Ctrl+C) saat tahap pengolahan, query di PostgreSQL bisa tetap berjalan dan mengunci tabel `ruas_jalan`. Hentikan dengan SQL berikut di pgAdmin (database `kostin`), atau restart service PostgreSQL:
   ```sql
@@ -224,18 +248,41 @@ php artisan rute:cek --semua
 
 ---
 
+## 7a. Unggah gang hasil survei
+
+Syarat rekaman:
+- Rekam pakai aplikasi GPS di HP (GPS Logger, OsmAnd, atau Open GPX Tracker), lalu ekspor sebagai **GPX**.
+- Satu rekaman = satu gang. Mulai merekam di jalan yang sudah ada di peta, jalan menyusuri gang, berhenti di jalan lain. Kedua ujung maksimal 15 m dari jalan.
+- Gang buntu boleh (misalnya gang yang berakhir di depan kos), asal satu ujungnya di jalan.
+- Hanya rekam jalan umum, jangan masuk pekarangan rumah orang.
+- File maksimal 5 MB, format `.gpx`, `.geojson`, atau `.json`.
+
+Langkah di aplikasi:
+1. Login admin, buka menu **Jaringan Jalan**.
+2. Pilih file, isi nama gang (opsional) dan catatan (misalnya siapa yang merekam), klik **Unggah dan Sambungkan**.
+3. Cek di peta: gang harus berwarna cokelat dan menyambung ke jalan. Pilih kos di sekitarnya untuk melihat apakah rutenya jadi lebih pendek.
+4. Kalau salah unggah, hapus dari daftar gang lalu unggah ulang.
+
+Pesan penolakan yang mungkin muncul: kedua ujung terlalu jauh dari jalan, rekaman terlalu pendek, rekaman di luar 15 km dari kampus, file tidak berisi track (hanya waypoint), atau GeoJSON berisi lebih dari satu garis.
+
+---
+
 ## 8. Yang belum dikerjakan dan batasan yang diketahui
 
 - Import OSM data asli (26 Okt): 75.190 jalan menjadi 143.477 ruas (9.444,7 km), 99,7% ruas ada di jaringan utama. `rute:cek --semua`: 5 dari 5 kos berhasil dirutekan. Rute Griya Malabar (880 m) cocok dengan jalan yang biasa dilewati penghuninya. Kost Dito Ekonomis II memutar jauh (rasio 2,52), menjadi prioritas survei jalan tikus.
-- Jalan tikus dan deploy belum dikerjakan.
-- Jalan di OSM bisa belum lengkap (gang kecil sering belum terpetakan). Inilah yang akan ditutup survei jalan tikus di Fase Locality.
+- Deploy belum dikerjakan.
+- Kode Fase Locality sudah jadi, tapi baru diuji dengan data buatan. Rekaman gang asli dari lapangan belum ada.
+- Jalan di OSM bisa belum lengkap (gang kecil sering belum terpetakan). Ini yang ditutup dengan unggah gang hasil survei.
+- Satu file GPX = satu gang. Gang yang memotong jalan lain di tengahnya tidak disambungkan di titik potong itu (hanya kedua ujungnya). Kalau perlu, rekam sebagai dua gang.
+- Unggah file yang sama dua kali menghasilkan dua gang yang sama. Tidak merusak rute, tapi sebaiknya yang dobel dihapus.
+- Jarak aktual hasil jalan kaki GPS tidak dimasukkan ke sistem. Di laporan dicatat sebagai batasan dan saran pengembangan.
 - Tabel Data Kos di admin perlu digeser ke samping di layar kecil. Perapian responsif dijadwalkan di Fase Finishing.
 - Notifikasi admin ditunda.
 - Sebagian kos sudah Aktif. Kos lain masih Draft karena titik lokasi atau foto belum lengkap, menunggu survei lapangan.
 
 ### Backlog
 - Notifikasi di header admin
-- Menggambar jalan tikus langsung di peta admin
+- Menggambar gang langsung di peta admin (tanpa file GPX)
 - Area yang terjangkau dalam X menit jalan kaki (`pgr_drivingDistance`)
 
 ---
@@ -252,3 +299,4 @@ php artisan rute:cek --semua
 | 26 Okt 2026 | Import jalan OSM bisa dilanjutkan bila Overpass gagal di tengah jalan (simpanan kotak + coba ulang di akhir) |
 | 26 Okt 2026 | Pemotongan jalan OSM dipercepat (uji 141 ribu jalan: lebih dari 21 menit menjadi sekitar 40 detik) |
 | 29 Okt 2026 | Form Tambah/Edit kos menerima Plus Code dari Google Maps |
+| 30 Okt 2026 | Kode Fase Locality selesai: unggah gang GPX/GeoJSON, sambungan otomatis ke jaringan, menu Jaringan Jalan, tabel validasi jarak + CSV |
