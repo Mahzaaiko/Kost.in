@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin | Kost.in</title>
 
+    {{-- Favicon --}}
+    <link rel="icon" href="{{ asset('images/logo kost.in.png') }}" type="image/png">
     {{-- Font: Plus Jakarta Sans --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

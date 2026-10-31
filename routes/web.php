@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DasborController;
 use App\Http\Controllers\Admin\FasilitasController;
+use App\Http\Controllers\Admin\JaringanJalanController;
 use App\Http\Controllers\Admin\KosController;
 use App\Http\Controllers\Admin\PlusCodeController;
 use App\Http\Controllers\BerandaController;
@@ -55,6 +56,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/', 'store')->name('.store');
             Route::put('/{fasilitas}', 'update')->whereNumber('fasilitas')->name('.update');
             Route::delete('/{fasilitas}', 'destroy')->whereNumber('fasilitas')->name('.hapus');
+        });
+
+        // JARINGAN JALAN (gang hasil survei dan validasi jarak)
+        Route::prefix('jaringan-jalan')->name('jaringanJalan')->controller(JaringanJalanController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store')->name('.store');
+            Route::delete('/{rekaman}', 'destroy')->whereNumber('rekaman')->name('.hapus');
+            Route::get('/bandingkan/{kos}', 'bandingkan')->whereNumber('kos')->name('.bandingkan');
+            Route::get('/ekspor', 'ekspor')->name('.ekspor');
         });
     });
 });

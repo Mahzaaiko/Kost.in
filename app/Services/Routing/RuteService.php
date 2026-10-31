@@ -17,11 +17,18 @@ use Illuminate\Support\Facades\DB;
  * 3. Garis rute = titik kos → jalan → ... → jalan → titik kampus.
  *
  * Graf dianggap tidak berarah karena pejalan kaki boleh melawan arah jalan satu arah.
+ *
+ * Secara bawaan rute memakai seluruh jaringan: jalan OSM, gang hasil survei, dan ruas sambungannya
+ * (ruas yang sudah dipotong sambungan diganti potongannya). Dengan $pakaiSurvei = false hanya ruas
+ * OSM asli yang dipakai, untuk tabel validasi di halaman admin.
  */
 class RuteService
 {
+    /** Syarat ruas yang dipakai perhitungan yang sedang berjalan (jaringan lengkap atau OSM saja). */
+    private string $syaratRuas = "r.utama AND r.sumber = 'osm'";
+
     /** @return array{tersedia: bool, alasan?: string, panjang_m?: int, durasi_menit?: int, jarak_ke_jalan_m?: int, catatan?: string|null, geometri?: array} */
-    public function untukKos(Kos $kos): array
+    public function untukKos(Kos $kos, bool $pakaiSurvei = true): array
     {
         if (! $kos->lokasi) {
             return ['tersedia' => false, 'alasan' => 'Titik lokasi kos belum diisi.'];
@@ -29,21 +36,46 @@ class RuteService
 
         $kampus = Koordinat::kampus();
         $kunci = sprintf(
-            'rute:%s:%.7F,%.7F:%.7F,%.7F',
+            'rute:%s:%.7F,%.7F:%.7F,%.7F%s',
             Cache::get(ImportJaringanJalan::KUNCI_VERSI, '0'),
             $kos->lokasi->lat, $kos->lokasi->lng, $kampus->lat, $kampus->lng,
+            $pakaiSurvei ? '' : ':osm',
         );
 
         return Cache::remember(
             $kunci,
             now()->addDays((int) config('kostin.routing.cache_hari')),
-            fn () => $this->hitung($kos->lokasi, $kampus),
+            fn () => $this->hitung($kos->lokasi, $kampus, $pakaiSurvei),
         );
     }
 
-    /** Hitung rute tanpa cache. */
-    public function hitung(Koordinat $dari, Koordinat $ke): array
+    /**
+     * Hitung rute tanpa cache.
+     *
+     * Bila ada gang survei, rute dihitung di jaringan lengkap dan di jaringan OSM saja, lalu dipilih
+     * yang lebih pendek. Titik kos atau kampus menempel ke ruas terdekat, dan gang yang lewat dekat
+     * sebuah titik bisa membuat titik itu menempel ke gang, padahal lewat jalan biasa lebih pendek
+     * beberapa meter. Dengan cara ini gang survei tidak pernah membuat rute lebih panjang.
+     */
+    public function hitung(Koordinat $dari, Koordinat $ke, bool $pakaiSurvei = true): array
     {
+        $osm = $this->hitungDi($dari, $ke, "r.utama AND r.sumber = 'osm'");
+        if (! $pakaiSurvei || ! DB::table('ruas_jalan')->where('sumber', 'survei')->exists()) {
+            return $osm;
+        }
+
+        $lengkap = $this->hitungDi($dari, $ke, 'r.utama AND NOT r.terpecah');
+        if (! $osm['tersedia']) {
+            return $lengkap;
+        }
+
+        return $lengkap['tersedia'] && $lengkap['panjang_m'] < $osm['panjang_m'] ? $lengkap : $osm;
+    }
+
+    private function hitungDi(Koordinat $dari, Koordinat $ke, string $syaratRuas): array
+    {
+        $this->syaratRuas = $syaratRuas;
+
         $a = $this->tempel($dari);
         $b = $this->tempel($ke);
         if (! $a || ! $b) {
@@ -88,7 +120,7 @@ class RuteService
                        ST_LineLocatePoint(r.geom, t.p) AS f,
                        ST_Distance(r.geom::geography, t.p::geography) AS jarak_m
                 FROM ruas_jalan r, (SELECT ST_SetSRID(ST_MakePoint(?, ?), 4326) AS p) t
-                WHERE r.utama
+                WHERE '.$this->syaratRuas.'
                 ORDER BY r.geom <-> t.p
                 LIMIT 8
              ) k ORDER BY jarak_m, id LIMIT 1',
@@ -119,7 +151,7 @@ class RuteService
      */
     private function dijkstra(object $a, object $b, bool $batasiArea): ?array
     {
-        $sqlGraf = 'SELECT id, source, target, panjang_m AS cost, panjang_m AS reverse_cost FROM ruas_jalan WHERE utama';
+        $sqlGraf = 'SELECT r.id, r.source, r.target, r.panjang_m AS cost, r.panjang_m AS reverse_cost FROM ruas_jalan r WHERE '.$this->syaratRuas;
         if ($batasiArea) {
             // Hanya muat ruas di sekitar kedua titik supaya cepat. Bila rute tidak ditemukan,
             // dihitung ulang dengan seluruh jaringan.
@@ -130,7 +162,7 @@ class RuteService
             );
             $margin = max(0.01, 0.5 * max($kotak->x2 - $kotak->x1, $kotak->y2 - $kotak->y1));
             $sqlGraf .= sprintf(
-                ' AND geom && ST_MakeEnvelope(%.7F, %.7F, %.7F, %.7F, 4326)',
+                ' AND r.geom && ST_MakeEnvelope(%.7F, %.7F, %.7F, %.7F, 4326)',
                 $kotak->x1 - $margin, $kotak->y1 - $margin, $kotak->x2 + $margin, $kotak->y2 + $margin,
             );
         }

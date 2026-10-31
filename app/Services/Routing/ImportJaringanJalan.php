@@ -23,7 +23,8 @@ use RuntimeException;
  * 3. Jalan dipotong di setiap persimpangan (node OSM yang dipakai lebih dari satu kali)
  *    menjadi ruas-ruas dengan source/target = id node OSM. Ini dikerjakan di SQL lewat
  *    tabel sementara supaya waktunya sebanding dengan jumlah data (ratusan ribu jalan).
- * 4. Komponen jaringan terbesar ditandai utama (pgr_connectedComponents).
+ * 4. Gang hasil survei (Fase Locality) disambungkan ulang ke ruas OSM yang baru.
+ * 5. Komponen jaringan terbesar ditandai utama (pgr_connectedComponents).
  */
 class ImportJaringanJalan
 {
@@ -239,6 +240,12 @@ class ImportJaringanJalan
                     ."SELECT 'osm', osm_way_id, nama, jenis, source, target, ST_Length(geom::geography), geom FROM ruas_mentah"
                 );
 
+                // Gang hasil survei menempel ke ruas OSM, jadi sambungannya dibuat ulang di atas data baru.
+                if (DB::table('rekaman_jalan')->exists()) {
+                    $tahap('Menyambungkan ulang gang hasil survei...');
+                    app(JaringanSurvei::class)->sambungkanUlangSemua();
+                }
+
                 $tahap('Mencari jaringan jalan utama (pgr_connectedComponents)...');
 
                 return $this->tandaiKomponenUtama();
@@ -247,7 +254,7 @@ class ImportJaringanJalan
             DB::statement('DROP TABLE IF EXISTS ruas_mentah, titik_mentah, osm_way_mentah');
         }
 
-        Cache::forever(self::KUNCI_VERSI, now()->format('YmdHis').'-'.bin2hex(random_bytes(3)));
+        $this->gantiVersi();
 
         // Import sudah tersimpan di database, simpanan tile tidak diperlukan lagi.
         $this->hapusSimpananTile();
@@ -288,6 +295,12 @@ class ImportJaringanJalan
         return count($ways).' jalan'.($simpanan ? ' (simpanan)' : '');
     }
 
+    /** Ganti penanda versi jaringan supaya cache rute lama tidak dipakai lagi. */
+    public function gantiVersi(): void
+    {
+        Cache::forever(self::KUNCI_VERSI, now()->format('YmdHis').'-'.bin2hex(random_bytes(3)));
+    }
+
     /**
      * Tandai ruas yang termasuk komponen terhubung terbesar sebagai utama.
      *
@@ -295,8 +308,6 @@ class ImportJaringanJalan
      */
     public function tandaiKomponenUtama(): int
     {
-        DB::update('UPDATE ruas_jalan SET utama = false WHERE utama');
-
         // Komponen dihitung sekali lalu disimpan sementara (pgRouting memuat seluruh graf setiap dipanggil).
         DB::statement('DROP TABLE IF EXISTS komponen_mentah');
         DB::statement(
@@ -312,11 +323,17 @@ class ImportJaringanJalan
             );
 
             if (! $info || $info->terbesar === null) {
+                DB::update('UPDATE ruas_jalan SET utama = false WHERE utama');
+
                 return 0;
             }
 
+            // Hanya baris yang statusnya berubah yang ditulis. Menulis ulang semua baris (ratusan ribu)
+            // jauh lebih lambat, padahal setelah unggah gang biasanya hanya beberapa ruas yang berubah.
             DB::update(
-                'UPDATE ruas_jalan r SET utama = true FROM komponen_mentah c WHERE c.node = r.source AND c.component = ?',
+                'UPDATE ruas_jalan r SET utama = x.baru
+                 FROM (SELECT r2.id, (c.component = ?) AS baru FROM ruas_jalan r2 JOIN komponen_mentah c ON c.node = r2.source) x
+                 WHERE x.id = r.id AND r.utama IS DISTINCT FROM x.baru',
                 [$info->terbesar],
             );
 

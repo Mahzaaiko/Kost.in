@@ -58,6 +58,12 @@ return [
         // Kos yang lebih jauh dari ini ke jalan terpetakan diberi catatan
         // (kandidat survei jalan tikus di Fase Locality).
         'peringatan_jarak_ke_jalan_m' => 50,
+
+        // Rekaman GPS gang dirapikan dengan toleransi ini (titik yang goyang kurang dari 3 m dibuang).
+        'penyederhanaan_survei_m' => 3,
+
+        // Batas file GPX/GeoJSON rekaman gang.
+        'berkas_survei_maks_kb' => 5120,
     ],
 
     // Akun admin pertama, dibaca AdminSeeder. Isi lewat .env.

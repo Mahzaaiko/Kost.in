@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard') | Kost.in</title>
 
+    {{-- Favicon --}}
+    <link rel="icon" href="{{ asset('images/logo kost.in.png') }}" type="image/png">
+
     {{-- Font: Plus Jakarta Sans --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,6 +67,16 @@
                         Fasilitas
                     </span>
                     @if (request()->routeIs('admin.fasilitas*'))
+                        <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                    @endif
+                </a>
+                {{-- Menu 4: Jaringan Jalan --}}
+                <a href="{{ route('admin.jaringanJalan') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.jaringanJalan*') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
+                    <span class="flex items-center gap-3">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 19h7.5a3.5 3.5 0 000-7h-7a3.5 3.5 0 010-7H16"/></svg>
+                        Jaringan Jalan
+                    </span>
+                    @if (request()->routeIs('admin.jaringanJalan*'))
                         <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
                     @endif
                 </a>
