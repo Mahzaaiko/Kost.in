@@ -7,37 +7,36 @@ use Illuminate\Database\Seeder;
 
 /**
  * Master fasilitas hasil pembakuan dari spreadsheet pendataan kos.
- * Kolom "ikon" adalah kunci ikon SVG yang sudah ada di frontend;
- * null berarti memakai ikon default.
+ * Kolom "ikon" adalah kunci ikon di komponen x-ikon-fasilitas (App\Models\Fasilitas::IKON).
  */
 class FasilitasSeeder extends Seeder
 {
     /** @var array<string, string|null> nama => kunci ikon */
     public const DAFTAR = [
         'Kamar Mandi Dalam' => 'kamar-mandi',
-        'Kamar Mandi Luar' => null,
-        'Water Heater' => null,
-        'Kasur' => null,
-        'Lemari' => null,
-        'Meja' => null,
-        'Kursi' => null,
+        'Kamar Mandi Luar' => 'kamar-mandi-luar',
+        'Water Heater' => 'water-heater',
+        'Kasur' => 'kasur',
+        'Lemari' => 'lemari',
+        'Meja' => 'meja',
+        'Kursi' => 'kursi',
         'AC' => 'ac',
-        'Kipas Angin' => null,
+        'Kipas Angin' => 'kipas',
         'WiFi' => 'wifi',
         'Dapur' => 'dapur',
-        'Kulkas' => null,
-        'Dispenser' => null,
-        'Mesin Cuci' => null,
+        'Kulkas' => 'kulkas',
+        'Dispenser' => 'dispenser',
+        'Mesin Cuci' => 'mesin-cuci',
         'Laundry' => 'laundry',
-        'Tempat Jemur' => null,
-        'Ruang TV' => null,
-        'Ruang Tamu' => null,
-        'Parkir Motor' => 'parkir',
-        'Parkir Mobil' => 'parkir',
-        'CCTV' => 'keamanan',
-        'Mushola' => null,
-        'Listrik Termasuk' => null,
-        'Air Termasuk' => null,
+        'Tempat Jemur' => 'jemur',
+        'Ruang TV' => 'tv',
+        'Ruang Tamu' => 'ruang-tamu',
+        'Parkir Motor' => 'motor',
+        'Parkir Mobil' => 'mobil',
+        'CCTV' => 'cctv',
+        'Mushola' => 'mushola',
+        'Listrik Termasuk' => 'listrik',
+        'Air Termasuk' => 'air',
     ];
 
     public function run(): void
