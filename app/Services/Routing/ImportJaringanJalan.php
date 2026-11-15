@@ -255,6 +255,8 @@ class ImportJaringanJalan
         }
 
         $this->gantiVersi();
+        $tahap('Menghitung ulang jarak rute setiap kos...');
+        app(JarakRuteKos::class)->perbaruiYangUsang();
 
         // Import sudah tersimpan di database, simpanan tile tidak diperlukan lagi.
         $this->hapusSimpananTile();

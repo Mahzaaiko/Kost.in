@@ -53,11 +53,54 @@ class JangkauanJalanKaki
     }
 
     /**
-     * Hitung jangkauan tanpa cache.
+     * Area yang bisa dicapai dari kampus dengan berjalan sejauh $km lewat jalan (network buffer).
+     * Dipakai slider jarak di Jelajah, menggantikan lingkaran buffer garis lurus.
+     */
+    public function untukJarak(float $km, string $jaringan = 'lengkap'): array
+    {
+        $jaringan = array_key_exists($jaringan, self::JARINGAN) ? $jaringan : 'lengkap';
+        $meter = (int) round($km * 1000);
+        $kampus = Koordinat::kampus();
+
+        $kunci = sprintf(
+            'jangkauan-jarak:%s:%s:%.7F,%.7F:%d:%s',
+            Cache::get(ImportJaringanJalan::KUNCI_VERSI, '0'),
+            $jaringan, $kampus->lat, $kampus->lng, $meter,
+            md5(json_encode([config('kostin.peta'), config('kostin.routing.kecepatan_jalan_kmh')])),
+        );
+
+        return Cache::remember($kunci, now()->addDays((int) config('kostin.routing.cache_hari')), function () use ($kampus, $meter, $jaringan) {
+            $hasil = $this->hitungMeter($kampus, [$meter], $jaringan);
+            foreach ($hasil['features'] as &$f) {
+                $f['properties']['menit'] = JarakRuteKos::menit($f['properties']['jarak_m']);
+            }
+
+            return $hasil;
+        });
+    }
+
+    /**
+     * Hitung jangkauan per pita waktu tanpa cache.
      *
      * @param  list<int>  $menit
      */
     public function hitung(Koordinat $asal, array $menit, string $jaringan = 'lengkap'): array
+    {
+        $kecepatan = JarakRuteKos::meterPerMenit();
+        $hasil = $this->hitungMeter($asal, array_map(fn (int $m) => (int) round($m * $kecepatan), $menit), $jaringan);
+        foreach ($hasil['features'] as &$f) {
+            $f['properties'] = ['menit' => (int) round($f['properties']['jarak_m'] / $kecepatan)] + $f['properties'];
+        }
+
+        return $hasil;
+    }
+
+    /**
+     * Hitung jangkauan per batas jarak jaringan (meter) tanpa cache.
+     *
+     * @param  list<int>  $meter
+     */
+    public function hitungMeter(Koordinat $asal, array $meter, string $jaringan = 'lengkap'): array
     {
         $syarat = self::JARINGAN[$jaringan] ?? self::JARINGAN['lengkap'];
         $kosong = ['type' => 'FeatureCollection', 'features' => [], 'tersedia' => false, 'jaringan' => $jaringan];
@@ -67,9 +110,8 @@ class JangkauanJalanKaki
             return $kosong + ['alasan' => 'Jaringan jalan belum diimpor. Jalankan php artisan jalan:import-osm.'];
         }
 
-        $kecepatan = (float) config('kostin.routing.kecepatan_jalan_kmh') * 1000 / 60;
-        // Jarak dari titik kampus ke jalan sudah memakai sebagian waktu tempuh.
-        $batas = array_map(fn (int $m) => max(0.0, $m * $kecepatan - $tempel->jarak_m), $menit);
+        // Jarak dari titik kampus ke jalan sudah memakai sebagian jarak tempuh.
+        $batas = array_map(fn (int $m) => max(0.0, $m - $tempel->jarak_m), $meter);
         $maks = max($batas);
         if ($maks <= 0) {
             return $kosong + ['alasan' => 'Titik kampus terlalu jauh dari jalan yang terpetakan.'];
@@ -95,7 +137,7 @@ class JangkauanJalanKaki
                 GROUP BY d.node
              ),
              pita AS (
-                SELECT * FROM unnest(?::int[], ?::float8[]) p(menit, batas)
+                SELECT * FROM unnest(?::int[], ?::float8[]) p(label, batas)
              ),
              ruas AS (
                 SELECT r.geom, r.panjang_m, ds.jarak AS js, dt.jarak AS jt
@@ -106,46 +148,46 @@ class JangkauanJalanKaki
              ),
              porsi AS (
                 -- Bagian ruas yang terjangkau dari ujung source (fs) dan dari ujung target (ft), 0..1.
-                SELECT p.menit, x.geom,
+                SELECT p.label, x.geom,
                        CASE WHEN x.js < p.batas THEN CASE WHEN x.panjang_m > 0 THEN LEAST(1, (p.batas - x.js) / x.panjang_m) ELSE 1 END ELSE 0 END AS fs,
                        CASE WHEN x.jt < p.batas THEN CASE WHEN x.panjang_m > 0 THEN LEAST(1, (p.batas - x.jt) / x.panjang_m) ELSE 1 END ELSE 0 END AS ft
                 FROM ruas x CROSS JOIN pita p
              ),
              garis AS (
-                SELECT menit, ST_LineSubstring(geom, 0, CASE WHEN fs + ft >= 1 THEN 1 ELSE fs END) AS g FROM porsi WHERE fs > 0
+                SELECT label, ST_LineSubstring(geom, 0, CASE WHEN fs + ft >= 1 THEN 1 ELSE fs END) AS g FROM porsi WHERE fs > 0
                 UNION ALL
-                SELECT menit, ST_LineSubstring(geom, 1 - ft, 1) FROM porsi WHERE ft > 0 AND fs + ft < 1
+                SELECT label, ST_LineSubstring(geom, 1 - ft, 1) FROM porsi WHERE ft > 0 AND fs + ft < 1
                 UNION ALL
                 -- Ruas tempat kampus menempel: terjangkau ke dua arah dari titik tempel.
-                SELECT p.menit, ST_LineSubstring(r.geom, GREATEST(0, ? - p.batas / r.panjang_m), LEAST(1, ? + p.batas / r.panjang_m))
+                SELECT p.label, ST_LineSubstring(r.geom, GREATEST(0, ? - p.batas / r.panjang_m), LEAST(1, ? + p.batas / r.panjang_m))
                 FROM ruas_jalan r CROSS JOIN pita p
                 WHERE r.id = ? AND r.panjang_m > 0 AND p.batas > 0
              ),
              area AS (
                 -- Setiap potongan dilebarkan dulu lalu digabung (cascaded union): jauh lebih cepat
                 -- daripada melebarkan gabungan semua garis sekaligus di jaringan yang rapat.
-                SELECT menit, ST_Union(ST_Buffer(ST_Transform(g, 32748), ?, 'quad_segs=3')) AS a
+                SELECT label, ST_Union(ST_Buffer(ST_Transform(g, 32748), ?, 'quad_segs=3')) AS a
                 FROM garis
-                GROUP BY menit
+                GROUP BY label
              ),
              rapi AS (
-                SELECT area.menit, ST_Collect(ST_MakePolygon(
+                SELECT area.label, ST_Collect(ST_MakePolygon(
                            ST_ExteriorRing(d.geom),
                            ARRAY(SELECT ST_InteriorRingN(d.geom, n)
                                  FROM generate_series(1, ST_NumInteriorRings(d.geom)) n
                                  WHERE ST_Area(ST_MakePolygon(ST_InteriorRingN(d.geom, n))) > ?)
                        )) AS a
                 FROM area, LATERAL ST_Dump(area.a) d
-                GROUP BY area.menit
+                GROUP BY area.label
              )
-             SELECT menit, ST_Area(a) AS luas_m2,
+             SELECT label, ST_Area(a) AS luas_m2,
                     ST_AsGeoJSON(ST_Transform(ST_SimplifyPreserveTopology(a, 2), 4326), 6) AS gj
              FROM rapi
-             ORDER BY menit DESC",
+             ORDER BY label DESC",
             [
                 $tempel->source, $tempel->f * $tempel->panjang_m, $tempel->target, (1 - $tempel->f) * $tempel->panjang_m,
                 $sqlGraf, $tempel->source, $tempel->target, $maks,
-                '{'.implode(',', $menit).'}', '{'.implode(',', $batas).'}',
+                '{'.implode(',', $meter).'}', '{'.implode(',', $batas).'}',
                 $tempel->f, $tempel->f, $tempel->id,
                 (float) config('kostin.peta.jangkauan_lebar_m'),
                 (float) config('kostin.peta.jangkauan_lubang_maks_m2'),
@@ -155,8 +197,7 @@ class JangkauanJalanKaki
         $fitur = array_map(fn ($r) => [
             'type' => 'Feature',
             'properties' => [
-                'menit' => (int) $r->menit,
-                'jarak_m' => (int) round($r->menit * $kecepatan),
+                'jarak_m' => (int) $r->label,
                 'luas_ha' => round($r->luas_m2 / 10_000, 1),
             ],
             'geometry' => json_decode($r->gj, true),

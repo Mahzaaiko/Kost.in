@@ -239,5 +239,6 @@ class JaringanSurvei
     {
         $this->importOsm->tandaiKomponenUtama();
         $this->importOsm->gantiVersi();
+        app(JarakRuteKos::class)->perbaruiYangUsang();
     }
 }

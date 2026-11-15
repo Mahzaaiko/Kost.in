@@ -4,16 +4,26 @@ namespace App\Services;
 
 use App\Enums\TipeKos;
 use App\Models\Kos;
+use App\Services\Routing\JarakRuteKos;
 use App\Support\Koordinat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
-/** Pencarian kos untuk halaman pengguna: hanya kos Aktif yang punya titik lokasi. */
+/**
+ * Pencarian kos untuk halaman pengguna: hanya kos Aktif yang punya titik lokasi.
+ *
+ * Jarak acuan (filter jarak, urut jarak, kriteria jarak SAW) adalah jarak rute jalan kaki
+ * di jaringan jalan (kolom jarak_rute_m). Jarak garis lurus (jarak_m) tetap dikirim sebagai
+ * pembanding dan dipakai sebagai cadangan bila rute kos tidak tersedia.
+ */
 class PencarianKosService
 {
     public const URUTAN = ['rekomendasi', 'jarak', 'murah', 'mahal'];
 
-    public function __construct(private readonly RekomendasiService $rekomendasi) {}
+    public function __construct(
+        private readonly RekomendasiService $rekomendasi,
+        private readonly JarakRuteKos $jarakRute,
+    ) {}
 
     /**
      * Query dasar: kos aktif + kolom jarak_m (meter, garis lurus ke kampus, dihitung PostGIS).
@@ -29,10 +39,13 @@ class PencarianKosService
 
     /**
      * @param  array{harga_max?: int|null, jarak_max_km?: float|null, tipe?: string|null, fasilitas?: list<int>, q?: string|null, urut?: string|null}  $filter
-     * @return Collection<int, Kos> setiap kos punya atribut jarak_m dan skor
+     * @return Collection<int, Kos> setiap kos punya atribut jarak_m, jarak_acuan_m, dan skor
      */
     public function cari(array $filter): Collection
     {
+        // Biasanya tidak ada yang dihitung: nilai sudah diperbarui saat kos disimpan atau jaringan berubah.
+        $this->jarakRute->perbaruiYangUsang();
+
         $query = $this->queryDasar()->with(['fasilitas', 'foto']);
 
         if (! empty($filter['harga_max'])) {
@@ -40,9 +53,10 @@ class PencarianKosService
         }
 
         if (! empty($filter['jarak_max_km'])) {
-            // Buffer: kos di dalam radius X meter dari kampus (garis lurus).
+            // Jarak rute jalan kaki lewat jaringan jalan, sama dengan area slider di peta.
+            // Kos yang rutenya tidak tersedia (misalnya jaringan belum diimpor) memakai garis lurus.
             $query->whereRaw(
-                'ST_DWithin(lokasi, ST_GeogFromText(?), ?)',
+                'COALESCE(jarak_rute_m, ST_Distance(lokasi, ST_GeogFromText(?))) <= ?',
                 [Koordinat::kampus()->toEwkt(), (float) $filter['jarak_max_km'] * 1000],
             );
         }
@@ -63,6 +77,7 @@ class PencarianKosService
         }
 
         $hasil = $query->get();
+        $hasil->each(fn (Kos $k) => $k->setAttribute('jarak_acuan_m', $k->jarak_rute_m ?? (float) $k->jarak_m));
         $this->isiSkor($hasil);
 
         return $this->urutkan($hasil, $filter['urut'] ?? 'rekomendasi');
@@ -73,7 +88,7 @@ class PencarianKosService
     {
         $skor = $this->rekomendasi->hitung(
             $daftar->mapWithKeys(fn (Kos $k) => [$k->id => [
-                'jarak' => (float) $k->jarak_m,
+                'jarak' => (float) ($k->jarak_acuan_m ?? $k->jarak_rute_m ?? $k->jarak_m),
                 'harga' => (int) $k->harga_per_bulan,
                 'fasilitas' => $k->fasilitas->count(),
             ]])->all(),
@@ -85,10 +100,10 @@ class PencarianKosService
     private function urutkan(Collection $daftar, string $urut): Collection
     {
         $urutan = match ($urut) {
-            'jarak' => [['jarak_m', 'asc']],
-            'murah' => [['harga_per_bulan', 'asc'], ['jarak_m', 'asc']],
-            'mahal' => [['harga_per_bulan', 'desc'], ['jarak_m', 'asc']],
-            default => [['skor', 'desc'], ['jarak_m', 'asc']],
+            'jarak' => [['jarak_acuan_m', 'asc']],
+            'murah' => [['harga_per_bulan', 'asc'], ['jarak_acuan_m', 'asc']],
+            'mahal' => [['harga_per_bulan', 'desc'], ['jarak_acuan_m', 'asc']],
+            default => [['skor', 'desc'], ['jarak_acuan_m', 'asc']],
         };
 
         return $daftar->sortBy($urutan)->values();

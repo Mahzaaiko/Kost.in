@@ -2,7 +2,7 @@
 
 Dokumen ini mencatat apa yang sudah dikerjakan di backend, keputusan teknis yang sudah disepakati, dan alur kerja tim. Baca ini dulu sebelum mulai mengerjakan apa pun di repo.
 
-Terakhir diperbarui: 30 Oktober 2026 (kode Fase Locality selesai, menunggu rekaman gang dari lapangan)
+Terakhir diperbarui: 4 November 2026 (layer tematik peta: jangkauan jalan kaki dan jaringan jalan)
 
 ---
 
@@ -16,6 +16,7 @@ Terakhir diperbarui: 30 Oktober 2026 (kode Fase Locality selesai, menunggu rekam
 | Pengguna (API Jelajah, filter, rekomendasi, Beranda) | 2–4 Nov | Selesai |
 | Routing (OSM + pgRouting, tombol Lihat Rute) | 5–8 Nov | Selesai 26 Okt |
 | Locality (gang hasil survei, validasi jarak) | 9–11 Nov | Kode selesai 30 Okt, menunggu rekaman gang |
+| Layer tematik (jangkauan jalan kaki, jaringan jalan, kontrol layer) | 4–7 Nov | Selesai 4 Nov |
 | Deploy percobaan (VPS) | 8–9 Nov | Belum |
 | Finishing (blackbox testing, bug, dokumentasi, deploy final) | 11–14 Nov | Belum |
 
@@ -36,7 +37,7 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | Database | PostgreSQL 18 + PostGIS + pgRouting 4.0.1 | Filter radius dan routing dihitung di database sendiri |
 | Peta | Leaflet + OpenStreetMap, bukan Google Maps | Saran dosen: fungsi spasial sendiri, bisa dicek, bisa menambah jalan tikus. Rute Google wajib tampil di Google Map dan butuh billing |
 | Titik kampus | Jl. Kumbang No.14 (Plus Code `CR64+5M9`) = `-6.5895875, 106.8067344` | Satu titik untuk pusat buffer dan tujuan rute |
-| Filter jarak dan rekomendasi | Jarak garis lurus dari titik kampus | Bogor Tengah padat permukiman, garis lurus cukup mewakili |
+| Filter jarak dan rekomendasi | Jarak **rute jalan kaki** (kolom `kos.jarak_rute_m`) untuk slider jarak, urut jarak, dan kriteria jarak SAW. Slider tetap dalam km; area di peta mengikuti jalan (network buffer), lingkaran garis lurus jadi layer pembanding | Diubah 15 Nov. Tabel validasi menunjukkan garis lurus menyesatkan: dari 59 kos Aktif dalam 1 km garis lurus, median rasio rute 1,79 dan 32 kos butuh lebih dari 10 menit jalan kaki |
 | Rute "Lihat Rute" | Jalur pejalan kaki dari pgRouting (OSM + gang hasil survei) | Aspek locality yang diminta dosen |
 | Gang hasil survei | Tidak terikat ke kos, langsung dipakai rute semua kos. Gang buntu boleh. Di Jelajah tidak dibedakan, bukti locality ada di halaman admin Jaringan Jalan dan tabel validasi | Bagi mahasiswa gang itu jalan biasa. Dosen melihat perbandingan di sisi admin |
 | Jarak aktual GPS | Tidak dibuat di sistem | Data gang sudah hasil jalan kaki dengan GPS. Validasi banyak sampel ditulis sebagai batasan dan saran |
@@ -72,12 +73,15 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 ### Fase Pengguna
 - **API `GET /api/kos`** (publik, maks 60 request/menit): hanya kos Aktif yang punya titik lokasi. Parameter:
   - `harga_max` (rupiah per bulan)
-  - `jarak_max_km` (0,1 sampai 10, buffer garis lurus `ST_DWithin`)
+  - `jarak_max_km` (0,1 sampai 10): jarak **rute jalan kaki** ke kampus. Kos yang rutenya tidak tersedia memakai garis lurus
   - `tipe` (`putri`, `putra`, `campur`, atau `semua`)
   - `fasilitas[]` (id fasilitas, kos harus punya **semua** yang dipilih)
   - `q` (cari di nama dan alamat)
-  - `urut` (`rekomendasi` default, `jarak`, `murah`, `mahal`)
-- **Rekomendasi SAW** (`app/Services/RekomendasiService.php`): skor 0 sampai 1 = 0,5 x jarak + 0,3 x harga + 0,2 x jumlah fasilitas, dinormalisasi min-max terhadap kos yang lolos filter. Contoh hitungan ada di `tests/Unit/RekomendasiServiceTest.php`.
+  - `urut` (`rekomendasi` default, `jarak`, `murah`, `mahal`). `jarak` mengurutkan berdasarkan rute jalan kaki
+  - Setiap kos berisi `jarak_m` (garis lurus), `jarak_rute_m`, dan `waktu_jalan_menit` (4,8 km/jam). `meta.kriteria_jarak` = `rute_jalan_kaki`
+- **API `GET /api/peta/jangkauan?jarak_km=1.2`**: satu area yang bisa dicapai dengan berjalan 1,2 km lewat jalan, untuk menggambar area slider jarak (dibulatkan 0,1 km, di-cache). Tanpa `jarak_km` tetap pita 5/10/15/20 menit. Perintah `peta:siapkan-jangkauan` menghitung semua area slider lebih dulu (jalankan setelah deploy, import OSM, atau unggah gang)
+- **Jarak rute per kos** (`app/Services/Routing/JarakRuteKos.php`): disimpan di `kos.jarak_rute_m` beserta versi jaringan saat dihitung. Dihitung ulang otomatis saat lokasi kos berubah, gang diunggah atau dihapus, dan import OSM. Bila jaringan belum diimpor, pencarian kembali ke garis lurus.
+- **Rekomendasi SAW** (`app/Services/RekomendasiService.php`): skor 0 sampai 1 = 0,5 x jarak rute + 0,3 x harga + 0,2 x jumlah fasilitas, dinormalisasi min-max terhadap kos yang lolos filter. Contoh hitungan ada di `tests/Unit/RekomendasiServiceTest.php`.
 - **API `POST /api/kos/{id}/dilihat`**: menambah jumlah dilihat, sekali per IP per kos dalam 6 jam.
 - **Halaman Jelajah**: data dari API, filter dan urutan berjalan di server, ada opsi urutan "Rekomendasi" dengan skor, fasilitas di filter hanya yang dimiliki kos aktif, bisa dibuka dengan `?q=` dan `?kos={id}`.
 - **Beranda**: jumlah kos, 3 kos yang paling sering dilihat, dan peta radius dari data asli.
@@ -113,6 +117,27 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 - **Import ulang OSM**: semua gang otomatis disambungkan ulang ke ruas OSM yang baru. Gang yang tidak lagi tersambung diberi tanda merah di halaman admin.
 - **Kecepatan** (uji jaringan buatan 143 ribu ruas, setara data asli): unggah gang sekitar 0,8 detik, hapus sekitar 0,8 detik, satu rute 0,05 sampai 0,3 detik. Penandaan jaringan utama sekarang hanya menulis ruas yang berubah (sebelumnya 8,6 detik, sekarang 0,8 detik), jadi import OSM juga ikut lebih cepat.
 
+### Layer tematik peta (syarat minimal 4 layer)
+- **Peta Jelajah** sekarang punya kontrol layer (kanan atas) dengan 4 layer tematik yang bisa dinyalakan/dimatikan, di luar peta dasar OSM:
+  1. **Kos** (titik, warna per tipe). Menyala dari awal.
+  2. **Buffer garis lurus** (poligon, lingkaran 1/3/5/10 km dari kampus). Menyala dari awal.
+  3. **Jangkauan jalan kaki** (poligon, isochrone 5/10/15/20 menit dari kampus). Dimuat saat pertama dinyalakan.
+  4. **Jaringan jalan** (garis, jalan OSM abu-abu dan gang hasil survei biru, radius 2 km). Dimuat saat pertama dinyalakan.
+  Ditambah titik kampus dan rute kos terpilih. Legenda ikut menyesuaikan layer yang menyala.
+- **Jangkauan jalan kaki** (`app/Services/Routing/JangkauanJalanKaki.php`, `GET /api/peta/jangkauan`):
+  1. Titik kampus ditempelkan ke ruas terdekat, lalu `pgr_drivingDistance` menghitung jarak jaringan ke setiap simpul.
+  2. Untuk setiap pita waktu, ruas diambil sepanjang bagian yang masih terjangkau. Ruas yang terjangkau sebagian dipotong di tengah (`ST_LineSubstring`).
+  3. Potongan ruas dilebarkan 30 m ke kiri-kanan (`ST_Buffer`, lalu `ST_Union`), lubang kecil di dalamnya (blok rumah di bawah 2 ha) ditutup.
+  4. Memakai jaringan lengkap (OSM + gang survei). `?jaringan=osm` menghasilkan jangkauan tanpa gang, untuk membandingkan dampak survei.
+  5. Hasil di-cache dan otomatis dihitung ulang saat jaringan berubah (import OSM, unggah atau hapus gang).
+- **Jaringan jalan** (`app/Services/Routing/LayerJaringanJalan.php`, `GET /api/peta/jaringan-jalan`): dua fitur MultiLineString (OSM dan gang survei) dengan jumlah ruas dan panjang total. Ruas terpecah diwakili potongannya.
+- **Pengaturan** di `config/kostin.php` bagian `peta`: pita menit, lebar area jalan, batas lubang, radius layer jalan.
+- **Kecepatan** (uji jaringan buatan 31 ribu ruas dengan jarak antarjalan 40 m, lebih rapat dari data asli): jangkauan pertama kali sekitar 1,9 detik, berikutnya dari cache sekitar 0,04 detik. Layer jalan sekitar 0,2 detik.
+- **Kenapa tidak memakai POI OSM** (minimarket, laundry, masjid): data POI di sekitar kampus menumpuk di jalan besar dan banyak yang tidak mutakhir. Bila dipakai di skor rekomendasi, kos di dalam gang dirugikan karena kualitas data, bukan kondisi nyata. Dicatat sebagai pengembangan berikutnya (survei POI mandiri).
+
+### Ikon fasilitas
+- Setiap master fasilitas punya ikon sendiri (Tabler Icons, MIT, ditanam langsung di komponen Blade). Migrasi `2026_11_01_000001_isi_ikon_master_fasilitas` mengisi ikon yang masih kosong tanpa menimpa ikon pilihan admin.
+
 ### Perbaikan pada tampilan lama
 - Checkbox fasilitas di form Tambah dulu tidak terkirim (tidak punya `name`).
 - Foto di form Tambah dulu tidak pernah terkirim ke server.
@@ -134,14 +159,15 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | Logika simpan kos dan foto | `app/Services/KosService.php` |
 | Import spreadsheet | `app/Services/Import/NormalisasiKos.php` |
 | Pencarian dan rekomendasi | `app/Services/PencarianKosService.php`, `app/Services/RekomendasiService.php` |
-| API pengguna | `app/Http/Controllers/Api/KosController.php`, `routes/api.php` |
+| API pengguna | `app/Http/Controllers/Api/KosController.php`, `PetaController.php`, `routes/api.php` |
 | Routing (import jalan dan rute) | `app/Services/Routing/ImportJaringanJalan.php`, `app/Services/Routing/RuteService.php` |
+| Layer tematik peta | `app/Services/Routing/JangkauanJalanKaki.php`, `LayerJaringanJalan.php` |
 | Gang hasil survei dan validasi jarak | `app/Services/Routing/BacaRekamanGps.php`, `JaringanSurvei.php`, `ValidasiJarak.php`, `app/Http/Controllers/Admin/JaringanJalanController.php` |
 | Perintah artisan | `app/Console/Commands/` (`kos:import`, `jalan:import-osm`, `rute:cek`) |
 | Halaman pengguna | `app/Http/Controllers/BerandaController.php`, `JelajahController.php` |
 | Utilitas | `app/Support/Koordinat.php`, `Format.php`, `PlusCode.php` |
 | Ikon fasilitas | `resources/views/components/ikon-fasilitas.blade.php` |
-| Test | `tests/Feature`, `tests/Unit` (145 test) |
+| Test | `tests/Feature`, `tests/Unit` (164 test) |
 
 ### Route admin
 
@@ -157,6 +183,16 @@ Pekerjaan lapangan yang berjalan paralel (target 5 November):
 | `/admin/jaringan-jalan/ekspor` | Unduh tabel validasi jarak (CSV) |
 
 Halaman pengguna: `/pengguna/beranda` dan `/pengguna/jelajah-kos` (bisa dengan `?q=` dan `?kos={id}`).
+
+### API publik
+
+| URL | Fungsi |
+|---|---|
+| `/api/kos` | Daftar kos untuk Jelajah (filter, urutan, skor) |
+| `/api/kos/{id}/dilihat` | Tambah penghitung dilihat (POST) |
+| `/api/kos/{id}/rute` | Rute jalan kaki kos ke kampus (GeoJSON) |
+| `/api/peta/jangkauan` | Jangkauan jalan kaki dari kampus (GeoJSON, `?jaringan=osm` untuk pembanding) |
+| `/api/peta/jaringan-jalan` | Jaringan jalan OSM dan gang survei sekitar kampus (GeoJSON) |
 
 ---
 
@@ -262,6 +298,8 @@ Langkah di aplikasi:
 2. Pilih file, isi nama gang (opsional) dan catatan (misalnya siapa yang merekam), klik **Unggah dan Sambungkan**.
 3. Cek di peta: gang harus berwarna cokelat dan menyambung ke jalan. Pilih kos di sekitarnya untuk melihat apakah rutenya jadi lebih pendek.
 4. Kalau salah unggah, hapus dari daftar gang lalu unggah ulang.
+5. Bila gang memotong jalan lain di tengah rekaman, pecah jadi dua rekaman. Persimpangan hanya dibuat di ujung rekaman. Untuk pertigaan di gang, unggah cabang pertama dulu, lalu rekam cabang kedua mulai tepat dari pertigaan.
+6. Data gang tersimpan di database, bukan di repo. Simpan file GPX di Drive tim dan catat urutan unggah, untuk diunggah ulang saat deploy.
 
 Pesan penolakan yang mungkin muncul: kedua ujung terlalu jauh dari jalan, rekaman terlalu pendek, rekaman di luar 15 km dari kampus, file tidak berisi track (hanya waypoint), atau GeoJSON berisi lebih dari satu garis.
 
@@ -283,7 +321,8 @@ Pesan penolakan yang mungkin muncul: kedua ujung terlalu jauh dari jalan, rekama
 ### Backlog
 - Notifikasi di header admin
 - Menggambar gang langsung di peta admin (tanpa file GPX)
-- Area yang terjangkau dalam X menit jalan kaki (`pgr_drivingDistance`)
+- Survei POI mandiri (minimarket, laundry, masjid) untuk layer dan skor rekomendasi
+- Peta pembanding jangkauan OSM vs OSM + survei di halaman admin Jaringan Jalan (API sudah ada)
 
 ---
 
@@ -300,3 +339,7 @@ Pesan penolakan yang mungkin muncul: kedua ujung terlalu jauh dari jalan, rekama
 | 26 Okt 2026 | Pemotongan jalan OSM dipercepat (uji 141 ribu jalan: lebih dari 21 menit menjadi sekitar 40 detik) |
 | 29 Okt 2026 | Form Tambah/Edit kos menerima Plus Code dari Google Maps |
 | 30 Okt 2026 | Kode Fase Locality selesai: unggah gang GPX/GeoJSON, sambungan otomatis ke jaringan, menu Jaringan Jalan, tabel validasi jarak + CSV |
+| 2 Nov 2026 | Ikon khusus untuk setiap master fasilitas |
+| 4 Nov 2026 | Layer tematik peta Jelajah: jangkauan jalan kaki (isochrone), jaringan jalan, kontrol layer dan legenda |
+| 15 Nov 2026 | Jarak rute jalan kaki menjadi jarak acuan: slider jarak, urut jarak, kriteria jarak SAW; area slider mengikuti jalan (`/api/peta/jangkauan?jarak_km=`) |
+| 15 Nov 2026 | Perbaikan rute pembanding OSM saja: kolom `utama_osm`, supaya jalan OSM yang hanya tersambung lewat gang survei tidak membuat rute OSM kosong |

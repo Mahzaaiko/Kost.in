@@ -59,7 +59,19 @@ class Kos extends Model
             'periode_minimal_bulan' => 'integer',
             'jumlah_dilihat' => 'integer',
             'lokasi' => GeographyPoint::class,
+            'jarak_rute_m' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Lokasi berubah: jarak rute lama tidak berlaku, dihitung ulang oleh JarakRuteKos.
+        static::saving(function (Kos $kos) {
+            if ($kos->isDirty('lokasi')) {
+                $kos->jarak_rute_m = null;
+                $kos->jarak_rute_versi = null;
+            }
+        });
     }
 
     public function fasilitas(): BelongsToMany

@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Kos;
+use App\Services\Routing\JarakRuteKos;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,7 +33,10 @@ class KosResource extends JsonResource
             'fotos' => $this->foto->map(fn ($f) => $f->url())->values(),
             'lat' => $this->lokasi?->lat,
             'lng' => $this->lokasi?->lng,
+            // jarak_m = garis lurus ke kampus, jarak_rute_m = rute jalan kaki (null bila rute tidak tersedia).
             'jarak_m' => $this->jarak_m !== null ? (int) round((float) $this->jarak_m) : null,
+            'jarak_rute_m' => $this->jarak_rute_m,
+            'waktu_jalan_menit' => JarakRuteKos::menit($this->jarak_rute_m),
             'skor' => $this->skor,
         ];
     }

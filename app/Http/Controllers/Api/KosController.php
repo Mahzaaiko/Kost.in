@@ -29,6 +29,9 @@ class KosController extends Controller
                 'jumlah' => $hasil->count(),
                 'urut' => $filter['urut'] ?? 'rekomendasi',
                 'bobot' => config('kostin.rekomendasi.bobot'),
+                // Kriteria jarak SAW dan urut jarak memakai rute jalan kaki, bukan garis lurus.
+                'kriteria_jarak' => 'rute_jalan_kaki',
+                'kecepatan_jalan_kmh' => (float) config('kostin.routing.kecepatan_jalan_kmh'),
             ],
         ]);
     }
