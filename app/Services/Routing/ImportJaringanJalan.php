@@ -302,17 +302,34 @@ class ImportJaringanJalan
     }
 
     /**
-     * Tandai ruas yang termasuk komponen terhubung terbesar sebagai utama.
+     * Tandai ruas yang termasuk komponen terhubung terbesar.
      *
-     * @return int jumlah komponen di seluruh jaringan
+     * - utama: komponen terbesar di jaringan lengkap (OSM, gang survei, dan sambungannya).
+     * - utama_osm: komponen terbesar di jaringan OSM saja. Dipakai rute pembanding "OSM saja",
+     *   supaya potongan jalan OSM yang hanya tersambung lewat gang survei tidak dipakai untuk
+     *   menempelkan titik di jaringan OSM (di jaringan itu potongan tersebut terputus).
+     *
+     * @return int jumlah komponen di jaringan lengkap
      */
     public function tandaiKomponenUtama(): int
+    {
+        $jumlah = $this->tandaiKomponen('utama', 'TRUE');
+        $this->tandaiKomponen('utama_osm', "sumber = 'osm'");
+
+        return $jumlah;
+    }
+
+    /**
+     * @param  string  $kolom  kolom penanda (utama atau utama_osm)
+     * @param  string  $syarat  ruas yang ikut graf
+     */
+    private function tandaiKomponen(string $kolom, string $syarat): int
     {
         // Komponen dihitung sekali lalu disimpan sementara (pgRouting memuat seluruh graf setiap dipanggil).
         DB::statement('DROP TABLE IF EXISTS komponen_mentah');
         DB::statement(
             'CREATE TEMPORARY TABLE komponen_mentah AS SELECT component, node FROM pgr_connectedComponents(?)',
-            ['SELECT id, source, target, panjang_m AS cost, panjang_m AS reverse_cost FROM ruas_jalan'],
+            ["SELECT id, source, target, panjang_m AS cost, panjang_m AS reverse_cost FROM ruas_jalan WHERE {$syarat}"],
         );
         DB::statement('ANALYZE komponen_mentah');
 
@@ -323,7 +340,7 @@ class ImportJaringanJalan
             );
 
             if (! $info || $info->terbesar === null) {
-                DB::update('UPDATE ruas_jalan SET utama = false WHERE utama');
+                DB::update("UPDATE ruas_jalan SET {$kolom} = false WHERE {$kolom}");
 
                 return 0;
             }
@@ -331,9 +348,12 @@ class ImportJaringanJalan
             // Hanya baris yang statusnya berubah yang ditulis. Menulis ulang semua baris (ratusan ribu)
             // jauh lebih lambat, padahal setelah unggah gang biasanya hanya beberapa ruas yang berubah.
             DB::update(
-                'UPDATE ruas_jalan r SET utama = x.baru
-                 FROM (SELECT r2.id, (c.component = ?) AS baru FROM ruas_jalan r2 JOIN komponen_mentah c ON c.node = r2.source) x
-                 WHERE x.id = r.id AND r.utama IS DISTINCT FROM x.baru',
+                "UPDATE ruas_jalan r SET {$kolom} = x.baru
+                 FROM (
+                    SELECT r2.id, coalesce(({$syarat}) AND c.component = ?, false) AS baru
+                    FROM ruas_jalan r2 LEFT JOIN komponen_mentah c ON c.node = r2.source
+                 ) x
+                 WHERE x.id = r.id AND r.{$kolom} IS DISTINCT FROM x.baru",
                 [$info->terbesar],
             );
 

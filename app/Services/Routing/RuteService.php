@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\DB;
 class RuteService
 {
     /** Syarat ruas yang dipakai perhitungan yang sedang berjalan (jaringan lengkap atau OSM saja). */
-    private string $syaratRuas = "r.utama AND r.sumber = 'osm'";
+    private string $syaratRuas = "r.utama_osm AND r.sumber = 'osm'";
 
     /** @return array{tersedia: bool, alasan?: string, panjang_m?: int, durasi_menit?: int, jarak_ke_jalan_m?: int, catatan?: string|null, geometri?: array} */
     public function untukKos(Kos $kos, bool $pakaiSurvei = true): array
@@ -59,7 +59,7 @@ class RuteService
      */
     public function hitung(Koordinat $dari, Koordinat $ke, bool $pakaiSurvei = true): array
     {
-        $osm = $this->hitungDi($dari, $ke, "r.utama AND r.sumber = 'osm'");
+        $osm = $this->hitungDi($dari, $ke, "r.utama_osm AND r.sumber = 'osm'");
         if (! $pakaiSurvei || ! DB::table('ruas_jalan')->where('sumber', 'survei')->exists()) {
             return $osm;
         }

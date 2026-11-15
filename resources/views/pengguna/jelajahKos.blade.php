@@ -135,15 +135,57 @@
                 </div>
             </div>
 
-            {{-- Legenda --}}
-            <div id="overlay-legenda" class="absolute bottom-4 left-4 z-[1000] hidden rounded-xl border border-stone-200 bg-white p-3 text-xs shadow-sm sm:block">
-                <p class="mb-2 font-bold text-stone-900">Legenda</p>
-                <ul class="space-y-1.5 text-stone-600">
-                    <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-pink-400"></span>Kos Putri</li>
-                    <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-sky-400"></span>Kos Putra</li>
-                    <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-purple-400"></span>Kos Campur</li>
-                    <li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-stone-900"></span>Kampus</li>
-                </ul>
+            {{-- Panel layer + legenda (tertutup secara bawaan supaya peta tidak tertutup) --}}
+            <div id="panel-layer" class="absolute bottom-4 left-4 z-[1000] flex flex-col-reverse items-start gap-2">
+                <button id="tombol-layer" type="button" aria-expanded="false" aria-controls="isi-layer"
+                        class="flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-bold text-stone-800 shadow-sm transition hover:border-[#B46C54] hover:text-[#B46C54]">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4l-8 4l8 4l8 -4l-8 -4M4 12l8 4l8 -4M4 16l8 4l8 -4"/></svg>
+                    Layer peta
+                    <svg id="panah-layer" class="h-3.5 w-3.5 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 15l6-6 6 6"/></svg>
+                </button>
+
+                <div id="isi-layer" class="scroll-thin hidden max-h-[min(60vh,420px)] w-64 overflow-y-auto rounded-xl border border-stone-200 bg-white p-3 text-xs text-stone-600 shadow-sm">
+                    <ul class="space-y-3">
+                        <li>
+                            <label class="flex cursor-pointer items-center gap-2 font-semibold text-stone-800">
+                                <input type="checkbox" data-layer="kos" checked class="h-3.5 w-3.5 accent-[#B46C54]">Kos
+                            </label>
+                            <div data-legenda="kos" class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 pl-5">
+                                <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-pink-400"></span>Putri</span>
+                                <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-sky-400"></span>Putra</span>
+                                <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-full bg-purple-400"></span>Campur</span>
+                            </div>
+                        </li>
+                        <li>
+                            <label class="flex cursor-pointer items-center gap-2 font-semibold text-stone-800">
+                                <input type="checkbox" data-layer="buffer" checked class="h-3.5 w-3.5 accent-[#B46C54]">Buffer garis lurus
+                            </label>
+                            <div data-legenda="buffer" class="mt-1.5 flex items-center gap-1.5 pl-5">
+                                <span class="h-2.5 w-4 rounded-full border-2 border-dashed border-[#B46C54]"></span>Lingkaran jarak dari kampus
+                            </div>
+                        </li>
+                        <li>
+                            <label class="flex cursor-pointer items-center gap-2 font-semibold text-stone-800">
+                                <input type="checkbox" data-layer="jangkauan" class="h-3.5 w-3.5 accent-[#B46C54]">Jangkauan jalan kaki
+                            </label>
+                            <div data-legenda="jangkauan" class="mt-1.5 hidden pl-5">
+                                <div id="leg-jangkauan" class="text-stone-500">Memuat...</div>
+                                <p class="mt-1 text-[11px] leading-snug text-stone-500">Area yang bisa dicapai dari kampus lewat jalan, bukan garis lurus.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <label class="flex cursor-pointer items-center gap-2 font-semibold text-stone-800">
+                                <input type="checkbox" data-layer="jalan" class="h-3.5 w-3.5 accent-[#B46C54]">Jaringan jalan
+                            </label>
+                            <div data-legenda="jalan" class="mt-1.5 hidden pl-5">
+                                <div id="leg-jalan" class="text-stone-500">Memuat...</div>
+                            </div>
+                        </li>
+                        <li class="flex items-center gap-2 border-t border-stone-100 pt-2">
+                            <span class="h-2.5 w-2.5 rounded-sm bg-stone-900"></span>Kampus
+                        </li>
+                    </ul>
+                </div>
             </div>
         </section>
 
@@ -246,6 +288,8 @@
         const URL_API = @json(route('api.kos.index'));
         const URL_DILIHAT = id => @json(url('/api/kos')) + '/' + id + '/dilihat';
         const URL_RUTE = id => @json(url('/api/kos')) + '/' + id + '/rute';
+        const URL_JANGKAUAN = @json(route('api.peta.jangkauan'));
+        const URL_JALAN = @json(route('api.peta.jaringanJalan'));
         const WARNA = { 'Putri': '#f472b6', 'Putra': '#38bdf8', 'Campur': '#a78bfa' };
         const BADGE = {
             'Putri':  'border-pink-300 text-pink-600',
@@ -269,18 +313,23 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        ['overlay-atas', 'overlay-legenda'].forEach(id => {
+        ['overlay-atas', 'panel-layer'].forEach(id => {
             const el = $(id);
             L.DomEvent.disableClickPropagation(el);
             L.DomEvent.disableScrollPropagation(el);
         });
 
-        // Buffer radius + label
+        // Urutan tumpukan: jangkauan paling bawah, lalu jaringan jalan, lalu buffer dan rute (overlayPane, 400).
+        map.createPane('jangkauan').style.zIndex = 350;
+        map.createPane('jalan').style.zIndex = 360;
+
+        // Layer: buffer radius garis lurus + label
+        const layerBuffer = L.layerGroup().addTo(map);
         RING_KM.forEach(km => {
             L.circle([KAMPUS.lat, KAMPUS.lng], {
                 radius: km * 1000, color: COKLAT, weight: 2, opacity: 0.55, dashArray: '10 8',
                 fillColor: COKLAT, fillOpacity: 0.03, interactive: false
-            }).addTo(map);
+            }).addTo(layerBuffer);
             L.marker([KAMPUS.lat + (km * 1000) / 111320, KAMPUS.lng], {
                 icon: L.divIcon({
                     className: '',
@@ -288,8 +337,73 @@
                     iconSize: [0, 0]
                 }),
                 interactive: false, keyboard: false
-            }).addTo(map);
+            }).addTo(layerBuffer);
         });
+
+        // Layer: jangkauan jalan kaki dari kampus (isochrone pgRouting). Dimuat saat pertama dinyalakan.
+        const HIJAU = '#0f766e';
+        const OPASITAS_PITA = 0.1;
+        const layerJangkauan = L.layerGroup();
+        function gambarJangkauan(data) {
+            const pita = (data.features || []).slice().sort((a, b) => b.properties.menit - a.properties.menit);
+            // Pita bertumpuk dari terjauh: area terdekat tertutup semua pita sehingga warnanya paling pekat.
+            pita.forEach((f, i) => {
+                L.geoJSON(f, {
+                    pane: 'jangkauan', interactive: false,
+                    style: { stroke: i === 0, color: HIJAU, weight: 1, opacity: 0.45, fillColor: HIJAU, fillOpacity: OPASITAS_PITA }
+                }).addTo(layerJangkauan);
+            });
+            if (!pita.length) {
+                $('leg-jangkauan').textContent = data.alasan || 'Belum tersedia.';
+                return;
+            }
+            const naik = pita.slice().reverse();
+            $('leg-jangkauan').innerHTML =
+                '<div class="flex overflow-hidden rounded">' + naik.map((f, i) => {
+                    const pekat = 1 - Math.pow(1 - OPASITAS_PITA, naik.length - i);
+                    return '<span class="h-2.5 flex-1" style="background:rgba(15,118,110,' + pekat.toFixed(2) + ')"></span>';
+                }).join('') + '</div>' +
+                '<div class="mt-1 flex text-[11px] text-stone-500">' + naik.map(f =>
+                    '<span class="flex-1 text-right">' + f.properties.menit + '</span>').join('') + '</div>' +
+                '<p class="text-[11px] text-stone-500">menit jalan kaki dari kampus</p>';
+        }
+
+        // Layer: jaringan jalan sekitar kampus (OSM dan gang hasil survei). Dimuat saat pertama dinyalakan.
+        const GAYA_JALAN = {
+            osm: { color: '#57534e', weight: 1, opacity: 0.45, interactive: false },
+            survei: { color: '#2563eb', weight: 4, opacity: 0.9 }
+        };
+        const layerJalan = L.layerGroup();
+        function gambarJalan(data) {
+            const fitur = data.features || [];
+            fitur.forEach(f => {
+                const garis = L.geoJSON(f, { pane: 'jalan', style: GAYA_JALAN[f.properties.kategori] || GAYA_JALAN.osm });
+                // Hanya gang survei yang diberi keterangan; jalan OSM sudah terlihat di peta dasar.
+                if (f.properties.kategori === 'survei') garis.bindTooltip(esc(f.properties.label));
+                garis.addTo(layerJalan);
+            });
+            const ada = k => fitur.find(f => f.properties.kategori === k);
+            $('leg-jalan').innerHTML = ['osm', 'survei'].map(k => {
+                const f = ada(k);
+                const label = k === 'osm' ? 'Jalan OSM' : 'Gang hasil survei';
+                const g = GAYA_JALAN[k];
+                return '<div class="flex items-center gap-1.5"><span class="w-4 rounded-full" style="height:' + Math.max(2, g.weight) + 'px;background:' + g.color + '"></span>' +
+                    label + (f ? ' · ' + f.properties.panjang_km.toFixed(1).replace('.', ',') + ' km' : ' · belum ada') + '</div>';
+            }).join('');
+        }
+
+        async function muatLayer(layer, url, gambar) {
+            if (layer.getLayers().length || layer.dimuat) return;
+            layer.dimuat = true;
+            try {
+                const res = await fetch(url, { headers: { Accept: 'application/json' } });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                gambar(await res.json());
+            } catch (e) {
+                layer.dimuat = false;
+                console.error('Gagal memuat layer', url, e);
+            }
+        }
 
         // Kampus
         L.marker([KAMPUS.lat, KAMPUS.lng], {
@@ -314,6 +428,26 @@
         const sudahDihitung = new Set();
         const markers = {};
         const layerKos = L.layerGroup().addTo(map);
+
+        // ---------- Panel layer peta ----------
+        const LAYER = {
+            kos: { layer: layerKos },
+            buffer: { layer: layerBuffer },
+            jangkauan: { layer: layerJangkauan, muat: () => muatLayer(layerJangkauan, URL_JANGKAUAN, gambarJangkauan) },
+            jalan: { layer: layerJalan, muat: () => muatLayer(layerJalan, URL_JALAN, gambarJalan) }
+        };
+        document.querySelectorAll('#isi-layer [data-layer]').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const l = LAYER[cb.dataset.layer];
+                if (cb.checked) { l.layer.addTo(map); l.muat && l.muat(); } else { map.removeLayer(l.layer); }
+                document.querySelector('[data-legenda="' + cb.dataset.layer + '"]').classList.toggle('hidden', !cb.checked);
+            });
+        });
+        $('tombol-layer').addEventListener('click', () => {
+            const buka = $('isi-layer').classList.toggle('hidden') === false;
+            $('tombol-layer').setAttribute('aria-expanded', String(buka));
+            $('panah-layer').classList.toggle('rotate-180', buka);
+        });
         const cariKos = id => daftar.find(x => x.id === id);
 
         function ikonKos(k, aktif) {

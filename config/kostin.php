@@ -66,6 +66,22 @@ return [
         'berkas_survei_maks_kb' => 5120,
     ],
 
+    // Layer tematik peta Jelajah.
+    'peta' => [
+        // Pita jangkauan jalan kaki dari kampus (isochrone), dalam menit.
+        'jangkauan_menit' => [5, 10, 15, 20],
+
+        // Lebar area di kiri-kanan jalan yang dianggap terjangkau (rumah/kos menghadap jalan).
+        'jangkauan_lebar_m' => 30,
+
+        // Lubang di tengah poligon jangkauan yang lebih kecil dari ini ditutup (blok rumah
+        // yang dikelilingi jalan terjangkau). Lubang besar seperti kebun atau kompleks tertutup tetap.
+        'jangkauan_lubang_maks_m2' => 20000,
+
+        // Radius layer jaringan jalan dari kampus.
+        'radius_jalan_km' => 2,
+    ],
+
     // Akun admin pertama, dibaca AdminSeeder. Isi lewat .env.
     'admin' => [
         'name' => env('ADMIN_NAME', 'Admin Kost.in'),

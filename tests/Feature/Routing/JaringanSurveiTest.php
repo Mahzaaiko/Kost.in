@@ -308,6 +308,34 @@ class JaringanSurveiTest extends TestCase
         $this->assertSame(2, RekamanJalan::count());
     }
 
+    public function test_jalan_osm_terpisah_yang_tersambung_gang_tidak_merusak_rute_osm_saja(): void
+    {
+        $this->jaringanUji();
+        // Potongan jalan OSM yang tidak tersambung ke jaringan (simpul 7 dan 8), 20 m dari Jalan Barat.
+        $this->ruas(7, [-180, 200], 8, [-80, 200], 'Jalan Terpisah');
+        app(ImportJaringanJalan::class)->tandaiKomponenUtama();
+
+        $kos = $this->kos('Kos Dekat Jalan Terpisah', -130, 210);
+        $rute = app(RuteService::class);
+
+        // Sebelum survei kos menempel ke Jalan Barat (70 m) dan memutar lewat N1:
+        // 70 + 230 + 200 + 20 = 520 m.
+        $this->assertEqualsWithDelta(520, $rute->untukKos($kos, false)['panjang_m'], 3);
+
+        // Gang dari ujung timur Jalan Terpisah ke Jalan Bawah membuat potongan itu ikut jaringan utama.
+        $this->unggah($this->gpx([[-80, 200], [-80, -20]]))->assertSessionHasNoErrors();
+        $this->assertSame(2, RekamanJalan::sole()->ujung_tersambung);
+
+        // Rute OSM saja tetap sama, tidak menempel ke potongan yang hanya tersambung lewat gang.
+        $osm = $rute->untukKos($kos, false);
+        $this->assertTrue($osm['tersedia']);
+        $this->assertEqualsWithDelta(520, $osm['panjang_m'], 3);
+
+        // Rute lengkap lewat Jalan Terpisah dan gang: 10 + 50 + 220 + 80 + 20 = 380 m.
+        $this->assertEqualsWithDelta(380, $rute->untukKos($kos)['panjang_m'], 4);
+        $this->getJson("/admin/jaringan-jalan/bandingkan/{$kos->id}")->assertJsonPath('rute_osm_m', $osm['panjang_m']);
+    }
+
     public function test_import_ulang_osm_menyambung_ulang_gang(): void
     {
         Sleep::fake();
