@@ -182,6 +182,8 @@ class LayerPetaTest extends TestCase
             ->assertSee(json_encode(route('api.peta.jangkauan')), false)
             ->assertSee(json_encode(route('api.peta.jaringanJalan')), false)
             ->assertSee('id="panel-layer"', false)
-            ->assertSee('data-layer="jangkauan"', false);
+            ->assertSee('data-layer="jangkauan"', false)
+            ->assertSee('data-layer="area"', false)
+            ->assertSee('id="f-jarak-ket"', false);
     }
 }

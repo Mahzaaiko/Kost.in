@@ -54,6 +54,7 @@
                     </div>
                     <input id="f-jarak" type="range" min="0.5" max="{{ $jarakMaks }}" step="0.5" value="{{ $jarakMaks }}" class="mt-3 w-full accent-[#B46C54]">
                     <div class="flex justify-between text-[11px] text-stone-500"><span>0,5 km</span><span>{{ $jarakMaks }} km</span></div>
+                    <p id="f-jarak-ket" class="mt-1.5 text-[11px] leading-snug text-stone-500">Semua jarak. Jarak dihitung lewat jalan, bukan garis lurus.</p>
                 </div>
 
                 {{-- Tipe --}}
@@ -113,7 +114,7 @@
                 </div>
                 <ul id="daftar-kos" class="mt-3 space-y-2.5"></ul>
                 <p id="kosong" class="hidden py-6 text-center text-sm text-stone-500">Tidak ada kos yang cocok dengan filter.</p>
-                <p id="ket-skor" class="mt-3 hidden text-[11px] leading-relaxed text-stone-400">Skor rekomendasi (0 sampai 1) dihitung dari jarak ke kampus (50%), harga per bulan (30%), dan jumlah fasilitas (20%), relatif terhadap kos yang tampil.</p>
+                <p id="ket-skor" class="mt-3 hidden text-[11px] leading-relaxed text-stone-400">Skor rekomendasi (0 sampai 1) dihitung dari jarak ke kampus lewat jalan (50%), harga per bulan (30%), dan jumlah fasilitas (20%), relatif terhadap kos yang tampil.</p>
             </section>
         </aside>
 
@@ -158,15 +159,25 @@
                         </li>
                         <li>
                             <label class="flex cursor-pointer items-center gap-2 font-semibold text-stone-800">
-                                <input type="checkbox" data-layer="buffer" checked class="h-3.5 w-3.5 accent-[#B46C54]">Buffer garis lurus
+                                <input type="checkbox" data-layer="area" checked class="h-3.5 w-3.5 accent-[#B46C54]">Area jarak jalan kaki
                             </label>
-                            <div data-legenda="buffer" class="mt-1.5 flex items-center gap-1.5 pl-5">
-                                <span class="h-2.5 w-4 rounded-full border-2 border-dashed border-[#B46C54]"></span>Lingkaran jarak dari kampus
+                            <div data-legenda="area" class="mt-1.5 pl-5">
+                                <div class="flex items-center gap-1.5"><span class="h-2.5 w-4 rounded-sm border-2 border-[#B46C54] bg-[#B46C54]/10"></span><span id="leg-area">Geser slider jarak untuk melihat area.</span></div>
+                                <p class="mt-1 text-[11px] leading-snug text-stone-500">Area yang bisa dicapai dari kampus dengan berjalan sejauh jarak filter lewat jalan.</p>
                             </div>
                         </li>
                         <li>
                             <label class="flex cursor-pointer items-center gap-2 font-semibold text-stone-800">
-                                <input type="checkbox" data-layer="jangkauan" class="h-3.5 w-3.5 accent-[#B46C54]">Jangkauan jalan kaki
+                                <input type="checkbox" data-layer="buffer" class="h-3.5 w-3.5 accent-[#B46C54]">Lingkaran garis lurus
+                            </label>
+                            <div data-legenda="buffer" class="mt-1.5 hidden pl-5">
+                                <div class="flex items-center gap-1.5"><span class="h-2.5 w-4 rounded-full border-2 border-dashed border-[#B46C54]"></span>Radius dari kampus</div>
+                                <p class="mt-1 text-[11px] leading-snug text-stone-500">Pembanding: kos di dalam lingkaran belum tentu dekat bila jalannya memutar.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <label class="flex cursor-pointer items-center gap-2 font-semibold text-stone-800">
+                                <input type="checkbox" data-layer="jangkauan" class="h-3.5 w-3.5 accent-[#B46C54]">Pita waktu jalan kaki
                             </label>
                             <div data-legenda="jangkauan" class="mt-1.5 hidden pl-5">
                                 <div id="leg-jangkauan" class="text-stone-500">Memuat...</div>
@@ -284,6 +295,7 @@
         const IKON = @json($ikonSvg);
         const HARGA_MAX = {{ $hargaMax }};
         const JARAK_MAKS = {{ $jarakMaks }};
+        const M_PER_MENIT = {{ (float) config('kostin.routing.kecepatan_jalan_kmh') * 1000 / 60 }};
         const AWAL = @json($awal);
         const URL_API = @json(route('api.kos.index'));
         const URL_DILIHAT = id => @json(url('/api/kos')) + '/' + id + '/dilihat';
@@ -301,6 +313,12 @@
 
         const rupiah = n => 'Rp ' + Number(n).toLocaleString('id-ID');
         const jarakTeks = m => m < 1000 ? (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
+        const kmTeks = km => (+km).toString().replace('.', ',') + ' km';
+        const menitDari = m => Math.max(1, Math.ceil(m / M_PER_MENIT));
+        // Jarak kos untuk kartu, tooltip, dan detail: rute jalan kaki, atau garis lurus bila rute tidak tersedia.
+        const jarakKos = k => k.jarak_rute_m !== null && k.jarak_rute_m !== undefined
+            ? jarakTeks(k.jarak_rute_m) + ' lewat jalan · ± ' + k.waktu_jalan_menit + ' menit jalan kaki'
+            : jarakTeks(k.jarak_m) + ' dari kampus (garis lurus)';
         const skorTeks = s => s === null || s === undefined ? '' : Number(s).toFixed(2).replace('.', ',');
         const $ = id => document.getElementById(id);
         const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -323,22 +341,58 @@
         map.createPane('jangkauan').style.zIndex = 350;
         map.createPane('jalan').style.zIndex = 360;
 
-        // Layer: buffer radius garis lurus + label
-        const layerBuffer = L.layerGroup().addTo(map);
-        RING_KM.forEach(km => {
-            L.circle([KAMPUS.lat, KAMPUS.lng], {
-                radius: km * 1000, color: COKLAT, weight: 2, opacity: 0.55, dashArray: '10 8',
-                fillColor: COKLAT, fillOpacity: 0.03, interactive: false
-            }).addTo(layerBuffer);
-            L.marker([KAMPUS.lat + (km * 1000) / 111320, KAMPUS.lng], {
+        // Layer: lingkaran garis lurus (pembanding). Mengikuti slider jarak; tanpa filter jarak berupa cincin 1/3/5/10 km.
+        const layerBuffer = L.layerGroup();
+        function labelCincin(km) {
+            return L.marker([KAMPUS.lat + (km * 1000) / 111320, KAMPUS.lng], {
                 icon: L.divIcon({
                     className: '',
-                    html: '<span style="display:inline-block;transform:translate(-50%,-50%);background:#fff;color:#955844;font:700 12px/1 \'Plus Jakarta Sans\',sans-serif;padding:5px 9px;border-radius:8px;border:1px solid #ead9d2;box-shadow:0 1px 3px rgba(0,0,0,.12);white-space:nowrap">' + km + ' km</span>',
+                    html: '<span style="display:inline-block;transform:translate(-50%,-50%);background:#fff;color:#955844;font:700 12px/1 \'Plus Jakarta Sans\',sans-serif;padding:5px 9px;border-radius:8px;border:1px solid #ead9d2;box-shadow:0 1px 3px rgba(0,0,0,.12);white-space:nowrap">' + kmTeks(km) + ' garis lurus</span>',
                     iconSize: [0, 0]
                 }),
                 interactive: false, keyboard: false
-            }).addTo(layerBuffer);
-        });
+            });
+        }
+        function gambarBuffer() {
+            layerBuffer.clearLayers();
+            const cincin = state.jarak < JARAK_MAKS ? [state.jarak] : RING_KM;
+            cincin.forEach(km => {
+                L.circle([KAMPUS.lat, KAMPUS.lng], {
+                    radius: km * 1000, color: COKLAT, weight: 2, opacity: 0.55, dashArray: '10 8',
+                    fill: false, interactive: false
+                }).addTo(layerBuffer);
+                labelCincin(km).addTo(layerBuffer);
+            });
+        }
+
+        // Layer: area jarak jalan kaki (network buffer). Mengikuti slider jarak, menggantikan lingkaran garis lurus.
+        const layerArea = L.layerGroup().addTo(map);
+        let nomorArea = 0;
+        async function gambarArea() {
+            const nomor = ++nomorArea;
+            layerArea.clearLayers();
+            if (state.jarak >= JARAK_MAKS) {
+                $('leg-area').textContent = 'Geser slider jarak untuk melihat area.';
+                return;
+            }
+            $('leg-area').textContent = 'Memuat area ' + kmTeks(state.jarak) + '...';
+            try {
+                const res = await fetch(URL_JANGKAUAN + '?jarak_km=' + state.jarak, { headers: { Accept: 'application/json' } });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                if (nomor !== nomorArea) return;
+                const f = (data.features || [])[0];
+                if (!f) { $('leg-area').textContent = data.alasan || 'Area belum tersedia.'; return; }
+                L.geoJSON(f, {
+                    pane: 'jangkauan', interactive: false,
+                    style: { color: COKLAT, weight: 2, opacity: 0.8, fillColor: COKLAT, fillOpacity: 0.08 }
+                }).addTo(layerArea);
+                $('leg-area').textContent = kmTeks(state.jarak) + ' lewat jalan · ± ' + f.properties.menit + ' menit';
+            } catch (e) {
+                if (nomor === nomorArea) $('leg-area').textContent = 'Gagal memuat area.';
+                console.error('Gagal memuat area jarak', e);
+            }
+        }
 
         // Layer: jangkauan jalan kaki dari kampus (isochrone pgRouting). Dimuat saat pertama dinyalakan.
         const HIJAU = '#0f766e';
@@ -432,6 +486,7 @@
         // ---------- Panel layer peta ----------
         const LAYER = {
             kos: { layer: layerKos },
+            area: { layer: layerArea },
             buffer: { layer: layerBuffer },
             jangkauan: { layer: layerJangkauan, muat: () => muatLayer(layerJangkauan, URL_JANGKAUAN, gambarJangkauan) },
             jalan: { layer: layerJalan, muat: () => muatLayer(layerJalan, URL_JALAN, gambarJalan) }
@@ -518,7 +573,7 @@
                     '<span class="min-w-0 flex-1">' +
                     '<span class="flex items-start gap-2"><span class="block truncate text-sm font-bold text-stone-900">' + esc(k.nama) + '</span>' + skor + '</span>' +
                     '<span class="mt-0.5 block text-xs font-bold text-[#B46C54]">' + rupiah(k.harga) + ' <span class="font-medium text-stone-500">/ bulan</span></span>' +
-                    '<span class="mt-0.5 block text-xs text-stone-500">' + jarakTeks(k.jarak_m) + ' dari kampus</span>' +
+                    '<span class="mt-0.5 block text-xs text-stone-500">' + jarakKos(k) + '</span>' +
                     '<span class="mt-1 block truncate text-[10px] text-stone-500">' + esc(k.fasilitas.slice(0, 3).map(f => f.nama).join(' · ')) + '</span>' +
                     '</span></button>';
                 li.firstChild.addEventListener('click', () => pilih(k.id, true));
@@ -531,7 +586,7 @@
             daftar.forEach(k => {
                 const m = L.marker([k.lat, k.lng], { icon: ikonKos(k, k.id === state.terpilih), zIndexOffset: k.id === state.terpilih ? 900 : 0 });
                 m.on('click', () => pilih(k.id, false));
-                m.bindTooltip(esc(k.nama) + ' · ' + jarakTeks(k.jarak_m), { direction: 'top', offset: [0, -18] });
+                m.bindTooltip(esc(k.nama) + ' · ' + (k.waktu_jalan_menit ? '± ' + k.waktu_jalan_menit + ' menit jalan kaki' : jarakTeks(k.jarak_m)), { direction: 'top', offset: [0, -18] });
                 markers[k.id] = m;
                 layerKos.addLayer(m);
             });
@@ -638,7 +693,9 @@
             $('d-tipe').className = 'shrink-0 rounded-full border px-3 py-1 text-xs font-semibold ' + (BADGE[k.tipe] || '');
             $('d-harga').textContent = rupiah(k.harga);
             $('d-alamat').textContent = k.alamat || '';
-            $('d-jarak').textContent = jarakTeks(k.jarak_m) + ' dari ' + KAMPUS.nama + ' (garis lurus)';
+            $('d-jarak').textContent = k.jarak_rute_m !== null && k.jarak_rute_m !== undefined
+                ? jarakTeks(k.jarak_rute_m) + ' lewat jalan ke ' + KAMPUS.nama + ' (± ' + k.waktu_jalan_menit + ' menit jalan kaki) · garis lurus ' + jarakTeks(k.jarak_m)
+                : jarakTeks(k.jarak_m) + ' dari ' + KAMPUS.nama + ' (garis lurus)';
             $('d-deskripsi').textContent = k.deskripsi || '';
             $('d-deskripsi').classList.toggle('hidden', !k.deskripsi);
             $('d-deskripsi-hr').classList.toggle('hidden', !k.deskripsi);
@@ -669,7 +726,7 @@
             if (k && geser) map.flyTo([k.lat, k.lng], Math.max(map.getZoom(), 15), { duration: 0.6 });
         }
 
-        // Filter jarak aktif: tampilkan lingkaran radiusnya. Tanpa filter jarak: sesuaikan dengan sebaran kos.
+        // Filter jarak aktif: tampilkan area sejauh radius itu (area lewat jalan selalu di dalamnya). Tanpa filter jarak: sesuaikan dengan sebaran kos.
         function fitKeFilter() {
             if (state.jarak < JARAK_MAKS || daftar.length === 0) {
                 map.fitBounds(L.latLng(KAMPUS.lat, KAMPUS.lng).toBounds(state.jarak * 2000), { padding: [30, 30] });
@@ -820,13 +877,22 @@
         buatDropdown('dd-urut', v => { state.urut = v; muat(); });
 
         inHarga.addEventListener('input', () => { $('f-harga-label').textContent = rupiah(+inHarga.value); });
-        inJarak.addEventListener('input', () => { $('f-jarak-label').textContent = (+inJarak.value).toString().replace('.', ',') + ' km'; });
+        function keteranganJarak() {
+            const km = +inJarak.value;
+            $('f-jarak-label').textContent = kmTeks(km);
+            $('f-jarak-ket').textContent = km >= JARAK_MAKS
+                ? 'Semua jarak. Jarak dihitung lewat jalan, bukan garis lurus.'
+                : 'Lewat jalan, ± ' + menitDari(km * 1000) + ' menit jalan kaki dari kampus.';
+        }
+        inJarak.addEventListener('input', keteranganJarak);
 
         function terapkan() {
             state.harga = +inHarga.value;
             state.jarak = +inJarak.value;
             state.tipe = ddTipe.get();
             state.fasilitas = [...document.querySelectorAll('.f-fasilitas:checked')].map(c => +c.value);
+            gambarArea();
+            gambarBuffer();
             muat({ fit: true });
         }
         $('btn-terapkan').addEventListener('click', terapkan);
@@ -836,7 +902,7 @@
             document.querySelectorAll('.f-fasilitas').forEach(c => c.checked = false);
             $('f-cari').value = ''; state.cari = '';
             $('f-harga-label').textContent = rupiah(HARGA_MAX);
-            $('f-jarak-label').textContent = JARAK_MAKS + ' km';
+            keteranganJarak();
             terapkan();
         });
 
@@ -854,6 +920,7 @@
         });
 
         // ---------- Awal ----------
+        gambarBuffer();
         muat({ fit: true, pilih: AWAL.kos });
         setTimeout(() => map.invalidateSize(), 200);
     });
