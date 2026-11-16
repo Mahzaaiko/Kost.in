@@ -9,14 +9,13 @@
         html { scroll-padding-top: 88px; }
 
         #hero-lottie-container svg,
-        #hero-lottie-mobile svg,
         #leaves-lottie-container svg {
             width: 100% !important;
             height: 100% !important;
             display: block !important;
         }
 
-        /* ================= 4 CARDS INTERACTIVE ALTERNATING ZIG-ZAG ANIMATION ================= */
+        /* ================= 4 CARDS INTERACTIVE TILTED FAN ANIMATION (PERSIS GAMBAR 8 FIGMA) ================= */
         .fanned-deck {
             perspective: 1200px;
         }
@@ -26,46 +25,49 @@
                         box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1), 
                         border-color 0.3s ease, 
                         opacity 0.35s ease;
-            transform-origin: center center;
+            transform-origin: center bottom;
             will-change: transform;
         }
 
         @media (min-width: 1024px) {
-            /* Barisan selang-seling naik turun tegak lurus sesuai gambar 7 */
+            /* Susunan persis referensi user (referensi_4_card.png): selang-seling naik-turun bertumpuk menyamping */
             .fanned-deck .card-1 {
-                transform: translateY(18px);
+                transform: rotate(-5deg) translateY(-18px);
                 z-index: 1;
             }
             .fanned-deck .card-2 {
-                transform: translateY(-18px);
+                transform: rotate(3.5deg) translateY(18px);
                 z-index: 2;
             }
             .fanned-deck .card-3 {
-                transform: translateY(18px);
+                transform: rotate(-3deg) translateY(-16px);
                 z-index: 3;
             }
             .fanned-deck .card-4 {
-                transform: translateY(-18px);
+                transform: rotate(4deg) translateY(16px);
                 z-index: 4;
             }
 
-            /* Saat kartu di-hover, berdiri timbul ke atas dan terpisah */
+            /* Saat kartu di-hover: tegak lurus (rotate 0deg), terpisah naik, di depan */
             .fanned-deck .fanned-card:hover {
-                transform: translateY(-32px) scale(1.06) !important;
+                transform: translateY(-34px) rotate(0deg) scale(1.06) !important;
                 z-index: 50 !important;
-                box-shadow: 0 30px 45px -12px rgba(20, 56, 33, 0.22), 0 12px 20px -6px rgba(20, 56, 33, 0.1) !important;
+                box-shadow: 0 25px 40px -12px rgba(20, 56, 33, 0.22), 0 10px 16px -6px rgba(20, 56, 33, 0.1) !important;
                 border-color: #B8694C !important;
                 opacity: 1 !important;
             }
 
             .fanned-deck:hover .fanned-card:not(:hover) {
-                opacity: 0.9;
+                opacity: 0.88;
             }
         }
 
         @media (max-width: 1023px) {
+            .fanned-card {
+                transform: none !important;
+            }
             .fanned-card:hover {
-                transform: translateY(-8px) scale(1.02);
+                transform: translateY(-6px) scale(1.02) !important;
                 border-color: #B8694C !important;
                 box-shadow: 0 16px 28px -8px rgba(20, 56, 33, 0.15) !important;
             }
@@ -164,19 +166,14 @@
                 </div>
             </div>
 
-            {{-- GELOMBANG TRANSISI 1: Bentuk Gelombang Asli Figma Menuju Section Tentang (#DDEDC4) --}}
-            <div class="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none -mb-[2px] pointer-events-none select-none z-20">
-                <svg viewBox="0 0 1280 37" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto block" preserveAspectRatio="none">
-                    <path d="M0,4.1 C160.4,34.8 320.8,-18.5 481.1,7.3 C641.5,33.2 801.9,-15.3 962.3,7.3 C1122.6,30.0 1211.7,-5.6 1280,5.7 L1280,37 L0,37 Z" fill="#DDEDC4"/>
-                </svg>
+            {{-- GELOMBANG TRANSISI 1: Menggunakan gelombang asli yang diberikan pengguna (gelombang_header_asli.png) --}}
+            <div class="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none select-none z-20">
+                <img src="{{ asset('images/gelombang_header_asli.png') }}" alt="" class="w-full h-auto block -mb-[2px]">
             </div>
         </div>
 
-        {{-- 2. WRAPPER MOBILE (block md:hidden): Responsif fleksibel untuk smartphone --}}
-        <div class="block md:hidden relative w-full overflow-hidden pt-24 pb-4">
-            {{-- Background Animasi Lottie di Mobile --}}
-            <div id="hero-lottie-mobile" class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40"></div>
-
+        {{-- 2. WRAPPER MOBILE (block md:hidden): Responsif bersih & proporsional untuk smartphone --}}
+        <div class="block md:hidden relative w-full overflow-hidden pt-24 pb-0 bg-gradient-to-b from-[#D5EEE0] via-[#DFF2E6] to-[#E6F5E8]">
             <div class="relative z-10 px-5">
                 {{-- Pill Tag Rekomendasi --}}
                 <div class="inline-flex items-center gap-2 rounded-full border border-[#D4EAD2] bg-white/90 px-3.5 py-1 text-xs font-bold text-[#163A27] shadow-sm backdrop-blur-sm">
@@ -185,13 +182,13 @@
                 </div>
 
                 {{-- Headline Utama --}}
-                <h1 class="mt-4 text-3xl font-black tracking-tight leading-tight text-[#163A27]">
+                <h1 class="mt-4 text-2xl sm:text-3xl font-black tracking-tight leading-tight text-[#163A27]">
                     <span class="text-[#B8694C]">Cari kost nyaman</span> <span class="text-[#163A27]">di sekitar</span>
                     <span class="text-[#0E7A4D]">Sekolah Vokasi IPB University!</span>
                 </h1>
 
                 {{-- Subheadline --}}
-                <p class="mt-3 text-sm leading-relaxed text-[#244B35] font-medium">
+                <p class="mt-3 text-xs sm:text-sm leading-relaxed text-[#244B35] font-medium">
                     Jelajahi kos, bandingkan harga dan fasilitas, lalu temukan yang paling pas buatmu.
                 </p>
 
@@ -217,17 +214,15 @@
                     <span>kost terverifikasi</span>
                 </div>
 
-                {{-- Ilustrasi Peta Header di Mobile --}}
+                {{-- Ilustrasi Peta Header di Mobile (Tunggal & Rapi) --}}
                 <div class="mt-6 flex justify-center">
-                    <img src="{{ asset('images/map_3d_header.svg') }}" alt="Ilustrasi SV IPB" class="w-full max-w-[280px] h-auto drop-shadow-md">
+                    <img src="{{ asset('images/map_3d_header.svg') }}" alt="Ilustrasi SV IPB" class="w-full max-w-[280px] sm:max-w-[320px] h-auto drop-shadow-md">
                 </div>
             </div>
 
             {{-- GELOMBANG TRANSISI 1 di Mobile Menuju Section Tentang (#DDEDC4) --}}
-            <div class="relative w-full overflow-hidden leading-none -mb-[2px] mt-6 pointer-events-none select-none z-10">
-                <svg viewBox="0 0 1280 37" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto block" preserveAspectRatio="none">
-                    <path d="M0,4.1 C160.4,34.8 320.8,-18.5 481.1,7.3 C641.5,33.2 801.9,-15.3 962.3,7.3 C1122.6,30.0 1211.7,-5.6 1280,5.7 L1280,37 L0,37 Z" fill="#DDEDC4"/>
-                </svg>
+            <div class="relative w-full overflow-hidden leading-none mt-6 pointer-events-none select-none z-10">
+                <img src="{{ asset('images/gelombang_header_asli.png') }}" alt="" class="w-full h-auto block -mb-[2px]">
             </div>
         </div>
 
@@ -235,13 +230,13 @@
 
     {{-- ================= WRAPPER DENGAN ANIMASI DAUN JATUH (landing 4.json) ================= --}}
     {{-- Posisi daun di atas background warna section (z-10), tetapi di belakang kartu & teks (z-20) --}}
-    <div id="falling-leaves-wrapper" class="relative overflow-hidden">
+    <div id="falling-leaves-wrapper" class="relative overflow-hidden bg-[#DDEDC4] -mt-1 sm:-mt-2">
         
         {{-- Animasi Lottie Daun Jatuh murni dari landing 4.json menggunakan Bodymovin Lottie --}}
         <div id="leaves-lottie-container" class="pointer-events-none absolute inset-0 overflow-hidden z-10" aria-hidden="true"></div>
 
         {{-- ================= SECTION 2: TENTANG KOST.IN (#DDEDC4) ================= --}}
-        <section id="tentang" class="relative bg-[#DDEDC4] pt-12 pb-16 sm:pt-16 sm:pb-20 lg:pt-20 lg:pb-24">
+        <section id="tentang" class="relative bg-[#DDEDC4] pt-8 pb-0 sm:pt-12 lg:pt-16">
             <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
                 
                 {{-- Header Tentang --}}
@@ -249,20 +244,20 @@
                     <span class="inline-block text-xs font-black uppercase tracking-widest text-[#7E6722]">
                         TENTANG KOST.IN
                     </span>
-                    <h2 class="mt-2 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#163A27]">
+                    <h2 class="mt-2 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight text-[#163A27]">
                         Kenapa memilih Kost.in?
                     </h2>
-                    <p class="mx-auto mt-4 max-w-2xl text-sm sm:text-base leading-relaxed text-[#244B35] font-medium">
+                    <p class="mx-auto mt-4 max-w-2xl text-xs sm:text-sm lg:text-base leading-relaxed text-[#244B35] font-medium">
                         Kost.in hadir untuk membantu kamu menemukan kost terbaik di sekitar Sekolah Vokasi IPB University, dengan informasi yang akurat dan mudah di akses.
                     </p>
                 </div>
 
-                {{-- 4 CARDS: SUSUNAN SELANG-SELING NAIK TURUN TEGAK LURUS SESUAI GAMBAR 7 --}}
+                {{-- 4 CARDS: SUSUNAN PERSIS GAMBAR 8 FIGMA (TILTED OVERLAPPING FAN DECK) --}}
                 <div class="mt-12 sm:mt-16 lg:mt-20">
-                    <div id="deck-tentang" class="fanned-deck mx-auto flex flex-col sm:flex-row flex-wrap lg:flex-nowrap justify-center items-center gap-5 lg:gap-0 lg:-space-x-4 max-w-5xl">
+                    <div id="deck-tentang" class="fanned-deck mx-auto flex flex-col sm:flex-row flex-wrap lg:flex-nowrap justify-center items-center gap-6 lg:gap-0 lg:-space-x-8 max-w-5xl pt-4 pb-6">
                         
-                        {{-- Card 01: Data Terverifikasi (Turun) --}}
-                        <div class="fanned-card card-1 w-full max-w-[270px] sm:w-[260px] lg:w-[250px] shrink-0 rounded-3xl border border-[#EFE3CC] bg-[#FDF7EA] p-6 shadow-md">
+                        {{-- Card 01: Data Terverifikasi (Tilt Left -5deg, z-1) --}}
+                        <div class="fanned-card card-1 w-full max-w-[270px] sm:w-[260px] lg:w-[265px] shrink-0 rounded-3xl border border-[#EFE3CC] bg-[#FDF7EA] p-6 shadow-md cursor-pointer">
                             <div class="flex items-center justify-between">
                                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#FDE7D2] text-xs font-black text-[#C2410C]">
                                     01
@@ -281,8 +276,8 @@
                             </p>
                         </div>
 
-                        {{-- Card 02: Filter Lengkap (Naik) --}}
-                        <div class="fanned-card card-2 w-full max-w-[270px] sm:w-[260px] lg:w-[250px] shrink-0 rounded-3xl border border-[#D4EAD2] bg-[#EAF6E8] p-6 shadow-md">
+                        {{-- Card 02: Filter Lengkap (Tilt Right +3.5deg, Overlap, z-2) --}}
+                        <div class="fanned-card card-2 w-full max-w-[270px] sm:w-[260px] lg:w-[265px] shrink-0 rounded-3xl border border-[#D4EAD2] bg-[#EAF6E8] p-6 shadow-md cursor-pointer">
                             <div class="flex items-center justify-between">
                                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#CBE6C9] text-xs font-black text-[#15803D]">
                                     02
@@ -301,8 +296,8 @@
                             </p>
                         </div>
 
-                        {{-- Card 03: Hubungi Langsung (Turun) --}}
-                        <div class="fanned-card card-3 w-full max-w-[270px] sm:w-[260px] lg:w-[250px] shrink-0 rounded-3xl border border-[#EFE3CC] bg-[#FDF7EA] p-6 shadow-md">
+                        {{-- Card 03: Hubungi Langsung (Tilt Left -3deg, Overlap, z-3) --}}
+                        <div class="fanned-card card-3 w-full max-w-[270px] sm:w-[260px] lg:w-[265px] shrink-0 rounded-3xl border border-[#EFE3CC] bg-[#FDF7EA] p-6 shadow-md cursor-pointer">
                             <div class="flex items-center justify-between">
                                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#FDE7D2] text-xs font-black text-[#C2410C]">
                                     03
@@ -321,8 +316,8 @@
                             </p>
                         </div>
 
-                        {{-- Card 04: 100% Gratis (Naik) --}}
-                        <div class="fanned-card card-4 w-full max-w-[270px] sm:w-[260px] lg:w-[250px] shrink-0 rounded-3xl border border-[#D4EAD2] bg-[#EAF6E8] p-6 shadow-md">
+                        {{-- Card 04: 100% Gratis (Tilt Right +4deg, Overlap, z-4) --}}
+                        <div class="fanned-card card-4 w-full max-w-[270px] sm:w-[260px] lg:w-[265px] shrink-0 rounded-3xl border border-[#D4EAD2] bg-[#EAF6E8] p-6 shadow-md cursor-pointer">
                             <div class="flex items-center justify-between">
                                 <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#CBE6C9] text-xs font-black text-[#15803D]">
                                     04
@@ -345,16 +340,14 @@
                 </div>
             </div>
 
-            {{-- GELOMBANG TRANSISI 2: Bentuk Asli Figma Menuju Section Kost Populer (#7CB75A) --}}
-            <div class="absolute bottom-0 left-0 right-0 overflow-hidden leading-none pointer-events-none select-none -mb-[2px] z-20">
-                <svg viewBox="0 0 1280 37" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto block" preserveAspectRatio="none">
-                    <path d="M0,4.1 C160.4,34.8 320.8,-18.5 481.1,7.3 C641.5,33.2 801.9,-15.3 962.3,7.3 C1122.6,30.0 1211.7,-5.6 1280,5.7 L1280,37 L0,37 Z" fill="#7CB75A"/>
-                </svg>
+            {{-- GELOMBANG TRANSISI 2: Menuju Section Kos Populer (#7CB75A) menggunakan gelombang asli gelombang_kos.png --}}
+            <div class="relative w-full overflow-hidden leading-none pointer-events-none select-none mt-12 sm:mt-16 lg:mt-20 -mb-[1px] z-20">
+                <img src="{{ asset('images/gelombang_kos.png') }}" alt="" class="w-full h-auto block">
             </div>
         </section>
 
         {{-- ================= SECTION 3: KOST POPULER (#7CB75A) ================= --}}
-        <section id="kos" class="relative bg-[#7CB75A] pt-14 pb-20 sm:pt-18 sm:pb-24 lg:pt-20 lg:pb-28 text-white">
+        <section id="kos" class="relative z-10 bg-[#7CB75A] pt-4 sm:pt-6 pb-0 text-white">
             <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
                 
                 {{-- Header Section --}}
@@ -421,7 +414,7 @@
                                 <div class="mt-3.5 flex flex-wrap gap-1.5">
                                     @foreach ($kos['fasilitas'] as $fas)
                                         <span class="rounded-md border border-[#E6DEC8] bg-[#F5EFE0] px-2.5 py-0.5 text-[11px] font-semibold text-stone-700">
-                                            {{ $fas }}
+                                             {{ $fas }}
                                         </span>
                                     @endforeach
                                 </div>
@@ -449,23 +442,21 @@
                 </div>
             </div>
 
-            {{-- GELOMBANG TRANSISI 3: Bentuk Asli Figma Menuju Section Peta (#DDEDC4) --}}
-            <div class="absolute bottom-0 left-0 right-0 overflow-hidden leading-none pointer-events-none select-none -mb-[2px] z-20">
-                <svg viewBox="0 0 1280 37" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto block" preserveAspectRatio="none">
-                    <path d="M0,4.1 C160.4,34.8 320.8,-18.5 481.1,7.3 C641.5,33.2 801.9,-15.3 962.3,7.3 C1122.6,30.0 1211.7,-5.6 1280,5.7 L1280,37 L0,37 Z" fill="#DDEDC4"/>
-                </svg>
+            {{-- GELOMBANG TRANSISI 3: Menuju Section Peta (#DDEDC4) menggunakan gelombang asli gelombang_peta.png --}}
+            <div class="relative w-full overflow-hidden leading-none pointer-events-none select-none mt-12 sm:mt-16 lg:mt-20 -mb-[1px] z-20">
+                <img src="{{ asset('images/gelombang_peta.png') }}" alt="" class="w-full h-auto block">
             </div>
         </section>
 
         {{-- ================= SECTION 4: ANTI TELAT NGAMPUS (PETA TIMBUL) (#DDEDC4) ================= --}}
-        {{-- Menggunakan partial map_poin.blade.php dengan interaktivitas timbul saat kursor diarahkan ke wilayah map/pin --}}
-        <section id="peta" class="relative bg-[#DDEDC4] pt-12 pb-16 sm:pt-16 sm:pb-20 lg:pt-20 lg:pb-24">
-            <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        {{-- Menggunakan partial map_poin.blade.php dengan interaktivitas highlight saat kursor diarahkan ke wilayah map/pin --}}
+        <section id="peta" class="relative bg-[#DDEDC4] pt-4 sm:pt-6 pb-0">
+            <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 pb-10 sm:pb-14 lg:pb-16">
                 <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
                     
-                    {{-- Kiri: Ilustrasi map_3d_poin interaktif timbul saat kursor mengarah ke bagian map --}}
+                    {{-- Kiri: Ilustrasi map_3d_poin interaktif (responsif penuh, tidak terpotong di mobile) --}}
                     <div class="lg:col-span-6 flex justify-center items-center">
-                        <div class="w-full max-w-[460px] drop-shadow-xl select-none">
+                        <div class="w-full max-w-[440px] drop-shadow-xl select-none mx-auto overflow-visible">
                             @include('pengguna.partials.map_poin')
                         </div>
                     </div>
@@ -513,66 +504,65 @@
 
                 </div>
             </div>
+
+            {{-- SILUET PEPOHONAN DI ATAS FOOTER (Daun jatuh mengalir melewati atas pepohonan ini) --}}
+            <div class="relative w-full overflow-hidden leading-none select-none pointer-events-none -mt-1 -mb-[1px] z-10">
+                <img src="{{ asset('images/footer_pepohonan.svg') }}" alt="Siluet Pepohonan" class="w-full h-auto block">
+            </div>
         </section>
 
-        {{-- ================= SECTION 5: FOOTER DENGAN footer_pepohonan.svg ================= --}}
-        {{-- footer_pepohonan.svg memiliki latar langit #DDEDC4 di atas (menyatu ke Peta) dan siluet #285F40 di bawah (menyatu ke Footer) --}}
-        <footer class="relative bg-[#285F40] text-stone-200">
-            
-            {{-- SILUET PEPOHONAN DI ATAS FOOTER --}}
-            <div class="w-full overflow-hidden leading-none select-none pointer-events-none -mt-1 -mb-1">
-                <img src="{{ asset('images/footer_pepohonan.svg') }}" alt="Siluet Pepohonan" class="w-full h-auto block min-h-[50px]">
-            </div>
+    </div> {{-- ================= END WRAPPER DENGAN ANIMASI DAUN JATUH (landing 4.json) ================= --}}
 
-            <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 py-12 lg:py-16">
-                <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-12 items-start">
-                    
-                    {{-- Brand & Deskripsi --}}
-                    <div class="sm:col-span-2 md:col-span-6">
-                        <a href="{{ route('pengguna.beranda') }}" class="inline-flex items-center gap-2.5">
-                            <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-8 w-auto object-contain">
-                            <span class="text-xl font-black tracking-tight text-white">Kost<span class="text-[#B8694C]">.in</span></span>
-                        </a>
-                        <p class="mt-4 max-w-sm text-sm leading-relaxed text-emerald-100/85 font-medium">
-                            Bantu kamu nemuin kost yang nyaman dan aman di sekitar kampus SV IPB, Bogor.
-                        </p>
-                    </div>
-
-                    {{-- Menu Navigasi --}}
-                    <div class="md:col-span-3">
-                        <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Menu</h3>
-                        <ul class="mt-4 space-y-2.5 text-sm font-semibold text-emerald-100/85">
-                            <li><a href="{{ route('pengguna.beranda') }}" class="transition hover:text-white">Beranda</a></li>
-                            <li><a href="#tentang" class="transition hover:text-white">Tentang</a></li>
-                            <li><a href="#peta" class="transition hover:text-white">Peta</a></li>
-                            <li><a href="{{ route('pengguna.jelajahKos') }}" class="transition hover:text-white">Jelajah Kost</a></li>
-                        </ul>
-                    </div>
-
-                    {{-- Info Kampus --}}
-                    <div class="md:col-span-3">
-                        <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Kampus</h3>
-                        <ul class="mt-4 space-y-2.5 text-sm font-medium text-emerald-100/85">
-                            <li>Sekolah Vokasi IPB University</li>
-                            <li>Kota Bogor, Jawa Barat</li>
-                            <li class="pt-1 text-xs text-emerald-300">100% Gratis Tanpa Biaya Admin</li>
-                        </ul>
-                    </div>
-
+    {{-- ================= SECTION 5: FOOTER (#285F40) ================= --}}
+    {{-- Terpisah di luar falling-leaves-wrapper sehingga daun TIDAK keluar dari bawah pepohonan --}}
+    <footer class="relative z-20 bg-[#285F40] text-stone-200 -mt-[1px]">
+        <div class="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 py-12 lg:py-16">
+            <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-12 items-start">
+                
+                {{-- Brand & Deskripsi --}}
+                <div class="sm:col-span-2 md:col-span-6">
+                    <a href="{{ route('pengguna.beranda') }}" class="inline-flex items-center gap-2.5">
+                        <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-8 w-auto object-contain">
+                        <span class="text-xl font-black tracking-tight text-white">Kost<span class="text-[#B8694C]">.in</span></span>
+                    </a>
+                    <p class="mt-4 max-w-sm text-sm leading-relaxed text-emerald-100/85 font-medium">
+                        Bantu kamu nemuin kost yang nyaman dan aman di sekitar kampus SV IPB, Bogor.
+                    </p>
                 </div>
 
-                {{-- Baris Hak Cipta & Kebijakan --}}
-                <div class="mt-12 flex flex-col gap-3 border-t border-emerald-900/60 pt-6 text-xs text-emerald-200/75 sm:flex-row sm:items-center sm:justify-between font-medium">
-                    <p>&copy; 2026 Kost.in. Dibuat khusus buat anak kost SV IPB.</p>
-                    <div class="flex gap-6">
-                        <a href="#" class="transition hover:text-white">Privasi</a>
-                        <a href="#" class="transition hover:text-white">Syarat penggunaan</a>
-                    </div>
+                {{-- Menu Navigasi --}}
+                <div class="md:col-span-3">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Menu</h3>
+                    <ul class="mt-4 space-y-2.5 text-sm font-semibold text-emerald-100/85">
+                        <li><a href="{{ route('pengguna.beranda') }}" class="transition hover:text-white">Beranda</a></li>
+                        <li><a href="#tentang" class="transition hover:text-white">Tentang</a></li>
+                        <li><a href="#peta" class="transition hover:text-white">Peta</a></li>
+                        <li><a href="{{ route('pengguna.jelajahKos') }}" class="transition hover:text-white">Jelajah Kost</a></li>
+                    </ul>
+                </div>
+
+                {{-- Info Kampus --}}
+                <div class="md:col-span-3">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Kampus</h3>
+                    <ul class="mt-4 space-y-2.5 text-sm font-medium text-emerald-100/85">
+                        <li>Sekolah Vokasi IPB University</li>
+                        <li>Kota Bogor, Jawa Barat</li>
+                        <li class="pt-1 text-xs text-emerald-300">100% Gratis Tanpa Biaya Admin</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            {{-- Baris Hak Cipta & Kebijakan --}}
+            <div class="mt-12 flex flex-col gap-3 border-t border-emerald-900/60 pt-6 text-xs text-emerald-200/75 sm:flex-row sm:items-center sm:justify-between font-medium">
+                <p>&copy; 2026 Kost.in. Dibuat khusus buat anak kost SV IPB.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="transition hover:text-white">Privasi</a>
+                    <a href="#" class="transition hover:text-white">Syarat penggunaan</a>
                 </div>
             </div>
-        </footer>
-
-    </div>
+        </div>
+    </footer>
 @endsection
 
 @push('scripts')
@@ -607,22 +597,7 @@
             }, 1200);
         }
 
-        // 2. Inisialisasi Bodymovin Lottie Hero Mobile
-        const heroMobileContainer = document.getElementById('hero-lottie-mobile');
-        if (heroMobileContainer && typeof lottie !== 'undefined') {
-            lottie.loadAnimation({
-                container: heroMobileContainer,
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: "{{ asset('images/Main Content.json') }}",
-                rendererSettings: {
-                    preserveAspectRatio: 'xMidYMid slice'
-                }
-            });
-        }
-
-        // 3. Inisialisasi Bodymovin Lottie Daun Jatuh (landing 4.json)
+        // 2. Inisialisasi Bodymovin Lottie Daun Jatuh (landing 4.json)
         const leavesContainer = document.getElementById('leaves-lottie-container');
         if (leavesContainer && typeof lottie !== 'undefined') {
             lottie.loadAnimation({
