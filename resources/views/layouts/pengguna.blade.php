@@ -34,8 +34,8 @@
 
     {{-- NAVBAR UTAMA --}}
     @if ($onBeranda)
-        <header class="sticky top-0 z-[2000] pt-3 pb-2 px-4 sm:px-6 bg-[#EDF7EE]/90 backdrop-blur-md transition-all">
-            <nav class="mx-auto flex max-w-5xl items-center justify-between rounded-full bg-white px-5 sm:px-6 py-2 sm:py-2.5 shadow-md border border-emerald-100/60">
+        <header class="fixed top-0 left-0 right-0 z-[2000] pt-3 sm:pt-4 pb-2 px-4 pointer-events-none bg-transparent transition-all">
+            <nav class="pointer-events-auto mx-auto flex max-w-5xl items-center justify-between rounded-full bg-white px-5 sm:px-6 py-2 sm:py-2.5 shadow-md border border-emerald-100/60">
                 {{-- Logo --}}
                 <a href="{{ route('pengguna.beranda') }}" class="flex items-center gap-2">
                     <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-7 sm:h-8 w-auto object-contain">
@@ -69,7 +69,7 @@
             </nav>
 
             {{-- Menu Mobile Beranda --}}
-            <div id="nav-mobile" class="hidden mt-2 mx-auto max-w-5xl rounded-2xl bg-white p-4 shadow-lg border border-stone-100 md:hidden">
+            <div id="nav-mobile" class="pointer-events-auto hidden mt-2 mx-auto max-w-5xl rounded-2xl bg-white p-4 shadow-lg border border-stone-100 md:hidden">
                 <ul class="space-y-1">
                     @foreach ($menu as $item)
                         <li>
