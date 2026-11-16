@@ -1,367 +1,696 @@
 @extends('layouts.pengguna')
 
-@section('title', 'Kost.in | Temukan Kos Terbaik di Sekitar SV IPB')
+@section('title', 'Kost.in | Cari Kost Nyaman di Sekitar SV IPB University')
+@section('body_class', 'bg-[#D6EFE1]')
 
 @push('styles')
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <style>
-        html { scroll-padding-top: 76px; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .leaflet-container { font-family: 'Plus Jakarta Sans', sans-serif; }
+        html { scroll-padding-top: 88px; }
 
-        /* Peta ilustrasi wilayah Kota Bogor */
-        .kec { fill: #ffffff; stroke: #d1c7bc; stroke-width: 1.2; stroke-linejoin: round; transition: fill 0.2s; }
-        .kec:hover { fill: #f5ede6; }
-        .kec-tengah { fill: #ead5c9; }
-        .pin-kos { fill: #fff; stroke: #B46C54; stroke-width: 4; }
-        .pin-kampus { fill: #fff; stroke: #1c1917; stroke-width: 4; }
-        .lbl { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 10px; fill: #1c1917; paint-order: stroke; stroke: #fff; stroke-width: 2.5px; stroke-linejoin: round; }
+        /* ================= ANIMASI MUNCUL TEKS HERO DI AWAL ================= */
+        @keyframes heroFadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(22px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .hero-animate {
+            opacity: 0;
+            animation: heroFadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.22s; }
+        .delay-300 { animation-delay: 0.35s; }
+        .delay-400 { animation-delay: 0.48s; }
+        .delay-500 { animation-delay: 0.6s; }
+
+        /* ================= ANIMASI PETA 3D, AWAN & DAUN (NIMPA DI ATAS MAIN CONTENT.SVG) ================= */
+        @keyframes floatMap {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(1deg);
+            }
+        }
+        .animate-float-map {
+            animation: floatMap 5.5s ease-in-out infinite;
+            filter: drop-shadow(0 20px 28px rgba(22, 58, 39, 0.14));
+            will-change: transform;
+        }
+
+        @keyframes driftCloudA {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(14px); }
+        }
+        .animate-cloud-a {
+            animation: driftCloudA 7.5s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        @keyframes driftCloudB {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(-14px); }
+        }
+        .animate-cloud-b {
+            animation: driftCloudB 8.5s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        @keyframes swayLeafA {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(9deg); }
+        }
+        .animate-leaf-a {
+            animation: swayLeafA 4.5s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        @keyframes swayLeafB {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(8px) rotate(-10deg); }
+        }
+        .animate-leaf-b {
+            animation: swayLeafB 5.2s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        /* Haluskan hanya 15% tepi paling atas Main Content.svg agar tidak ada garis sambung di langit */
+        .main-content-blend {
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 15%);
+        }
+
+        /* ================= 4 CARDS INTERACTIVE FAN & HOVER ANIMATION ================= */
+        .fanned-deck {
+            perspective: 1200px;
+        }
+
+        .fanned-card {
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+                        border-color 0.3s ease,
+                        opacity 0.35s ease;
+            transform-origin: center bottom;
+            will-change: transform;
+        }
+
+        @media (min-width: 1024px) {
+            .fanned-deck:not(:hover) .card-1 {
+                transform: rotate(-6deg) translateY(12px) translateX(14px);
+                z-index: 1;
+            }
+            .fanned-deck:not(:hover) .card-2 {
+                transform: rotate(-2deg) translateY(-4px) translateX(5px);
+                z-index: 2;
+            }
+            .fanned-deck:not(:hover) .card-3 {
+                transform: rotate(2deg) translateY(-2px) translateX(-5px);
+                z-index: 3;
+            }
+            .fanned-deck:not(:hover) .card-4 {
+                transform: rotate(6deg) translateY(14px) translateX(-14px);
+                z-index: 4;
+            }
+
+            .fanned-deck:hover .card-1 {
+                transform: rotate(-3deg) translateX(-28px) translateY(6px);
+                z-index: 1;
+            }
+            .fanned-deck:hover .card-2 {
+                transform: rotate(-1deg) translateX(-10px) translateY(0px);
+                z-index: 2;
+            }
+            .fanned-deck:hover .card-3 {
+                transform: rotate(1deg) translateX(10px) translateY(0px);
+                z-index: 3;
+            }
+            .fanned-deck:hover .card-4 {
+                transform: rotate(3deg) translateX(28px) translateY(6px);
+                z-index: 4;
+            }
+
+            .fanned-deck .fanned-card:hover {
+                transform: rotate(0deg) translateY(-28px) scale(1.08) !important;
+                z-index: 60 !important;
+                box-shadow: 0 30px 45px -12px rgba(20, 56, 33, 0.18), 0 12px 20px -6px rgba(20, 56, 33, 0.08) !important;
+                border-color: #B8694C !important;
+                opacity: 1 !important;
+            }
+
+            .fanned-deck:hover .fanned-card:not(:hover) {
+                opacity: 0.88;
+            }
+        }
+
+        /* ================= DEDAUNAN JATUH (FALLING LEAVES) ANIMATION ================= */
+        .falling-leaf {
+            position: absolute;
+            pointer-events: none;
+            will-change: transform, top;
+            animation-name: leafFallAndSway;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            z-index: 25;
+        }
+
+        @keyframes leafFallAndSway {
+            0% {
+                top: -60px;
+                transform: translate3d(0, 0, 0) rotate(0deg) rotateY(0deg);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.9;
+            }
+            25% {
+                transform: translate3d(32px, 0, 0) rotate(75deg) rotateY(50deg);
+            }
+            50% {
+                transform: translate3d(-35px, 0, 0) rotate(180deg) rotateY(100deg);
+            }
+            75% {
+                transform: translate3d(38px, 0, 0) rotate(280deg) rotateY(150deg);
+            }
+            95% {
+                opacity: 0.85;
+            }
+            100% {
+                top: 101%;
+                transform: translate3d(-18px, 0, 0) rotate(360deg) rotateY(180deg);
+                opacity: 0;
+            }
+        }
     </style>
 @endpush
 
 @section('content')
     @php
-        $warnaBadge = ['Putri' => 'text-pink-700', 'Putra' => 'text-blue-700', 'Campur' => 'text-purple-700'];
+        $warnaBadge = [
+            'Putri'  => 'bg-pink-50 text-pink-700 border-pink-200',
+            'Putra'  => 'bg-blue-50 text-blue-700 border-blue-200',
+            'Campur' => 'bg-purple-50 text-purple-700 border-purple-200',
+        ];
     @endphp
 
-    {{-- ================= HERO SECTION (Bersih & Profesional) ================= --}}
-    <section class="bg-white border-b border-stone-200 py-16 lg:py-24">
-        <div class="mx-auto grid max-w-6xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-12 lg:gap-8">
-            {{-- Teks Kiri --}}
-            <div class="lg:col-span-7">
-                <span class="inline-block rounded-full bg-[#fbf5f3] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#B46C54]">
-                    Platform Pencarian Kos SV IPB
-                </span>
+    {{-- ================= SECTION 1: HERO HEADER (Main Content.svg + LAYER NIMPA) ================= --}}
+    <section class="relative -mt-24 pt-24 overflow-hidden bg-gradient-to-b from-[#D5EEE0] via-[#DFF2E6] to-[#E6F5E8]">
 
-                <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-stone-900 sm:text-5xl lg:text-6xl leading-[1.15]">
-                    Temukan Kos Terbaik di Sekitar <span class="text-[#B46C54]">Sekolah Vokasi IPB</span>
-                </h1>
-
-                <p class="mt-6 text-base leading-relaxed text-stone-600 max-w-xl">
-                    Cari hunian yang terasa seperti rumah—dekat kampus, sesuai budget, dan punya fasilitas lengkap. Kost.in membantu mahasiswa merantau tanpa ribet dan tanpa biaya admin.
-                </p>
-
-                {{-- Kolom Pencarian Cepat --}}
-                <form action="{{ route('pengguna.jelajahKos') }}" method="GET" class="mt-8 flex max-w-xl overflow-hidden rounded-xl border border-stone-300 bg-white shadow-sm focus-within:border-[#B46C54]">
-                    <input type="text" name="q" placeholder="Cari nama kos, fasilitas, atau area..."
-                           class="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-sm text-stone-800 placeholder-stone-400 focus:outline-none">
-                    <button type="submit" aria-label="Cari kos" class="flex items-center gap-2 bg-[#B46C54] px-6 text-sm font-bold text-white transition hover:bg-[#955844]">
-                        Cari
-                    </button>
-                </form>
-
-                <div class="mt-6 flex flex-wrap gap-6 text-sm text-stone-500">
-                    <span class="flex items-center gap-1.5 font-medium text-stone-700">✓ {{ $jumlahKos }} Kos Terdaftar</span>
-                    <span class="flex items-center gap-1.5 font-medium text-stone-700">✓ 100% Gratis Tanpa Biaya Admin</span>
-                </div>
-            </div>
-
-            {{-- Gambar Hero Kanan (Clean Card) --}}
-            <div class="lg:col-span-5">
-                <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white p-2 shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80" alt="Suasana Kos" class="aspect-[4/3] w-full rounded-xl object-cover">
-                    <div class="p-4">
-                        <p class="text-xs font-bold text-[#B46C54] uppercase tracking-wider">Rekomendasi Unggulan</p>
-                        <h3 class="mt-1 font-bold text-stone-900">Kos Nyaman Dekat Kampus</h3>
-                        <p class="mt-1 text-xs text-stone-500">Akses berjalan kaki ke area kuliah Sekolah Vokasi IPB.</p>
-                    </div>
-                </div>
-            </div>
+        {{-- LAYER 1 (PALING BAWAH): Main Content.svg utuh selebar layar --}}
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10 w-full select-none" aria-hidden="true">
+            <img src="{{ asset('images/Main Content.svg') }}"
+                 alt=""
+                 class="main-content-blend w-full h-auto block">
         </div>
-    </section>
 
-    {{-- ================= SECTION: PETA WILAYAH KOTA BOGOR (TERITORIAL) ================= --}}
-    @php
-        // Proyeksi peta ilustrasi Kota Bogor
-        $pr = ['minLng' => 106.73499200028164, 'maxLat' => -6.51080200031123, 'k' => 0.9933824040959512, 's' => 3080.8790014777005, 'pad' => 20];
-        $px = fn ($lng) => ($lng - $pr['minLng']) * $pr['k'] * $pr['s'] + $pr['pad'];
-        $py = fn ($lat) => ($pr['maxLat'] - $lat) * $pr['s'] + $pr['pad'];
-        $mPx = fn ($m) => $m / 111320 * $pr['s'];
-    @endphp
-    <section class="bg-[#F9F7F4] py-16 lg:py-24 border-b border-stone-200">
-        <div class="mx-auto max-w-6xl px-5 sm:px-6">
-            <div class="grid items-center gap-12 lg:grid-cols-12">
-                {{-- Kiri: Penjelasan Wilayah --}}
+        {{-- LAYER 2 (TENGAH): Awan-awan putih mengambang di belakang konten --}}
+        <div class="pointer-events-none absolute inset-0 z-15 overflow-hidden select-none" aria-hidden="true">
+            {{-- Awan Kiri Atas (di belakang pill badge) --}}
+            <svg class="animate-cloud-a absolute -left-10 top-28 w-44 sm:w-56 text-white/65" viewBox="0 0 240 90" fill="currentColor">
+                <path d="M25,80 H205 C224,80 238,67 238,50 C238,34 225,21 209,20 C203,8 190,0 175,0 C158,0 144,10 139,25 C132,21 124,19 115,19 C94,19 77,34 75,54 C69,50 61,48 53,48 C34,48 18,62 18,80 Z"/>
+            </svg>
+
+            {{-- Awan Tengah (di belakang tulisan Sekolah Vokasi) --}}
+            <svg class="animate-cloud-b hidden md:block absolute left-[34%] top-44 w-44 lg:w-52 text-white/75" viewBox="0 0 240 90" fill="currentColor">
+                <path d="M25,80 H205 C224,80 238,67 238,50 C238,34 225,21 209,20 C203,8 190,0 175,0 C158,0 144,10 139,25 C132,21 124,19 115,19 C94,19 77,34 75,54 C69,50 61,48 53,48 C34,48 18,62 18,80 Z"/>
+            </svg>
+
+            {{-- Awan Bawah Kiri (di belakang search bar) --}}
+            <svg class="animate-cloud-a hidden sm:block absolute left-[38%] top-[330px] lg:top-[360px] w-48 lg:w-60 text-white/80" viewBox="0 0 240 90" fill="currentColor">
+                <path d="M25,80 H205 C224,80 238,67 238,50 C238,34 225,21 209,20 C203,8 190,0 175,0 C158,0 144,10 139,25 C132,21 124,19 115,19 C94,19 77,34 75,54 C69,50 61,48 53,48 C34,48 18,62 18,80 Z"/>
+            </svg>
+        </div>
+
+        {{-- LAYER 3 (ATAS): Grid Teks Kiri + Peta 3D & Daun Kanan --}}
+        <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-14 pb-56 sm:pb-72 md:pb-80 lg:pb-[380px] xl:pb-[440px]">
+            <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-6">
+
+                {{-- KOLOM KIRI: Teks & Pencarian --}}
                 <div class="lg:col-span-6">
-                    <span class="text-xs font-bold uppercase tracking-widest text-[#B46C54]">Wilayah Cakupan</span>
-                    <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl leading-tight">
-                        Eksplorasi Wilayah &amp; Zona Kampus SV IPB
-                    </h2>
-                    <p class="mt-4 text-sm leading-relaxed text-stone-600">
-                        Peta teritorial Kota Bogor memetakan wilayah kecamatan di sekitar pusat pendidikan. Titik pusat berada di Sekolah Vokasi IPB, memudahkan kamu menghitung jarak hunian secara presisi.
-                    </p>
-                    
-                    <div class="mt-8 space-y-4">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B46C54] text-white text-xs font-bold">1</div>
-                            <div>
-                                <h4 class="text-sm font-bold text-stone-900">Kecamatan Bogor Tengah</h4>
-                                <p class="mt-0.5 text-xs text-stone-500">Area utama tempat berdirinya kampus dan fasilitas penunjang.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#B46C54] text-white text-xs font-bold">2</div>
-                            <div>
-                                <h4 class="text-sm font-bold text-stone-900">Radius Jarak Terjangkau</h4>
-                                <p class="mt-0.5 text-xs text-stone-500">Pilihan kos mulai dari radius 500 meter hingga 3 kilometer.</p>
-                            </div>
-                        </div>
+                    {{-- Tag Pill --}}
+                    <div class="hero-animate delay-100 inline-flex items-center gap-2 rounded-full border border-emerald-200/90 bg-white/95 px-3.5 py-1.5 text-xs font-bold text-[#1F513F] shadow-sm">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="tracking-wide">REKOMENDASI KOST SV IPB</span>
                     </div>
 
-                    <div class="mt-8">
-                        <a href="{{ route('pengguna.jelajahKos') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#1c1917] px-6 py-3 text-sm font-semibold text-white transition hover:bg-stone-800">
-                            Buka Peta Interaktif Lengkap
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                        </a>
+                    {{-- Headline Utama --}}
+                    <h1 class="hero-animate delay-200 mt-5 text-4xl font-black tracking-tight leading-[1.12] text-stone-900 sm:text-5xl lg:text-[3.4rem]">
+                        <span class="text-[#B8694C]">Cari kost nyaman</span> <span class="text-[#163A27]">di</span><br>
+                        <span class="text-[#163A27]">sekitar</span> <span class="text-[#0E7A4D]">Sekolah</span><br>
+                        <span class="text-[#0E7A4D]">Vokasi IPB</span><br>
+                        <span class="text-[#0E7A4D]">University!</span>
+                    </h1>
+
+                    {{-- Deskripsi Subtitle --}}
+                    <p class="hero-animate delay-300 mt-5 max-w-md text-sm leading-relaxed text-stone-700 sm:text-base font-medium">
+                        Jelajahi kost, bandingkan harga dan fasilitas, lalu temukan yang paling pas buatmu.
+                    </p>
+
+                    {{-- Form Pencarian Cepat --}}
+                    <form action="{{ route('pengguna.jelajahKos') }}" method="GET"
+                          class="hero-animate delay-400 mt-7 flex max-w-[460px] items-center overflow-hidden rounded-full border border-stone-200/90 bg-white p-1.5 shadow-lg transition focus-within:border-[#B8694C] focus-within:ring-2 focus-within:ring-[#B8694C]/25">
+                        <div class="flex items-center pl-4 text-stone-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <input type="text" name="q" placeholder="Cari area, kampus, atau stasiun"
+                               class="min-w-0 flex-1 bg-transparent px-3 py-2.5 text-sm text-stone-800 placeholder-stone-400 focus:outline-none">
+                        <button type="submit" aria-label="Cari kost"
+                                class="shrink-0 rounded-full bg-[#B8694C] px-6 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#955844] sm:text-sm">
+                            Cari Kost
+                        </button>
+                    </form>
+
+                    {{-- Counter Terverifikasi --}}
+                    <div class="hero-animate delay-500 mt-4 flex items-center gap-1.5 text-xs font-semibold text-stone-800 sm:text-sm">
+                        <span class="text-base font-black text-[#1F513F]">{{ $jumlahKos }}+</span>
+                        <span>kost terverifikasi</span>
                     </div>
                 </div>
 
-                {{-- Kanan: Ilustrasi Peta SVG Kota Bogor --}}
-                <div class="lg:col-span-6 flex justify-center">
-                    <div class="w-full max-w-[380px] rounded-2xl bg-white p-6 border border-stone-200 shadow-sm">
-                        <p class="text-xs font-bold text-stone-500 mb-4 text-center">Peta Teritorial Kecamatan Bogor</p>
-                        <svg viewBox="-10 0 408 560" class="mx-auto h-auto w-full" role="img" aria-label="Peta wilayah Kota Bogor">
-                            <path class="kec" d="M235.3,328.2 L247.5,342.7 L276.5,366.8 L287.3,377.7 L292.1,384.6 L297.8,397.8 L300.7,401.3 L314.3,410.9 L315.1,410.0 L318.7,412.9 L324.6,414.2 L334.7,422.7 L337.9,426.8 L337.0,428.0 L341.2,431.6 L335.9,436.0 L337.2,438.0 L340.2,440.6 L347.9,443.7 L349.6,448.9 L360.2,461.5 L365.1,462.6 L357.2,484.2 L362.3,505.7 L366.2,529.7 L357.7,532.3 L355.9,535.5 L351.7,537.6 L342.5,539.8 L340.7,540.0 L339.6,537.7 L327.7,536.9 L323.7,534.1 L319.4,534.8 L316.9,537.6 L312.1,538.8 L304.6,535.3 L302.0,532.6 L299.9,532.6 L299.2,529.7 L292.6,525.7 L287.2,525.2 L286.1,520.6 L277.2,516.2 L277.3,510.8 L275.2,503.2 L275.6,499.3 L270.3,498.4 L268.9,496.8 L268.5,493.6 L269.7,489.9 L267.0,486.4 L266.8,483.7 L259.9,480.4 L258.5,476.7 L254.0,475.0 L250.2,470.0 L245.9,468.3 L244.7,456.3 L249.1,451.3 L251.3,446.0 L250.6,438.0 L248.7,437.2 L245.4,444.8 L242.1,447.6 L239.6,452.0 L238.1,452.0 L237.5,454.6 L230.9,454.2 L232.6,452.6 L235.0,445.7 L229.4,442.1 L229.0,443.3 L226.9,442.2 L223.1,443.8 L217.1,435.5 L209.9,442.5 L203.3,446.8 L200.8,453.7 L197.5,456.0 L196.0,459.9 L190.1,458.5 L189.4,464.7 L186.2,470.5 L179.0,477.3 L174.7,478.0 L167.0,476.3 L161.8,471.7 L156.5,469.1 L142.3,467.1 L132.2,460.2 L141.9,451.9 L151.9,447.3 L161.4,436.2 L166.8,433.4 L174.4,414.8 L173.8,409.0 L174.2,406.4 L176.5,404.3 L176.7,399.5 L179.3,395.2 L183.5,392.5 L184.7,386.6 L189.2,380.4 L184.6,372.5 L180.5,371.9 L181.2,370.4 L180.3,369.8 L178.9,371.5 L177.2,371.1 L177.5,368.2 L176.7,365.1 L174.9,363.6 L175.0,361.2 L171.0,359.8 L170.9,352.9 L168.5,351.9 L169.1,344.2 L166.9,341.9 L166.3,339.1 L162.8,336.0 L163.0,332.5 L174.2,326.0 L178.6,321.3 L181.2,320.8 L182.3,322.6 L186.4,324.0 L187.3,326.2 L185.8,329.8 L189.1,329.9 L187.9,332.8 L188.8,334.3 L186.8,335.3 L186.3,339.6 L185.1,340.8 L186.8,343.1 L183.9,347.9 L179.5,352.1 L181.5,351.1 L181.9,355.2 L183.7,351.7 L184.0,355.2 L191.7,355.0 L203.2,352.8 L203.2,350.5 L208.2,346.4 L203.8,341.8 L205.7,340.7 L202.5,336.5 L201.9,328.6 L197.8,321.9 L197.4,317.5 L201.2,312.4 L208.0,316.6 L211.7,316.5 L212.4,318.2 L215.9,319.8 L216.6,322.1 L217.9,321.4 L219.9,322.9 L221.2,321.6 L222.4,324.3 L225.4,325.1 L227.4,330.3 L230.7,331.0 L232.2,328.5 L234.2,329.5 L235.3,328.2Z"><title>Kec. Bogor Selatan</title></path>
-                            <path class="kec" d="M316.2,290.3 L315.0,303.1 L317.4,338.4 L337.9,390.1 L345.5,402.4 L360.2,421.3 L365.6,430.8 L367.8,438.6 L368.3,446.2 L365.1,462.6 L360.2,461.5 L349.6,448.9 L347.9,443.7 L340.2,440.6 L337.2,438.0 L335.9,436.0 L341.2,431.6 L337.0,428.0 L337.9,426.8 L334.7,422.7 L324.6,414.2 L318.7,412.9 L315.1,410.0 L314.3,410.9 L300.7,401.3 L297.8,397.8 L292.1,384.6 L287.3,377.7 L276.5,366.8 L247.5,342.7 L240.0,332.7 L232.2,325.4 L238.7,323.4 L240.6,320.2 L231.6,311.4 L225.8,301.8 L234.2,299.1 L240.2,308.6 L273.1,286.9 L275.5,307.9 L287.2,310.4 L293.8,309.7 L296.2,311.1 L302.5,307.7 L303.0,305.9 L299.8,303.5 L297.6,297.2 L295.4,296.1 L293.8,292.1 L295.1,283.5 L308.2,283.1 L311.9,284.1 L316.2,290.3Z"><title>Kec. Bogor Timur</title></path>
-                            <path class="kec kec-tengah" d="M216.4,233.0 L212.1,237.1 L213.2,241.9 L215.9,242.2 L216.8,244.7 L218.8,243.9 L218.2,247.1 L220.8,247.5 L223.7,243.7 L243.1,248.8 L244.5,250.1 L253.7,250.6 L253.3,256.3 L246.9,263.9 L246.4,269.2 L263.6,269.6 L266.7,268.3 L266.2,273.4 L268.6,276.7 L266.5,290.5 L240.2,308.6 L234.2,299.1 L225.8,301.8 L231.6,311.4 L240.6,320.2 L238.7,323.4 L232.2,325.4 L235.3,328.2 L234.2,329.5 L232.2,328.5 L230.7,331.0 L227.4,330.3 L225.4,325.1 L222.4,324.3 L221.2,321.6 L219.9,322.9 L217.9,321.4 L216.6,322.1 L215.9,319.8 L212.4,318.2 L211.7,316.5 L208.0,316.6 L201.2,312.4 L197.4,317.5 L197.8,321.9 L194.7,317.6 L196.0,314.5 L195.9,308.0 L190.6,308.3 L193.3,301.6 L182.9,298.3 L181.0,294.9 L183.9,293.5 L181.7,290.2 L174.9,289.3 L169.5,293.0 L165.2,290.9 L164.6,288.9 L166.9,282.8 L165.1,280.1 L171.5,272.3 L171.2,270.6 L167.5,270.2 L160.9,273.2 L157.5,270.1 L156.1,266.2 L157.2,262.6 L167.0,253.8 L168.3,261.6 L169.5,260.2 L173.6,259.5 L176.6,264.8 L180.9,262.3 L181.3,212.5 L184.8,214.1 L184.8,217.9 L194.0,217.4 L194.4,222.2 L191.3,229.0 L193.5,232.0 L195.3,238.3 L192.8,243.0 L196.4,242.2 L197.9,239.4 L204.1,237.6 L203.6,235.8 L206.3,234.8 L206.6,231.9 L208.5,229.6 L216.4,233.0Z"><title>Kec. Bogor Tengah (Pusat Kampus)</title></path>
-                            <path class="kec" d="M181.3,212.5 L180.9,262.3 L176.6,264.8 L173.6,259.5 L169.5,260.2 L168.3,261.6 L167.0,253.8 L157.2,262.6 L156.4,267.4 L157.7,270.4 L160.9,273.2 L167.5,270.2 L171.2,270.6 L171.5,272.3 L165.1,280.1 L166.9,282.8 L164.6,288.9 L165.6,291.5 L170.4,293.0 L174.9,289.3 L180.6,289.7 L183.9,293.5 L181.0,294.9 L182.9,298.3 L193.3,301.6 L190.7,308.6 L196.0,308.2 L196.0,314.5 L194.7,317.6 L201.9,328.6 L202.5,336.5 L205.7,340.7 L203.8,341.8 L208.2,346.4 L203.2,350.5 L203.2,352.8 L185.8,355.3 L184.0,355.2 L183.4,351.8 L181.9,355.2 L181.5,351.1 L180.0,352.3 L179.6,351.4 L183.9,347.9 L186.8,343.1 L185.1,340.8 L186.3,339.6 L186.8,335.3 L188.8,334.3 L187.9,332.8 L188.9,329.6 L185.8,329.5 L187.3,326.4 L186.8,324.4 L181.3,322.0 L181.2,320.8 L178.6,321.3 L174.0,326.2 L164.0,332.1 L157.4,334.4 L158.0,330.1 L156.2,327.7 L155.1,317.8 L143.8,315.4 L142.9,309.5 L144.1,307.2 L141.4,303.8 L141.5,299.8 L139.6,298.5 L141.2,296.2 L139.0,296.2 L138.6,293.0 L136.4,293.1 L135.0,291.1 L131.7,290.9 L129.9,285.2 L129.0,284.4 L127.9,285.7 L127.2,284.5 L127.7,281.8 L124.2,280.4 L119.7,281.3 L116.7,278.7 L116.1,269.8 L114.8,266.6 L112.7,265.2 L112.9,261.2 L108.2,255.7 L111.0,255.2 L105.5,247.4 L104.9,244.0 L106.1,242.8 L103.0,242.3 L101.4,240.1 L98.8,240.4 L97.6,237.2 L93.7,235.9 L91.9,234.0 L90.8,230.2 L86.5,229.1 L85.5,224.8 L82.8,224.2 L81.7,222.4 L75.9,220.8 L70.8,213.3 L65.4,209.6 L56.7,210.9 L56.4,213.1 L53.8,213.5 L52.6,215.9 L50.4,215.7 L49.2,213.7 L48.1,218.4 L50.1,220.6 L48.1,221.9 L42.9,221.3 L38.5,218.9 L37.1,215.5 L37.3,212.2 L32.3,209.7 L30.6,205.6 L40.2,202.6 L42.3,197.1 L36.6,196.9 L37.8,193.0 L35.0,193.8 L35.0,190.4 L24.7,191.3 L21.3,188.0 L20.0,171.0 L22.0,170.2 L22.2,154.8 L23.5,153.2 L29.2,155.7 L28.4,153.4 L26.2,152.6 L25.4,149.2 L27.3,148.6 L29.5,144.4 L30.2,142.4 L28.1,143.3 L27.8,139.7 L32.6,136.1 L34.0,128.0 L36.3,122.1 L37.6,121.5 L37.9,118.7 L48.1,121.6 L56.1,121.2 L57.1,125.6 L60.5,129.0 L59.9,134.0 L61.6,134.4 L65.2,132.3 L67.6,140.2 L69.8,142.7 L72.7,144.1 L76.2,143.4 L80.4,135.4 L82.5,136.8 L84.5,145.4 L87.4,146.4 L89.3,145.1 L89.9,141.9 L94.3,139.1 L93.0,134.8 L96.2,137.5 L95.4,138.5 L98.8,140.3 L97.9,131.9 L104.0,132.1 L110.7,128.0 L112.3,121.2 L109.1,115.4 L109.8,112.0 L108.6,107.1 L109.9,92.7 L110.8,90.3 L111.7,90.8 L113.2,92.3 L112.5,95.8 L113.9,98.1 L112.6,99.9 L113.0,101.9 L109.8,104.3 L109.9,106.4 L111.5,109.4 L115.6,111.1 L118.5,110.9 L120.8,113.1 L125.7,125.6 L125.4,128.8 L129.2,131.3 L132.7,140.9 L134.4,143.5 L138.1,145.8 L137.5,147.0 L139.2,147.7 L138.9,152.0 L143.7,160.3 L143.4,166.2 L145.8,173.6 L144.9,179.8 L146.7,180.9 L148.2,184.7 L154.0,187.7 L156.8,200.3 L161.6,206.2 L170.7,222.9 L173.1,212.3 L181.3,212.5Z"><title>Kec. Bogor Barat</title></path>
-                            <path class="kec" d="M316.2,290.3 L311.9,284.1 L308.2,283.1 L295.1,283.5 L293.8,292.1 L295.4,296.1 L297.6,297.2 L299.8,303.5 L302.7,304.9 L302.5,307.7 L296.2,311.1 L293.8,309.7 L287.2,310.4 L275.5,307.9 L273.1,286.9 L266.5,290.5 L268.6,277.2 L266.2,273.4 L266.7,268.3 L263.6,269.6 L246.4,269.2 L246.9,263.9 L253.3,256.3 L253.7,250.6 L244.5,250.1 L243.1,248.8 L223.7,243.7 L220.8,247.5 L218.2,247.1 L218.8,243.9 L216.8,244.7 L215.9,242.2 L213.2,241.9 L212.5,236.5 L217.0,232.4 L220.8,230.9 L221.2,227.4 L225.1,220.5 L231.1,218.3 L232.1,215.2 L241.1,204.6 L239.8,198.8 L242.6,193.0 L240.9,181.2 L248.0,171.3 L243.4,161.1 L236.1,156.7 L233.9,145.8 L231.2,145.9 L223.4,140.9 L221.0,131.2 L221.5,127.7 L225.0,121.4 L224.5,119.8 L221.4,118.1 L235.7,109.8 L235.6,126.7 L241.4,126.5 L246.2,128.6 L246.4,127.0 L248.0,127.3 L248.0,124.1 L251.2,119.3 L251.5,114.4 L253.8,107.9 L262.1,105.7 L271.4,105.9 L275.2,104.2 L273.2,114.8 L274.6,118.0 L287.7,118.4 L289.0,121.1 L289.5,118.0 L291.0,117.6 L292.5,119.6 L292.9,126.7 L293.8,127.1 L297.6,122.2 L299.1,126.2 L298.3,132.7 L301.3,136.9 L307.9,141.2 L310.9,154.1 L309.3,157.7 L309.3,160.8 L311.5,164.7 L310.5,173.3 L318.0,180.8 L320.0,188.5 L322.9,189.8 L325.6,196.4 L328.8,217.6 L330.9,219.6 L332.7,226.6 L335.6,221.5 L335.9,218.0 L340.1,217.0 L316.2,290.3Z"><title>Kec. Bogor Utara</title></path>
-                            
-                            {{-- Titik Kampus SV IPB di Peta --}}
-                            <circle class="pin-kampus" cx="{{ round($px($kampus['lng']), 1) }}" cy="{{ round($py($kampus['lat']), 1) }}" r="6"/>
-                            <text class="lbl" x="{{ round($px($kampus['lng']) + 10, 1) }}" y="{{ round($py($kampus['lat']) + 4, 1) }}">SV IPB</text>
+                {{-- KOLOM KANAN: Peta 3D (map_3d_header.svg) + Awan & Daun Saling Nimpa --}}
+                <div class="hero-animate delay-300 lg:col-span-6 flex justify-center items-center">
+                    <div class="relative w-full max-w-[520px] py-2">
+
+                        {{-- Awan Kanan Tengah (di belakang sisi kanan peta) --}}
+                        <svg class="animate-cloud-b pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2 w-36 sm:w-44 text-white/75 z-10" viewBox="0 0 240 90" fill="currentColor" aria-hidden="true">
+                            <path d="M25,80 H205 C224,80 238,67 238,50 C238,34 225,21 209,20 C203,8 190,0 175,0 C158,0 144,10 139,25 C132,21 124,19 115,19 C94,19 77,34 75,54 C69,50 61,48 53,48 C34,48 18,62 18,80 Z"/>
                         </svg>
+
+                        {{-- Awan Besar Kanan Bawah (menimpa sudut kanan bawah peta seperti di Figma) --}}
+                        <svg class="animate-cloud-a pointer-events-none absolute right-2 -bottom-8 w-52 sm:w-64 text-white/90 z-30 drop-shadow-sm" viewBox="0 0 240 90" fill="currentColor" aria-hidden="true">
+                            <path d="M25,80 H205 C224,80 238,67 238,50 C238,34 225,21 209,20 C203,8 190,0 175,0 C158,0 144,10 139,25 C132,21 124,19 115,19 C94,19 77,34 75,54 C69,50 61,48 53,48 C34,48 18,62 18,80 Z"/>
+                        </svg>
+
+                        {{-- Daun 1: Kiri Atas Peta --}}
+                        <img src="{{ asset('images/daun_1.svg') }}" alt="" aria-hidden="true"
+                             class="animate-leaf-a pointer-events-none absolute left-4 top-2 w-7 sm:w-8 h-auto z-30 drop-shadow-sm">
+
+                        {{-- Daun 2: Kiri Tengah Peta --}}
+                        <img src="{{ asset('images/daun_2.svg') }}" alt="" aria-hidden="true"
+                             class="animate-leaf-b pointer-events-none absolute -left-4 top-[42%] w-8 sm:w-9 h-auto z-30 drop-shadow-sm">
+
+                        {{-- Daun 3: Bawah Peta --}}
+                        <img src="{{ asset('images/daun_1.svg') }}" alt="" aria-hidden="true"
+                             class="animate-leaf-a pointer-events-none absolute left-[30%] -bottom-2 w-8 sm:w-9 h-auto z-30 drop-shadow-sm"
+                             style="animation-delay: 1.1s;">
+
+                        {{-- Daun 4: Kanan Atas Peta --}}
+                        <img src="{{ asset('images/daun_2.svg') }}" alt="" aria-hidden="true"
+                             class="animate-leaf-b pointer-events-none absolute -right-2 top-3 w-8 sm:w-9 h-auto z-30 drop-shadow-sm"
+                             style="animation-delay: 1.7s;">
+
+                        {{-- Peta 3D Utama (map_3d_header.svg) --}}
+                        <img src="{{ asset('images/map_3d_header.svg') }}"
+                             alt="Peta Rekomendasi Kost SV IPB"
+                             class="animate-float-map relative z-20 w-full h-auto object-contain select-none">
                     </div>
                 </div>
+
             </div>
+        </div>
+
+        {{-- GELOMBANG 1: Menimpa tepi bawah rumput Main Content.svg menuju Section Tentang (#CDE7C1) --}}
+        <div class="relative z-20 -mt-12 sm:-mt-16 lg:-mt-20 -mb-[2px] overflow-hidden leading-none pointer-events-none select-none">
+            <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto block" preserveAspectRatio="none">
+                <path d="M0,18 C480,78 960,-12 1440,46 L1440,90 L0,90 Z" fill="#CDE7C1"/>
+            </svg>
         </div>
     </section>
 
-    {{-- ================= DAFTAR KOS REKOMENDASI ================= --}}
-    <section id="kos" class="mx-auto max-w-6xl px-5 py-16 sm:px-6 lg:py-24">
-        <div class="flex items-end justify-between gap-4">
-            <div>
-                <span class="text-xs font-bold uppercase tracking-widest text-[#B46C54]">Pilihan Populer</span>
-                <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-stone-900 sm:text-3xl">Kos yang sering dilihat mahasiswa</h2>
-                <p class="mt-2 text-sm text-stone-600">Pilihan kos dekat kampus dengan fasilitas lengkap dan harga terjangkau.</p>
-            </div>
-            <a href="{{ route('pengguna.jelajahKos') }}" class="hidden shrink-0 items-center gap-1 text-sm font-semibold text-[#B46C54] hover:underline sm:flex">
-                Lihat semua kos &rarr;
-            </a>
-        </div>
+    {{-- ================= WRAPPER DENGAN ANIMASI DAUN JATUH (DARI TENTANG SAMPAI FOOTER) ================= --}}
+    <div id="falling-leaves-wrapper" class="relative overflow-hidden">
 
-        <div class="no-scrollbar -mx-5 mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
-            @forelse ($kosKartu as $kos)
-                <article class="group flex w-[85%] shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-stone-200 bg-white transition hover:border-stone-300 sm:w-auto shadow-sm">
-                    <div class="aspect-[4/3] overflow-hidden bg-stone-100">
-                        @if ($kos['foto'])
-                            <img src="{{ $kos['foto'] }}" alt="{{ $kos['nama'] }}" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
-                        @endif
-                    </div>
-                    <div class="flex flex-1 flex-col p-5">
-                        <div class="flex items-start justify-between gap-3">
-                            <h3 class="font-bold text-stone-900">{{ $kos['nama'] }}</h3>
-                            <span class="shrink-0 text-xs font-bold uppercase tracking-wide {{ $warnaBadge[$kos['tipe']] ?? 'text-stone-600' }}">{{ $kos['tipe'] }}</span>
-                        </div>
-                        <p class="mt-1 text-xs text-stone-500">{{ $kos['jarak'] }} dari kampus</p>
-                        <p class="mt-3 text-xs text-stone-500">{{ implode(' · ', $kos['fasilitas']) }}</p>
+        {{-- Layer Partikel Daun Jatuh (daun_1.svg & daun_2.svg) --}}
+        <div id="leaves-container" class="pointer-events-none absolute inset-0 overflow-hidden z-25" aria-hidden="true"></div>
 
-                        <div class="mt-5 flex items-center justify-between border-t border-stone-100 pt-4">
-                            <p class="font-bold text-stone-900 text-sm">{{ $kos['harga_fmt'] }} <span class="text-xs font-normal text-stone-500">/ bln</span></p>
-                            <a href="{{ route('pengguna.jelajahKos', ['kos' => $kos['id']]) }}" class="text-xs font-bold text-[#B46C54] hover:underline">Lihat Detail</a>
-                        </div>
-                    </div>
-                </article>
-            @empty
-                <p class="col-span-full rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center text-sm text-stone-500">Belum ada kos yang ditampilkan. Data kos sedang dilengkapi.</p>
-            @endforelse
-        </div>
-    </section>
+        {{-- ================= SECTION 2: TENTANG KOST.IN ================= --}}
+        <section id="tentang" class="relative overflow-hidden bg-[#CDE7C1] pt-10 pb-20 sm:pt-14 sm:pb-24 lg:pt-16 lg:pb-28">
+            <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
 
-    {{-- ================= PETA INTERAKTIF SECTION ================= --}}
-    <section id="peta" class="border-y border-stone-200 bg-white py-16 lg:py-24">
-        <div class="mx-auto max-w-6xl px-5 sm:px-6">
-            <div class="grid gap-10 lg:grid-cols-12 lg:gap-12 items-center">
-                <div class="lg:col-span-5">
-                    <span class="text-xs font-bold uppercase tracking-widest text-[#B46C54]">Radius Jarak</span>
-                    <h2 class="mt-2 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">Seberapa dekat kos pilihanmu?</h2>
-                    <p class="mt-3 text-sm text-stone-600 leading-relaxed">
-                        Gunakan filter radius pada peta interaktif di samping untuk melihat persebaran kos mulai dari radius 500 meter hingga 3 kilometer dari Kampus Sekolah Vokasi IPB.
-                    </p>
-
-                    <div class="mt-8">
-                        <a href="{{ route('pengguna.jelajahKos') }}" class="inline-block rounded-xl bg-[#B46C54] px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#955844]">
-                            Buka Peta &amp; Filter Kos
-                        </a>
-                    </div>
-                </div>
-
-                {{-- Peta Leaflet + Radius --}}
-                <div class="min-w-0 lg:col-span-7">
-                    <div class="mb-3 flex flex-wrap items-center gap-2" id="radius-filter">
-                        <span class="mr-1 text-xs font-bold text-stone-600">RADIUS:</span>
-                        <button type="button" data-radius="500" class="radius-btn rounded-lg border border-stone-300 bg-white px-3 py-1 text-xs font-semibold text-stone-700 transition">500 m</button>
-                        <button type="button" data-radius="1000" class="radius-btn rounded-lg border border-stone-300 bg-white px-3 py-1 text-xs font-semibold text-stone-700 transition">1 km</button>
-                        <button type="button" data-radius="2000" class="radius-btn rounded-lg border border-stone-300 bg-white px-3 py-1 text-xs font-semibold text-stone-700 transition">2 km</button>
-                        <button type="button" data-radius="3000" class="radius-btn rounded-lg border border-stone-300 bg-white px-3 py-1 text-xs font-semibold text-stone-700 transition">3 km</button>
-                    </div>
-
-                    <div id="peta-beranda" class="relative isolate z-0 h-[320px] overflow-hidden rounded-xl border border-stone-200 sm:h-[400px]"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- ================= TENTANG / ABOUT ================= --}}
-    <section id="tentang" class="bg-[#F9F7F4] py-16 lg:py-24">
-        <div class="mx-auto max-w-6xl px-5 sm:px-6">
-            <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-                <div class="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=80" alt="Tentang Kost.in" class="aspect-[4/3] w-full object-cover">
-                </div>
-
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-[#B46C54]">TENTANG KOST.IN</p>
-                    <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl leading-tight">
-                        Pencarian kos yang transparan dan dapat diandalkan.
+                {{-- Header Tentang --}}
+                <div class="text-center">
+                    <span class="inline-block text-xs font-extrabold uppercase tracking-widest text-[#7E6722]">
+                        TENTANG KOST.IN
+                    </span>
+                    <h2 class="mt-2 text-3xl font-black tracking-tight text-[#163A27] sm:text-4xl lg:text-5xl">
+                        Kenapa memilih Kost.in?
                     </h2>
-                    <p class="mt-4 text-sm leading-relaxed text-stone-600">
-                        Kost.in dikembangkan khusus untuk membantu mahasiswa Sekolah Vokasi IPB menemukan hunian terdekat tanpa hambatan. Seluruh data dikurasi agar kamu mendapatkan informasi akurat langsung dari pemilik kos.
+                    <p class="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#244B35] sm:text-base font-medium">
+                        Kost.in hadir untuk membantu kamu menemukan kost terbaik di sekitar Sekolah Vokasi IPB University, dengan informasi yang akurat dan mudah diakses.
                     </p>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    {{-- ================= FOOTER ================= --}}
-    <footer class="bg-[#1c1917] text-stone-300">
-        <div class="mx-auto max-w-6xl px-5 sm:px-6 py-12">
-            <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-12">
-                <div class="sm:col-span-2 md:col-span-6">
-                    <a href="{{ route('pengguna.beranda') }}" class="inline-flex items-center gap-2.5">
-                        <img src="{{ asset('images/logo kost.in.png') }}" alt="Kost.in" class="h-7 w-auto object-contain">
-                        <span class="text-lg font-extrabold tracking-tight text-white">Kost<span class="text-[#B46C54]">.in</span></span>
+                {{-- 4 CARDS DENGAN INTERACTIVE FAN & HOVER ANIMATION --}}
+                <div class="mt-14 lg:mt-20">
+                    <div id="deck-tentang" class="fanned-deck mx-auto flex flex-col sm:flex-row flex-wrap lg:flex-nowrap justify-center items-center gap-5 lg:gap-0 lg:-space-x-3 max-w-5xl">
+
+                        {{-- Card 01: Data Terverifikasi (Cream) --}}
+                        <div class="fanned-card card-1 w-full max-w-[270px] sm:w-[260px] lg:w-[250px] shrink-0 rounded-3xl border border-[#EFE3CC] bg-[#FDF7EA] p-6 shadow-md transition-all">
+                            <div class="flex items-center justify-between">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#FDE7D2] text-xs font-black text-[#C2410C]">
+                                    01
+                                </span>
+                                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F5EAD6] text-[#163A27]">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 class="mt-6 text-lg font-extrabold text-stone-900 leading-snug">
+                                Data Terverifikasi
+                            </h3>
+                            <p class="mt-2 text-xs leading-relaxed text-stone-600 font-medium">
+                                Informasi telah melalui pengecekan lokasi dan konfirmasi langsung dengan pemilik kost.
+                            </p>
+                        </div>
+
+                        {{-- Card 02: Filter Lengkap (Soft Green) --}}
+                        <div class="fanned-card card-2 w-full max-w-[270px] sm:w-[260px] lg:w-[250px] shrink-0 rounded-3xl border border-[#D4EAD2] bg-[#EAF6E8] p-6 shadow-md transition-all">
+                            <div class="flex items-center justify-between">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#CBE6C9] text-xs font-black text-[#15803D]">
+                                    02
+                                </span>
+                                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#D8EED6] text-[#163A27]">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 class="mt-6 text-lg font-extrabold text-stone-900 leading-snug">
+                                Filter Lengkap
+                            </h3>
+                            <p class="mt-2 text-xs leading-relaxed text-stone-600 font-medium">
+                                Sesuaikan pencarian kost berdasarkan harga, fasilitas, dan jarak ke kampus.
+                            </p>
+                        </div>
+
+                        {{-- Card 03: Hubungi Langsung (Cream) --}}
+                        <div class="fanned-card card-3 w-full max-w-[270px] sm:w-[260px] lg:w-[250px] shrink-0 rounded-3xl border border-[#EFE3CC] bg-[#FDF7EA] p-6 shadow-md transition-all">
+                            <div class="flex items-center justify-between">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#FDE7D2] text-xs font-black text-[#C2410C]">
+                                    03
+                                </span>
+                                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F5EAD6] text-[#163A27]">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 class="mt-6 text-lg font-extrabold text-stone-900 leading-snug">
+                                Hubungi Langsung
+                            </h3>
+                            <p class="mt-2 text-xs leading-relaxed text-stone-600 font-medium">
+                                Terhubung langsung ke nomor WhatsApp pemilik kost tanpa melalui perantara.
+                            </p>
+                        </div>
+
+                        {{-- Card 04: 100% Gratis (Soft Green) --}}
+                        <div class="fanned-card card-4 w-full max-w-[270px] sm:w-[260px] lg:w-[250px] shrink-0 rounded-3xl border border-[#D4EAD2] bg-[#EAF6E8] p-6 shadow-md transition-all">
+                            <div class="flex items-center justify-between">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#CBE6C9] text-xs font-black text-[#15803D]">
+                                    04
+                                </span>
+                                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#D8EED6] text-[#163A27]">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 class="mt-6 text-lg font-extrabold text-stone-900 leading-snug">
+                                100% Gratis
+                            </h3>
+                            <p class="mt-2 text-xs leading-relaxed text-stone-600 font-medium">
+                                Tanpa biaya admin maupun biaya tambahan lainnya bagi pencari kost.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {{-- GELOMBANG 2: S-curve landai ke Section Kost Populer (#71A857) --}}
+            <div class="absolute bottom-0 left-0 right-0 -mb-[2px] overflow-hidden leading-none pointer-events-none select-none">
+                <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto block" preserveAspectRatio="none">
+                    <path d="M0,48 C480,-10 960,78 1440,18 L1440,90 L0,90 Z" fill="#71A857"/>
+                </svg>
+            </div>
+        </section>
+
+        {{-- ================= SECTION 3: KOST POPULER (PALING BANYAK DILIHAT) ================= --}}
+        <section id="kos" class="relative overflow-hidden bg-[#71A857] pt-14 pb-20 sm:pt-18 sm:pb-24 lg:pt-20 lg:pb-28">
+            <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+
+                {{-- Header Section --}}
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                    <div>
+                        <span class="inline-block text-xs font-black uppercase tracking-widest text-[#143B22]">
+                            PALING DIMINATI
+                        </span>
+                        <h2 class="mt-2 text-2xl font-black tracking-tight text-[#11331D] sm:text-3xl lg:text-4xl">
+                            Kost yang paling banyak dilihat
+                        </h2>
+                        <p class="mt-2 text-sm text-[#194529] max-w-xl font-medium">
+                            Hunian favorit pengunjung dengan informasi lokasi, fasilitas, dan harga bulanan yang lengkap.
+                        </p>
+                    </div>
+                    <a href="{{ route('pengguna.jelajahKos') }}" class="group inline-flex items-center gap-1.5 text-sm font-bold text-[#11331D] hover:text-white transition shrink-0">
+                        <span>Lihat semua kost</span>
+                        <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
                     </a>
-                    <p class="mt-4 max-w-sm text-sm leading-relaxed text-stone-400">
-                        Platform pencarian dan pemetaan informasi kos untuk mahasiswa Sekolah Vokasi IPB University.
-                    </p>
                 </div>
 
-                <div class="md:col-span-3">
-                    <h3 class="text-sm font-bold text-white">Menu</h3>
-                    <ul class="mt-4 space-y-2 text-sm text-stone-400">
-                        <li><a href="{{ route('pengguna.beranda') }}" class="transition hover:text-white">Beranda</a></li>
-                        <li><a href="#peta" class="transition hover:text-white">Peta Kos</a></li>
-                        <li><a href="#tentang" class="transition hover:text-white">Tentang</a></li>
-                        <li><a href="{{ route('pengguna.jelajahKos') }}" class="transition hover:text-white">Jelajah Kos</a></li>
-                    </ul>
-                </div>
+                {{-- Grid Kartu Kos (Cream Hangat sesuai Figma) --}}
+                <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    @forelse ($kosKartu as $kos)
+                        <article class="group flex flex-col overflow-hidden rounded-3xl border border-[#EFE5D1] bg-[#FDF8EE] p-3.5 shadow-md transition duration-300 hover:-translate-y-1.5 hover:shadow-2xl">
 
-                <div class="md:col-span-3">
-                    <h3 class="text-sm font-bold text-white">Kontak</h3>
-                    <ul class="mt-4 space-y-2 text-sm text-stone-400">
-                        <li>halo@kostin.id</li>
-                        <li>Kampus SV IPB, Bogor</li>
-                    </ul>
+                            {{-- Foto Kos --}}
+                            <div class="relative aspect-[16/10] overflow-hidden rounded-2xl bg-stone-100">
+                                @if ($kos['foto'])
+                                    <img src="{{ $kos['foto'] }}" alt="{{ $kos['nama'] }}" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                                @else
+                                    <div class="flex h-full w-full items-center justify-center bg-emerald-50 text-emerald-700">
+                                        <svg class="h-10 w-10 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                        </svg>
+                                    </div>
+                                @endif
+
+                                {{-- Badge Tipe Kost di Atas Foto --}}
+                                <span class="absolute left-3 top-3 rounded-full border bg-white/95 px-2.5 py-0.5 text-[10px] font-bold tracking-wide shadow-sm {{ $warnaBadge[$kos['tipe']] ?? 'text-stone-700 border-stone-200' }}">
+                                    Kost {{ $kos['tipe'] }}
+                                </span>
+                            </div>
+
+                            {{-- Info Kos --}}
+                            <div class="flex flex-1 flex-col p-2.5 pt-4">
+                                <h3 class="font-extrabold text-stone-900 text-base leading-snug line-clamp-1 group-hover:text-[#B8694C] transition-colors">
+                                    {{ $kos['nama'] }}
+                                </h3>
+
+                                <p class="mt-1.5 flex items-center gap-1 text-xs text-stone-600 font-medium">
+                                    <svg class="h-3.5 w-3.5 text-[#B8694C] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    <span>{{ $kos['jarak'] }} dari kampus</span>
+                                </p>
+
+                                {{-- Fasilitas Chips --}}
+                                <div class="mt-3 flex flex-wrap gap-1.5">
+                                    @foreach ($kos['fasilitas'] as $fas)
+                                        <span class="rounded-md border border-[#E6DEC8] bg-[#F5EFE0] px-2 py-0.5 text-[11px] font-semibold text-stone-700">
+                                            {{ $fas }}
+                                        </span>
+                                    @endforeach
+                                </div>
+
+                                {{-- Harga & Tombol Detail --}}
+                                <div class="mt-5 flex items-center justify-between border-t border-[#ECE3D0] pt-3.5">
+                                    <div>
+                                        <span class="text-base font-black text-[#B8694C]">{{ $kos['harga_fmt'] }}</span>
+                                        <span class="text-xs text-stone-500 font-medium">/bulan</span>
+                                    </div>
+                                    <a href="{{ route('pengguna.jelajahKos', ['kos' => $kos['id']]) }}" aria-label="Lihat detail {{ $kos['nama'] }}" class="flex h-8 w-8 items-center justify-center rounded-full bg-[#B8694C] text-white shadow-sm transition hover:bg-[#955844] hover:scale-105">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+
+                        </article>
+                    @empty
+                        <p class="col-span-full rounded-2xl border border-dashed border-white/40 bg-white/10 p-8 text-center text-sm text-white">
+                            Belum ada data kost yang ditampilkan.
+                        </p>
+                    @endforelse
                 </div>
             </div>
 
-            <div class="mt-10 flex flex-col gap-3 border-t border-stone-800 pt-6 text-xs text-stone-500 sm:flex-row sm:items-center sm:justify-between">
-                <p>&copy; {{ date('Y') }} Kost.in. Hak cipta dilindungi.</p>
-                <div class="flex gap-5">
-                    <a href="#" class="transition hover:text-stone-300">Syarat &amp; Ketentuan</a>
-                    <a href="#" class="transition hover:text-stone-300">Kebijakan Privasi</a>
+            {{-- GELOMBANG 3: S-curve landai ke Section Peta (#DFF0C8) --}}
+            <div class="absolute bottom-0 left-0 right-0 -mb-[2px] overflow-hidden leading-none pointer-events-none select-none">
+                <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto block" preserveAspectRatio="none">
+                    <path d="M0,18 C480,78 960,-12 1440,46 L1440,90 L0,90 Z" fill="#DFF0C8"/>
+                </svg>
+            </div>
+        </section>
+
+        {{-- ================= SECTION 4: ANTI TELAT NGAMPUS (PETA SVG) ================= --}}
+        <section id="peta" class="relative overflow-hidden bg-[#DFF0C8] pt-12 pb-10 sm:pt-16 sm:pb-14 lg:pt-20 lg:pb-16">
+            <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+                <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+
+                    {{-- Kiri: Ilustrasi Peta SVG Teritorial --}}
+                    <div class="lg:col-span-6 flex justify-center items-center">
+                        <div class="w-full max-w-[440px] drop-shadow-lg transition duration-300 hover:scale-[1.02]">
+                            <img src="{{ asset('images/peta.svg') }}" alt="Peta Sebaran Kost SV IPB" class="w-full h-auto object-contain">
+                        </div>
+                    </div>
+
+                    {{-- Kanan: Penjelasan & Aksi --}}
+                    <div class="lg:col-span-6">
+                        <span class="inline-block text-xs font-black uppercase tracking-widest text-[#B8694C]">
+                            ANTI TELAT NGAMPUS
+                        </span>
+
+                        <h2 class="mt-3 text-3xl font-black tracking-tight text-[#163A27] sm:text-4xl lg:text-5xl leading-tight">
+                            Biar ke kampus makin sat-set, cek kost di sekitar kampus.
+                        </h2>
+
+                        <p class="mt-5 text-sm sm:text-base leading-relaxed text-[#244B35] font-medium">
+                            Pantau sebaran kost dari area SV IPB, lalu pilih sendiri hunian yang paling nyaman dan pas buatmu.
+                        </p>
+
+                        {{-- Legend Kategori --}}
+                        <div class="mt-7 flex flex-wrap items-center gap-6 text-xs sm:text-sm font-bold text-[#163A27]">
+                            <span class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-full bg-[#EC4899] shadow-sm"></span>
+                                <span>Putri</span>
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-full bg-[#3B82F6] shadow-sm"></span>
+                                <span>Putra</span>
+                            </span>
+                            <span class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-full bg-[#A855F7] shadow-sm"></span>
+                                <span>Campur</span>
+                            </span>
+                        </div>
+
+                        {{-- Tombol Buka Peta Kost --}}
+                        <div class="mt-9">
+                            <a href="{{ route('pengguna.jelajahKos') }}" class="group inline-flex items-center gap-2 text-base font-extrabold text-[#163A27] transition hover:text-[#B8694C]">
+                                <span class="underline decoration-2 underline-offset-4">Buka peta kost</span>
+                                <svg class="h-4 w-4 transition-transform group-hover:translate-x-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+        </section>
+
+        {{-- ================= SILUET PEPOHONAN TRANSISI KE FOOTER ================= --}}
+        <div class="w-full bg-[#DFF0C8] -mt-[2px] -mb-[2px] overflow-hidden leading-none select-none pointer-events-none">
+            <img src="{{ asset('images/footer_pepohonan.svg') }}" alt="Siluet Pepohonan Bogor" class="w-full h-auto block min-h-[60px]">
         </div>
-    </footer>
+
+        {{-- ================= SECTION 5: FOOTER ================= --}}
+        <footer class="relative bg-[#24593C] text-stone-200">
+            <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 py-12 lg:py-16">
+                <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-12 items-start">
+
+                    {{-- Brand & Deskripsi --}}
+                    <div class="sm:col-span-2 md:col-span-6">
+                        <a href="{{ route('pengguna.beranda') }}" class="inline-flex items-center gap-2.5">
+                            <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-8 w-auto object-contain">
+                            <span class="text-xl font-black tracking-tight text-white">Kost<span class="text-[#E08A6B]">.in</span></span>
+                        </a>
+                        <p class="mt-4 max-w-sm text-sm leading-relaxed text-emerald-100/85 font-medium">
+                            Bantu kamu nemuin kost yang nyaman dan aman di sekitar kampus SV IPB, Bogor.
+                        </p>
+                    </div>
+
+                    {{-- Menu Navigasi --}}
+                    <div class="md:col-span-3">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Menu</h3>
+                        <ul class="mt-4 space-y-2.5 text-sm font-semibold text-emerald-100/85">
+                            <li><a href="{{ route('pengguna.beranda') }}" class="transition hover:text-white">Beranda</a></li>
+                            <li><a href="#tentang" class="transition hover:text-white">Tentang</a></li>
+                            <li><a href="#peta" class="transition hover:text-white">Peta</a></li>
+                            <li><a href="{{ route('pengguna.jelajahKos') }}" class="transition hover:text-white">Jelajah Kost</a></li>
+                        </ul>
+                    </div>
+
+                    {{-- Info Kampus --}}
+                    <div class="md:col-span-3">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Kampus</h3>
+                        <ul class="mt-4 space-y-2.5 text-sm font-medium text-emerald-100/85">
+                            <li>Sekolah Vokasi IPB University</li>
+                            <li>Kota Bogor, Jawa Barat</li>
+                            <li class="pt-1 text-xs text-emerald-300">100% Gratis Tanpa Biaya Admin</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                {{-- Baris Hak Cipta & Kebijakan --}}
+                <div class="mt-12 flex flex-col gap-3 border-t border-emerald-900/60 pt-6 text-xs text-emerald-200/75 sm:flex-row sm:items-center sm:justify-between font-medium">
+                    <p>© 2026 Kost.in. Dibuat khusus buat anak kost SV IPB.</p>
+                    <div class="flex gap-6">
+                        <a href="#" class="transition hover:text-white">Privasi</a>
+                        <a href="#" class="transition hover:text-white">Syarat penggunaan</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
 @endsection
 
 @push('scripts')
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const kampus = @json($kampus);
-        const daftarKos = @json($kosList->values());
-        const warnaTipe = { 'Putri': '#ec4899', 'Putra': '#3b82f6', 'Campur': '#a855f7' };
-        const WARNA_UTAMA = '#B46C54';
-        const radiusBuffer = [500, 1000, 2000, 3000];
+        // Generator Dedaunan Jatuh (Falling Leaves dari Tentang sampai Footer)
+        const leavesContainer = document.getElementById('leaves-container');
+        if (leavesContainer) {
+            const leafSources = [
+                "{{ asset('images/daun_1.svg') }}",
+                "{{ asset('images/daun_2.svg') }}"
+            ];
+            const LEAF_COUNT = 16;
 
-        const map = L.map('peta-beranda', { scrollWheelZoom: false }).setView([kampus.lat, kampus.lng], 14);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+            for (let i = 0; i < LEAF_COUNT; i++) {
+                const leaf = document.createElement('img');
+                leaf.src = leafSources[i % leafSources.length];
+                leaf.className = 'falling-leaf';
+                leaf.alt = '';
 
-        map.on('focus', () => map.scrollWheelZoom.enable());
-        map.on('blur', () => map.scrollWheelZoom.disable());
+                const size = 20 + Math.random() * 20;
+                leaf.style.width = size + 'px';
+                leaf.style.height = 'auto';
+                leaf.style.left = (3 + Math.random() * 92) + '%';
 
-        L.marker([kampus.lat, kampus.lng], {
-            icon: L.divIcon({
-                className: '',
-                html: '<div style="background:#1c1917;color:#fff;font:600 11px/1 \'Plus Jakarta Sans\',sans-serif;padding:6px 10px;border-radius:6px;white-space:nowrap;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transform:translate(-50%,-50%)">' + kampus.nama + '</div>',
-                iconSize: [0, 0]
-            }),
-            zIndexOffset: 1000
-        }).addTo(map);
+                const duration = 14 + Math.random() * 12;
+                leaf.style.animationDuration = duration + 's';
 
-        const lingkaran = {};
-        radiusBuffer.forEach(r => {
-            lingkaran[r] = L.circle([kampus.lat, kampus.lng], {
-                radius: r, color: WARNA_UTAMA, weight: 1.5, dashArray: '6 6',
-                fillColor: WARNA_UTAMA, fillOpacity: 0.04
-            }).addTo(map);
-        });
+                const delay = -(Math.random() * duration);
+                leaf.style.animationDelay = delay + 's';
 
-        const formatJarak = m => m < 1000 ? (Math.round(m / 10) * 10) + ' m' : (m / 1000).toFixed(1).replace('.', ',') + ' km';
-        const items = daftarKos.map(k => {
-            const warna = warnaTipe[k.tipe] || WARNA_UTAMA;
-            const marker = L.marker([k.lat, k.lng], {
-                icon: L.divIcon({
-                    className: '',
-                    html: '<span style="display:block;width:14px;height:14px;border-radius:50%;background:' + warna + ';border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);transform:translate(-50%,-50%)"></span>',
-                    iconSize: [0, 0]
-                })
-            });
-            marker.bindPopup('<div style="font-family:\'Plus Jakarta Sans\',sans-serif"><strong>' + k.nama + '</strong><br>' + k.jarak + ' dari kampus</div>');
-
-            const garis = L.polyline([[kampus.lat, kampus.lng], [k.lat, k.lng]], {
-                color: warna, weight: 1, opacity: 0.5, dashArray: '3 4'
-            });
-            const grup = L.layerGroup([garis, marker]);
-            return { data: k, grup: grup };
-        });
-
-        const tombol = document.querySelectorAll('.radius-btn');
-        let radiusAktif = 3000;
-
-        function terapkanRadius(r) {
-            radiusAktif = r;
-            items.forEach(it => {
-                if (it.data.jarak_m <= r) { it.grup.addTo(map); } else { map.removeLayer(it.grup); }
-            });
-            radiusBuffer.forEach(rb => {
-                lingkaran[rb].setStyle({
-                    weight: rb === r ? 2 : 1,
-                    fillOpacity: rb === r ? 0.08 : 0.02
-                });
-            });
-            tombol.forEach(b => {
-                const aktif = parseInt(b.dataset.radius, 10) === r;
-                b.classList.toggle('bg-[#B46C54]', aktif);
-                b.classList.toggle('text-white', aktif);
-                b.classList.toggle('border-[#B46C54]', aktif);
-                b.classList.toggle('bg-white', !aktif);
-                b.classList.toggle('text-stone-700', !aktif);
-            });
-            map.fitBounds(lingkaran[r].getBounds(), { padding: [20, 20] });
+                leavesContainer.appendChild(leaf);
+            }
         }
-
-        tombol.forEach(b => b.addEventListener('click', () => terapkanRadius(parseInt(b.dataset.radius, 10))));
-        terapkanRadius(radiusAktif);
-
-        setTimeout(() => map.invalidateSize(), 200);
     });
     </script>
 @endpush
