@@ -3,7 +3,7 @@
 @section('title', 'Kost.in | Cari Kost Nyaman di Sekitar SV IPB University')
 @section('body_class', 'bg-[#D5EEE0]')
 
-@push('styles')
+@push('styles') 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <style>
         html { scroll-padding-top: 88px; }
@@ -229,15 +229,15 @@
     </section>
 
     {{-- ================= WRAPPER DENGAN ANIMASI DAUN JATUH (landing 4.json) ================= --}}
-    {{-- Posisi daun di atas background warna section (z-10), tetapi di belakang kartu & teks (z-20) --}}
+    {{-- Posisi daun di atas kartu & teks (z-20) sehingga tidak hilang di belakang kartu --}}
     <div id="falling-leaves-wrapper" class="relative overflow-hidden bg-[#DDEDC4] -mt-1 sm:-mt-2">
         
         {{-- Animasi Lottie Daun Jatuh murni dari landing 4.json menggunakan Bodymovin Lottie --}}
-        <div id="leaves-lottie-container" class="pointer-events-none absolute inset-0 overflow-hidden z-10" aria-hidden="true"></div>
+        <div id="leaves-lottie-container" class="pointer-events-none absolute inset-0 overflow-hidden z-20" aria-hidden="true"></div>
 
         {{-- ================= SECTION 2: TENTANG KOST.IN (#DDEDC4) ================= --}}
         <section id="tentang" class="relative bg-[#DDEDC4] pt-8 pb-0 sm:pt-12 lg:pt-16">
-            <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+            <div class="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
                 
                 {{-- Header Tentang --}}
                 <div class="text-center">
@@ -340,20 +340,20 @@
                 </div>
             </div>
 
-            {{-- GELOMBANG TRANSISI 2: Menuju Section Kos Populer (#7CB75A) menggunakan gelombang asli gelombang_kos.png --}}
-            <div class="relative w-full overflow-hidden leading-none pointer-events-none select-none mt-12 sm:mt-16 lg:mt-20 -mb-[1px] z-20">
+            {{-- GELOMBANG TRANSISI 2: Menuju Section Kos Populer (#7CB75A) menggunakan gelombang asli gelombang_kos.png (z-30 menutup daun tepat di gelombang) --}}
+            <div class="relative w-full overflow-hidden leading-none pointer-events-none select-none mt-12 sm:mt-16 lg:mt-20 -mb-[1px] z-30">
                 <img src="{{ asset('images/gelombang_kos.png') }}" alt="" class="w-full h-auto block">
             </div>
         </section>
 
         {{-- ================= SECTION 3: KOST POPULER (#7CB75A) ================= --}}
-        <section id="kos" class="relative z-10 bg-[#7CB75A] pt-4 sm:pt-6 pb-0 text-white">
+        <section id="kos" class="relative z-30 bg-[#7CB75A] pt-4 sm:pt-6 pb-0 text-white">
             <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
                 
                 {{-- Header Section --}}
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
-                        <span class="inline-block text-xs font-black uppercase tracking-widest text-[#143B22]">
+                        <span class="inline-block text-xs font-black uppercase tracking-widest text-[#5B280C]">
                             PALING DIMINATI
                         </span>
                         <h2 class="mt-2 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#11331D]">
@@ -363,7 +363,7 @@
                             Pilihan kost terpopuler dengan fasilitas lengkap, nyaman, dan harga bulanan yang terjangkau.
                         </p>
                     </div>
-                    <a href="{{ route('pengguna.jelajahKos') }}" class="group inline-flex items-center gap-1.5 text-sm font-bold text-white hover:text-emerald-100 transition shrink-0">
+                    <a href="{{ route('pengguna.jelajahKos') }}" class="group inline-flex items-center gap-1.5 text-sm font-bold text-[#5B280C] hover:text-[#3A1806] transition shrink-0">
                         <span>Lihat semua kost</span>
                         <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -443,7 +443,7 @@
             </div>
 
             {{-- GELOMBANG TRANSISI 3: Menuju Section Peta (#DDEDC4) menggunakan gelombang asli gelombang_peta.png --}}
-            <div class="relative w-full overflow-hidden leading-none pointer-events-none select-none mt-12 sm:mt-16 lg:mt-20 -mb-[1px] z-20">
+            <div class="relative w-full overflow-hidden leading-none pointer-events-none select-none mt-12 sm:mt-16 lg:mt-20 -mb-[1px] z-30">
                 <img src="{{ asset('images/gelombang_peta.png') }}" alt="" class="w-full h-auto block">
             </div>
         </section>
@@ -451,7 +451,7 @@
         {{-- ================= SECTION 4: ANTI TELAT NGAMPUS (PETA TIMBUL) (#DDEDC4) ================= --}}
         {{-- Menggunakan partial map_poin.blade.php dengan interaktivitas highlight saat kursor diarahkan ke wilayah map/pin --}}
         <section id="peta" class="relative bg-[#DDEDC4] pt-4 sm:pt-6 pb-0">
-            <div class="relative z-20 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 pb-10 sm:pb-14 lg:pb-16">
+            <div class="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 pb-10 sm:pb-14 lg:pb-16">
                 <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
                     
                     {{-- Kiri: Ilustrasi map_3d_poin interaktif (responsif penuh, tidak terpotong di mobile) --}}
@@ -505,64 +505,64 @@
                 </div>
             </div>
 
-            {{-- SILUET PEPOHONAN DI ATAS FOOTER (Daun jatuh mengalir melewati atas pepohonan ini) --}}
+            {{-- SILUET PEPOHONAN DI ATAS FOOTER (Daun jatuh mengalir melewati depan pepohonan ini) --}}
             <div class="relative w-full overflow-hidden leading-none select-none pointer-events-none -mt-1 -mb-[1px] z-10">
                 <img src="{{ asset('images/footer_pepohonan.svg') }}" alt="Siluet Pepohonan" class="w-full h-auto block">
             </div>
         </section>
 
+        {{-- ================= SECTION 5: FOOTER (#285F40) ================= --}}
+        {{-- Di dalam falling-leaves-wrapper agar animasi daun tetap mengalir sampai footer akhir --}}
+        <footer class="relative z-10 bg-[#285F40] text-stone-200 -mt-[1px]">
+            <div class="relative z-30 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 py-12 lg:py-16">
+                <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-12 items-start">
+                    
+                    {{-- Brand & Deskripsi --}}
+                    <div class="sm:col-span-2 md:col-span-6">
+                        <a href="{{ route('pengguna.beranda') }}" class="inline-flex items-center gap-2.5">
+                            <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-8 w-auto object-contain">
+                            <span class="text-xl font-black tracking-tight text-white">Kost<span class="text-[#B8694C]">.in</span></span>
+                        </a>
+                        <p class="mt-4 max-w-sm text-sm leading-relaxed text-emerald-100/85 font-medium">
+                            Bantu kamu nemuin kost yang nyaman dan aman di sekitar kampus SV IPB, Bogor.
+                        </p>
+                    </div>
+
+                    {{-- Menu Navigasi --}}
+                    <div class="md:col-span-3">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Menu</h3>
+                        <ul class="mt-4 space-y-2.5 text-sm font-semibold text-emerald-100/85">
+                            <li><a href="{{ route('pengguna.beranda') }}" class="transition hover:text-white">Beranda</a></li>
+                            <li><a href="#tentang" class="transition hover:text-white">Tentang</a></li>
+                            <li><a href="#peta" class="transition hover:text-white">Peta</a></li>
+                            <li><a href="{{ route('pengguna.jelajahKos') }}" class="transition hover:text-white">Jelajah Kost</a></li>
+                        </ul>
+                    </div>
+
+                    {{-- Info Kampus --}}
+                    <div class="md:col-span-3">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Kampus</h3>
+                        <ul class="mt-4 space-y-2.5 text-sm font-medium text-emerald-100/85">
+                            <li>Sekolah Vokasi IPB University</li>
+                            <li>Kota Bogor, Jawa Barat</li>
+                            <li class="pt-1 text-xs text-emerald-300">100% Gratis Tanpa Biaya Admin</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                {{-- Baris Hak Cipta & Kebijakan --}}
+                <div class="mt-12 flex flex-col gap-3 border-t border-emerald-900/60 pt-6 text-xs text-emerald-200/75 sm:flex-row sm:items-center sm:justify-between font-medium">
+                    <p>&copy; 2026 Kost.in. Dibuat khusus buat anak kost SV IPB.</p>
+                    <div class="flex gap-6">
+                        <a href="#" class="transition hover:text-white">Privasi</a>
+                        <a href="#" class="transition hover:text-white">Syarat penggunaan</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
     </div> {{-- ================= END WRAPPER DENGAN ANIMASI DAUN JATUH (landing 4.json) ================= --}}
-
-    {{-- ================= SECTION 5: FOOTER (#285F40) ================= --}}
-    {{-- Terpisah di luar falling-leaves-wrapper sehingga daun TIDAK keluar dari bawah pepohonan --}}
-    <footer class="relative z-20 bg-[#285F40] text-stone-200 -mt-[1px]">
-        <div class="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-8 py-12 lg:py-16">
-            <div class="grid gap-10 sm:grid-cols-2 md:grid-cols-12 items-start">
-                
-                {{-- Brand & Deskripsi --}}
-                <div class="sm:col-span-2 md:col-span-6">
-                    <a href="{{ route('pengguna.beranda') }}" class="inline-flex items-center gap-2.5">
-                        <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-8 w-auto object-contain">
-                        <span class="text-xl font-black tracking-tight text-white">Kost<span class="text-[#B8694C]">.in</span></span>
-                    </a>
-                    <p class="mt-4 max-w-sm text-sm leading-relaxed text-emerald-100/85 font-medium">
-                        Bantu kamu nemuin kost yang nyaman dan aman di sekitar kampus SV IPB, Bogor.
-                    </p>
-                </div>
-
-                {{-- Menu Navigasi --}}
-                <div class="md:col-span-3">
-                    <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Menu</h3>
-                    <ul class="mt-4 space-y-2.5 text-sm font-semibold text-emerald-100/85">
-                        <li><a href="{{ route('pengguna.beranda') }}" class="transition hover:text-white">Beranda</a></li>
-                        <li><a href="#tentang" class="transition hover:text-white">Tentang</a></li>
-                        <li><a href="#peta" class="transition hover:text-white">Peta</a></li>
-                        <li><a href="{{ route('pengguna.jelajahKos') }}" class="transition hover:text-white">Jelajah Kost</a></li>
-                    </ul>
-                </div>
-
-                {{-- Info Kampus --}}
-                <div class="md:col-span-3">
-                    <h3 class="text-xs font-black uppercase tracking-widest text-emerald-200">Kampus</h3>
-                    <ul class="mt-4 space-y-2.5 text-sm font-medium text-emerald-100/85">
-                        <li>Sekolah Vokasi IPB University</li>
-                        <li>Kota Bogor, Jawa Barat</li>
-                        <li class="pt-1 text-xs text-emerald-300">100% Gratis Tanpa Biaya Admin</li>
-                    </ul>
-                </div>
-
-            </div>
-
-            {{-- Baris Hak Cipta & Kebijakan --}}
-            <div class="mt-12 flex flex-col gap-3 border-t border-emerald-900/60 pt-6 text-xs text-emerald-200/75 sm:flex-row sm:items-center sm:justify-between font-medium">
-                <p>&copy; 2026 Kost.in. Dibuat khusus buat anak kost SV IPB.</p>
-                <div class="flex gap-6">
-                    <a href="#" class="transition hover:text-white">Privasi</a>
-                    <a href="#" class="transition hover:text-white">Syarat penggunaan</a>
-                </div>
-            </div>
-        </div>
-    </footer>
 @endsection
 
 @push('scripts')

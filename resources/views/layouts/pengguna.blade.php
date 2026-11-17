@@ -32,116 +32,60 @@
         ];
     @endphp
 
-    {{-- NAVBAR UTAMA --}}
-    @if ($onBeranda)
-        <header class="fixed top-0 left-0 right-0 z-[2000] pt-3 sm:pt-4 pb-2 px-4 pointer-events-none bg-transparent transition-all">
-            <nav class="pointer-events-auto mx-auto flex max-w-5xl items-center justify-between rounded-full bg-white px-5 sm:px-6 py-2 sm:py-2.5 shadow-md border border-emerald-100/60">
-                {{-- Logo --}}
-                <a href="{{ route('pengguna.beranda') }}" class="flex items-center gap-2">
-                    <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-7 sm:h-8 w-auto object-contain">
-                    <span class="text-base sm:text-lg font-black tracking-tight text-stone-900">Kost<span class="text-[#B8694C]">.in</span></span>
-                </a>
+    {{-- NAVBAR UTAMA: Floating Pill Navbar Konsisten untuk Semua Halaman (Beranda, Jelajah Kos, dll) --}}
+    <header class="{{ $onBeranda ? 'fixed' : 'sticky' }} top-0 left-0 right-0 z-[2000] pt-3 sm:pt-4 pb-2 px-4 pointer-events-none bg-transparent transition-all">
+        <nav class="pointer-events-auto mx-auto flex max-w-5xl items-center justify-between rounded-full bg-white px-5 sm:px-6 py-2 sm:py-2.5 shadow-md border border-emerald-100/60">
+            {{-- Logo --}}
+            <a href="{{ route('pengguna.beranda') }}" class="flex items-center gap-2">
+                <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-7 sm:h-8 w-auto object-contain">
+                <span class="text-base sm:text-lg font-black tracking-tight text-stone-900">Kost<span class="text-[#B8694C]">.in</span></span>
+            </a>
 
-                {{-- Menu Desktop --}}
-                <ul class="hidden items-center justify-center gap-7 text-xs font-bold text-stone-700 md:flex">
-                    @foreach ($menu as $item)
-                        <li>
-                            <a href="{{ $item['url'] }}" data-key="{{ $item['key'] }}" data-aktif="{{ $item['aktif'] ? 'true' : 'false' }}"
-                               class="nav-link relative block py-1 font-bold text-stone-600 transition-colors hover:text-[#B8694C] data-[aktif=true]:text-[#B8694C]">
-                                {{ $item['label'] }}
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-
-                {{-- Tombol Cari Kost Desktop --}}
-                <div class="hidden md:flex justify-end">
-                    <a href="{{ route('pengguna.jelajahKos') }}" class="rounded-full bg-[#B8694C] px-5 py-2 text-xs font-bold text-white transition hover:bg-[#955844] shadow-sm">
-                        Cari Kost
-                    </a>
-                </div>
-
-                {{-- Tombol Mobile --}}
-                <button type="button" id="nav-toggle" aria-label="Toggle menu" class="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-stone-700 md:hidden">
-                    <svg id="nav-ikon-buka" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
-                    <svg id="nav-ikon-tutup" class="hidden h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
-                </button>
-            </nav>
-
-            {{-- Menu Mobile Beranda --}}
-            <div id="nav-mobile" class="pointer-events-auto hidden mt-2 mx-auto max-w-5xl rounded-2xl bg-white p-4 shadow-lg border border-stone-100 md:hidden">
-                <ul class="space-y-1">
-                    @foreach ($menu as $item)
-                        <li>
-                            <a href="{{ $item['url'] }}" data-key="{{ $item['key'] }}" data-aktif="{{ $item['aktif'] ? 'true' : 'false' }}"
-                               class="nav-link block rounded-xl px-4 py-2.5 text-sm font-bold text-stone-700 transition-colors data-[aktif=true]:bg-[#fbf5f3] data-[aktif=true]:text-[#B8694C]">
-                                {{ $item['label'] }}
-                            </a>
-                        </li>
-                    @endforeach
-                    <li class="pt-2">
-                        <a href="{{ route('pengguna.jelajahKos') }}" class="block text-center rounded-full bg-[#B8694C] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#955844] shadow-sm">
-                            Cari Kost
+            {{-- Menu Desktop --}}
+            <ul class="hidden items-center justify-center gap-7 text-xs font-bold text-stone-700 md:flex">
+                @foreach ($menu as $item)
+                    <li>
+                        <a href="{{ $item['url'] }}" data-key="{{ $item['key'] }}" data-aktif="{{ $item['aktif'] ? 'true' : 'false' }}"
+                           class="nav-link relative block py-1 font-bold text-stone-600 transition-colors hover:text-[#B8694C] data-[aktif=true]:text-[#B8694C]">
+                            {{ $item['label'] }}
                         </a>
                     </li>
-                </ul>
-            </div>
-        </header>
-    @else
-        <header class="sticky top-0 z-[2000] border-b border-stone-200 bg-white/95 backdrop-blur-md">
-            <nav class="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-3 md:grid md:grid-cols-[1fr_auto_1fr] md:py-4">
-                {{-- Logo --}}
-                <a href="{{ route('pengguna.beranda') }}" class="flex items-center gap-2.5">
-                    <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in" class="h-8 w-auto object-contain">
-                    <span class="text-lg font-extrabold tracking-tight text-stone-900">Kost<span class="text-[#B8694C]">.in</span></span>
+                @endforeach
+            </ul>
+
+            {{-- Tombol Cari Kost Desktop --}}
+            <div class="hidden md:flex justify-end">
+                <a href="{{ route('pengguna.jelajahKos') }}" class="rounded-full bg-[#B8694C] px-5 py-2 text-xs font-bold text-white transition hover:bg-[#955844] shadow-sm">
+                    Cari Kost
                 </a>
+            </div>
 
-                {{-- Menu Desktop --}}
-                <ul class="hidden items-center justify-center gap-6 text-xs md:flex">
-                    @foreach ($menu as $item)
-                        <li>
-                            <a href="{{ $item['url'] }}" data-key="{{ $item['key'] }}" data-aktif="{{ $item['aktif'] ? 'true' : 'false' }}"
-                               class="nav-link relative block py-1 font-bold text-stone-600 transition-colors hover:text-stone-900 data-[aktif=true]:text-[#B8694C]">
-                                {{ $item['label'] }}
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
+            {{-- Tombol Mobile --}}
+            <button type="button" id="nav-toggle" aria-label="Toggle menu" class="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 text-stone-700 md:hidden">
+                <svg id="nav-ikon-buka" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+                <svg id="nav-ikon-tutup" class="hidden h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+        </nav>
 
-                {{-- Tombol Cari Kost Desktop --}}
-                <div class="hidden md:flex justify-end">
-                    <a href="{{ route('pengguna.jelajahKos') }}" class="rounded-full bg-[#B8694C] px-5 py-2 text-xs font-bold text-white transition hover:bg-[#955844] shadow-sm">
-                        Cari Kost
-                    </a>
-                </div>
-
-                {{-- Tombol Mobile --}}
-                <button type="button" id="nav-toggle" aria-label="Toggle menu" class="flex h-10 w-10 items-center justify-center rounded-lg border border-stone-200 text-stone-700 md:hidden">
-                    <svg id="nav-ikon-buka" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
-                    <svg id="nav-ikon-tutup" class="hidden h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
-                </button>
-            </nav>
-
-            {{-- Menu Mobile --}}
-            <div id="nav-mobile" class="hidden border-t border-stone-100 bg-white md:hidden">
-                <ul class="mx-auto max-w-[1600px] space-y-1 px-4 py-3">
-                    @foreach ($menu as $item)
-                        <li>
-                            <a href="{{ $item['url'] }}" data-key="{{ $item['key'] }}" data-aktif="{{ $item['aktif'] ? 'true' : 'false' }}"
-                               class="nav-link block rounded-lg px-4 py-3 text-sm font-bold tracking-wider uppercase text-stone-700 transition-colors data-[aktif=true]:bg-[#fbf5f3] data-[aktif=true]:text-[#B8694C]">
-                                {{ $item['label'] }}
-                            </a>
-                        </li>
-                    @endforeach
-                    <li class="pt-2">
-                        <a href="{{ route('pengguna.jelajahKos') }}" class="block text-center rounded-xl bg-[#B8694C] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#955844] shadow-sm">
-                            Cari Kost
+        {{-- Menu Mobile --}}
+        <div id="nav-mobile" class="pointer-events-auto hidden mt-2 mx-auto max-w-5xl rounded-2xl bg-white p-4 shadow-lg border border-stone-100 md:hidden">
+            <ul class="space-y-1">
+                @foreach ($menu as $item)
+                    <li>
+                        <a href="{{ $item['url'] }}" data-key="{{ $item['key'] }}" data-aktif="{{ $item['aktif'] ? 'true' : 'false' }}"
+                           class="nav-link block rounded-xl px-4 py-2.5 text-sm font-bold text-stone-700 transition-colors data-[aktif=true]:bg-[#fbf5f3] data-[aktif=true]:text-[#B8694C]">
+                            {{ $item['label'] }}
                         </a>
                     </li>
-                </ul>
-            </div>
-        </header>
-    @endif
+                @endforeach
+                <li class="pt-2">
+                    <a href="{{ route('pengguna.jelajahKos') }}" class="block text-center rounded-full bg-[#B8694C] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#955844] shadow-sm">
+                        Cari Kost
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
 
     {{-- KONTEN HALAMAN --}}
     @yield('content')
