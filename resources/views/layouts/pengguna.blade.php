@@ -33,7 +33,7 @@
     @endphp
 
     {{-- NAVBAR UTAMA: Floating Pill Navbar Konsisten untuk Semua Halaman (Beranda, Jelajah Kos, dll) --}}
-    <header class="{{ $onBeranda ? 'fixed' : 'sticky' }} top-0 left-0 right-0 z-[2000] pt-3 sm:pt-4 pb-2 px-4 pointer-events-none bg-transparent transition-all">
+    <header class="fixed top-0 left-0 right-0 z-[2000] pt-3 sm:pt-4 pb-2 px-4 pointer-events-none bg-transparent transition-all">
         <nav class="pointer-events-auto mx-auto flex max-w-5xl items-center justify-between rounded-full bg-white px-5 sm:px-6 py-2 sm:py-2.5 shadow-md border border-emerald-100/60">
             {{-- Logo --}}
             <a href="{{ route('pengguna.beranda') }}" class="flex items-center gap-2">
