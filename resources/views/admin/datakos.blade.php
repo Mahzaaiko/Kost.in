@@ -58,6 +58,16 @@
     get pagedIds() {
         return new Set(this.pagedItems.map(i => i.id));
     },
+    get itemNumberMap() {
+        const map = new Map();
+        this.filteredItems.forEach((item, index) => {
+            map.set(item.id, index + 1);
+        });
+        return map;
+    },
+    getRowNumber(id) {
+        return this.itemNumberMap.get(id) ?? '';
+    },
     isRowVisible(id) {
         return this.pagedIds.has(id);
     },
@@ -276,6 +286,7 @@
             <table class="w-full text-left text-sm text-slate-500">
                 <thead class="border-b border-stone-200 bg-stone-50/50 text-xs font-bold uppercase tracking-wider text-slate-500">
                     <tr>
+                        <th scope="col" class="pl-6 pr-2 py-4 text-center w-12">No</th>
                         <th scope="col" class="px-6 py-4 text-left">Kos</th>
                         <th scope="col" class="px-6 py-4 text-center">Tipe</th>
                         <th scope="col" class="px-6 py-4 text-center">Harga</th>
@@ -297,6 +308,9 @@
                     <tr class="data-row transition-colors hover:bg-stone-50/80"
                         x-show="isRowVisible({{ $kos->id }})"
                     >
+                        {{-- Kolom 0: Nomor --}}
+                        <td class="whitespace-nowrap pl-6 pr-2 py-4 text-center text-xs font-bold text-slate-400" x-text="getRowNumber({{ $kos->id }})"></td>
+
                         {{-- Kolom 1: Kos (Rata Kiri) --}}
                         <td class="whitespace-nowrap px-6 py-4">
                             <div class="flex items-center gap-4">
@@ -382,7 +396,7 @@
 
                     @if ($dataKos->isEmpty())
                     <tr>
-                        <td colspan="7" class="py-16">
+                        <td colspan="8" class="py-16">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <h3 class="text-sm font-bold text-ink">Belum ada data kos</h3>
                                 <p class="mt-1 text-xs text-slate-500">Klik "Tambah Kos" untuk menambahkan data pertama.</p>
@@ -393,7 +407,7 @@
 
                     {{-- Pesan Data Tidak Ditemukan --}}
                     <tr x-show="totalFiltered === 0 && items.length > 0" x-cloak style="display: none;">
-                        <td colspan="7" class="py-16">
+                        <td colspan="8" class="py-16">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <span class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-stone-50 text-slate-300">
                                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
