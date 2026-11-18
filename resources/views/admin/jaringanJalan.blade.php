@@ -41,18 +41,18 @@
                 @csrf
                 <div>
                     <label for="berkas" class="mb-1.5 block text-sm font-semibold text-slate-700">File rekaman <span class="text-red-500">*</span></label>
-                    <input type="file" id="berkas" name="berkas" required accept=".gpx,.geojson,.json" class="block w-full rounded-xl border border-stone-200 bg-white text-sm text-slate-600 file:mr-3 file:border-0 file:bg-[#fbf5f3] file:px-4 file:py-2.5 file:text-xs file:font-bold file:text-[#B46C54]">
+                    <input type="file" id="berkas" name="berkas" required accept=".gpx,.geojson,.json" class="block w-full rounded-xl border border-stone-200 bg-white text-sm text-slate-600 file:mr-3 file:border-0 file:bg-[#F8EFEA] file:px-4 file:py-2.5 file:text-xs file:font-bold file:text-[#B8694C]">
                     <p class="mt-1 text-[11px] text-slate-500">.gpx, .geojson, atau .json, maksimal {{ (int) config('kostin.routing.berkas_survei_maks_kb') / 1024 }} MB.</p>
                 </div>
                 <div>
                     <label for="nama" class="mb-1.5 block text-sm font-semibold text-slate-700">Nama gang</label>
-                    <input type="text" id="nama" name="nama" maxlength="150" value="{{ old('nama') }}" placeholder="Contoh: Gang Malabar Ujung ke Sancang" class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]">
+                    <input type="text" id="nama" name="nama" maxlength="150" value="{{ old('nama') }}" placeholder="Contoh: Gang Malabar Ujung ke Sancang" class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]">
                 </div>
                 <div>
                     <label for="catatan" class="mb-1.5 block text-sm font-semibold text-slate-700">Catatan</label>
-                    <textarea id="catatan" name="catatan" rows="2" maxlength="500" placeholder="Contoh: lewat jembatan kecil, direkam Andi 2 Nov" class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]">{{ old('catatan') }}</textarea>
+                    <textarea id="catatan" name="catatan" rows="2" maxlength="500" placeholder="Contoh: lewat jembatan kecil, direkam Andi 2 Nov" class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]">{{ old('catatan') }}</textarea>
                 </div>
-                <button type="submit" @disabled(! $adaJaringanOsm) class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#B46C54] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#955844] disabled:cursor-not-allowed disabled:opacity-50">
+                <button type="submit" @disabled(! $adaJaringanOsm) class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#B8694C] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#955844] disabled:cursor-not-allowed disabled:opacity-50">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                     Unggah dan Sambungkan
                 </button>
@@ -69,7 +69,7 @@
                     <div class="px-6 py-4">
                         <div class="flex items-start justify-between gap-3">
                             <button type="button" data-lihat-gang="{{ $r->id }}" class="text-left">
-                                <p class="text-sm font-bold text-ink hover:text-[#B46C54]">{{ $r->namaTampil() }}</p>
+                                <p class="text-sm font-bold text-ink hover:text-[#B8694C]">{{ $r->namaTampil() }}</p>
                                 <p class="mt-0.5 text-[11px] text-slate-500">{{ number_format($r->panjang_m, 0, ',', '.') }} m · {{ $r->created_at->translatedFormat('d M Y') }}{{ $r->pengunggah ? ' · '.$r->pengunggah->name : '' }}</p>
                             </button>
                             <form method="POST" action="{{ route('admin.jaringanJalan.hapus', $r) }}" onsubmit="return confirm('Hapus {{ addslashes($r->namaTampil()) }}? Rute kos akan dihitung ulang tanpa gang ini.')">
@@ -104,7 +104,7 @@
                     <h3 class="text-base font-bold text-ink">Bandingkan Rute</h3>
                     <p class="mt-1 text-xs text-slate-500">Pilih kos untuk melihat rute dengan dan tanpa gang hasil survei.</p>
                 </div>
-                <select id="pilih-kos" class="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-ink focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54] sm:w-64">
+                <select id="pilih-kos" class="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-ink focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C] sm:w-64">
                     <option value="">Pilih kos...</option>
                     @foreach ($kos as $k)
                         <option value="{{ $k['id'] }}">{{ $k['nama'] }}</option>
@@ -117,7 +117,7 @@
             </div>
 
             <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] font-semibold text-slate-600">
-                <span class="flex items-center gap-2"><span class="inline-block h-1 w-6 rounded bg-[#B46C54]"></span>Gang hasil survei</span>
+                <span class="flex items-center gap-2"><span class="inline-block h-1 w-6 rounded bg-[#B8694C]"></span>Gang hasil survei</span>
                 <span class="flex items-center gap-2"><span class="inline-block h-0 w-6 border-t-2 border-dashed border-red-500"></span>Gang tidak tersambung</span>
                 <span class="flex items-center gap-2"><span class="inline-block h-0 w-6 border-t-[3px] border-dashed border-slate-500"></span>Rute OSM saja</span>
                 <span class="flex items-center gap-2"><span class="inline-block h-1 w-6 rounded bg-[#2563eb]"></span>Rute OSM + survei</span>
@@ -134,9 +134,9 @@
     <div class="flex flex-col gap-3 border-b border-stone-200 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h3 class="text-base font-bold text-ink">Tabel Validasi Jarak</h3>
-            <p class="mt-1 text-xs text-slate-500">Semua kos yang punya titik lokasi. Rasio = panjang rute dibagi garis lurus, makin dekat ke 1 makin langsung. <span id="status-tabel" class="font-semibold text-[#B46C54]"></span></p>
+            <p class="mt-1 text-xs text-slate-500">Semua kos yang punya titik lokasi. Rasio = panjang rute dibagi garis lurus, makin dekat ke 1 makin langsung. <span id="status-tabel" class="font-semibold text-[#B8694C]"></span></p>
         </div>
-        <a href="{{ route('admin.jaringanJalan.ekspor') }}" class="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#B46C54] px-4 py-2 text-xs font-bold text-[#B46C54] transition hover:bg-[#B46C54] hover:text-white">
+        <a href="{{ route('admin.jaringanJalan.ekspor') }}" class="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#B8694C] px-4 py-2 text-xs font-bold text-[#B8694C] transition hover:bg-[#B8694C] hover:text-white">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
             Unduh CSV
         </a>
@@ -167,7 +167,7 @@
                         <td class="whitespace-nowrap px-5 py-3 text-right tabular-nums text-slate-400" data-kolom="selisih_m">...</td>
                         <td class="whitespace-nowrap px-5 py-3 text-right tabular-nums text-slate-400" data-kolom="rasio_osm">...</td>
                         <td class="whitespace-nowrap px-5 py-3 text-right tabular-nums text-slate-400" data-kolom="rasio_survei">...</td>
-                        <td class="px-5 py-3 text-right"><button type="button" data-lihat-kos="{{ $k['id'] }}" class="text-xs font-bold text-[#B46C54] hover:underline">Lihat</button></td>
+                        <td class="px-5 py-3 text-right"><button type="button" data-lihat-kos="{{ $k['id'] }}" class="text-xs font-bold text-[#B8694C] hover:underline">Lihat</button></td>
                     </tr>
                 @empty
                     <tr><td colspan="9" class="px-5 py-8 text-center text-sm text-slate-500">Belum ada kos yang punya titik lokasi.</td></tr>
@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const info = REKAMAN[id] || { nama: 'Gang', ujung: 0 };
         const putus = info.ujung === 0;
         lapisanGang[id] = L.geoJSON(geo, {
-            style: { color: putus ? '#ef4444' : '#B46C54', weight: 5, opacity: 0.9, dashArray: putus ? '6 6' : null }
+            style: { color: putus ? '#ef4444' : '#B8694C', weight: 5, opacity: 0.9, dashArray: putus ? '6 6' : null }
         }).addTo(peta).bindTooltip(info.nama, { sticky: true });
     });
     const semuaGang = Object.values(lapisanGang);
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const k = KOS[id];
         if (d.geometri_osm) L.geoJSON(d.geometri_osm, { style: { color: '#475569', weight: 4, opacity: 0.85, dashArray: '8 8' } }).addTo(lapisanRute);
         if (d.geometri_survei) L.geoJSON(d.geometri_survei, { style: { color: '#2563eb', weight: 5, opacity: 0.85 } }).addTo(lapisanRute);
-        L.circleMarker([k.lat, k.lng], { radius: 8, color: '#fff', weight: 2, fillColor: '#B46C54', fillOpacity: 1 }).addTo(lapisanRute).bindTooltip(k.nama, { permanent: true, direction: 'top', offset: [0, -8] });
+        L.circleMarker([k.lat, k.lng], { radius: 8, color: '#fff', weight: 2, fillColor: '#B8694C', fillOpacity: 1 }).addTo(lapisanRute).bindTooltip(k.nama, { permanent: true, direction: 'top', offset: [0, -8] });
 
         const batas = lapisanRute.getLayers().length ? L.featureGroup(lapisanRute.getLayers()).getBounds() : L.latLngBounds([[k.lat, k.lng]]);
         peta.fitBounds(batas.extend([KAMPUS.lat, KAMPUS.lng]), { padding: [40, 40], maxZoom: 18 });

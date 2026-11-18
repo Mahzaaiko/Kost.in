@@ -38,7 +38,7 @@
         </div>
         <button 
             @click="isAddModalOpen = true"
-            class="flex items-center gap-2 rounded-xl bg-[#B46C54] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#955844]"
+            class="flex items-center gap-2 rounded-xl bg-[#B8694C] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#955844]"
         >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             Tambah Fasilitas
@@ -57,7 +57,7 @@
                 <input 
                     type="text" 
                     x-model="searchQuery"
-                    class="block w-full rounded-xl border border-stone-200 bg-white py-2.5 pl-11 pr-4 text-sm text-ink placeholder-slate-400 transition focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54] shadow-sm" 
+                    class="block w-full rounded-xl border border-stone-200 bg-white py-2.5 pl-11 pr-4 text-sm text-ink placeholder-slate-400 transition focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C] shadow-sm" 
                     placeholder="Cari fasilitas..."
                 >
             </div>
@@ -73,7 +73,7 @@
             >
                 <div class="flex items-center gap-4">
                     {{-- Ikon (Ukurannya dikecilkan sedikit menjadi h-11 w-11) --}}
-                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fbf5f3] text-[#B46C54]">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F8EFEA] text-[#B8694C]">
                         <x-ikon-fasilitas :ikon="$fas->ikon" />
                     </span>
                     {{-- Teks --}}
@@ -87,7 +87,7 @@
                 <div class="flex items-center gap-3">
                     <button 
                         @click="isEditModalOpen = true; activeFasilitas = @js($fas->nama); activeIkon = @js($fas->ikon ?? ''); urlEdit = @js(route('admin.fasilitas.update', $fas))"
-                        class="text-slate-400 transition-colors hover:text-[#B46C54]" 
+                        class="text-slate-400 transition-colors hover:text-[#B8694C]" 
                         title="Edit"
                     >
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -123,9 +123,9 @@
                 @csrf
                 <div class="px-6 py-6">
                     <label class="mb-1.5 block text-sm font-semibold text-slate-700">Nama Fasilitas</label>
-                    <input type="text" name="nama_fasilitas" required class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition placeholder:text-slate-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]" placeholder="Contoh: Area Belajar">
+                    <input type="text" name="nama_fasilitas" required class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition placeholder:text-slate-400 focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]" placeholder="Contoh: Area Belajar">
                     <label for="ikon-tambah" class="mb-1.5 mt-4 block text-sm font-semibold text-slate-700">Ikon</label>
-                    <select id="ikon-tambah" name="ikon"  class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]">
+                    <select id="ikon-tambah" name="ikon"  class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]">
                         <option value="">Ikon umum (centang)</option>
                         @foreach ($pilihanIkon as $kunci => $label)
                             <option value="{{ $kunci }}">{{ $label }}</option>
@@ -134,7 +134,7 @@
                 </div>
                 <div class="flex flex-col-reverse justify-end gap-3 bg-stone-50/50 px-6 py-5 sm:flex-row">
                     <button @click="isAddModalOpen = false" type="button" class="rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-stone-100 hover:text-slate-800">Batal</button>
-                    <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#B46C54] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#955844] sm:w-auto shadow-sm">
+                    <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#B8694C] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#955844] sm:w-auto shadow-sm">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         Simpan
                     </button>
@@ -158,9 +158,9 @@
                 @csrf @method('PUT')
                 <div class="px-6 py-6">
                     <label class="mb-1.5 block text-sm font-semibold text-slate-700">Nama Fasilitas</label>
-                    <input type="text" name="nama_fasilitas" x-model="activeFasilitas" required class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]">
+                    <input type="text" name="nama_fasilitas" x-model="activeFasilitas" required class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]">
                     <label for="ikon-edit" class="mb-1.5 mt-4 block text-sm font-semibold text-slate-700">Ikon</label>
-                    <select id="ikon-edit" name="ikon" x-model="activeIkon" class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]">
+                    <select id="ikon-edit" name="ikon" x-model="activeIkon" class="block w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]">
                         <option value="">Ikon umum (centang)</option>
                         @foreach ($pilihanIkon as $kunci => $label)
                             <option value="{{ $kunci }}">{{ $label }}</option>
@@ -169,7 +169,7 @@
                 </div>
                 <div class="flex flex-col-reverse justify-end gap-3 bg-stone-50/50 px-6 py-5 sm:flex-row">
                     <button @click="isEditModalOpen = false" type="button" class="rounded-xl border border-stone-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-stone-100 hover:text-slate-800">Batal</button>
-                    <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#B46C54] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#955844] sm:w-auto shadow-sm">
+                    <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#B8694C] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#955844] sm:w-auto shadow-sm">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         Simpan
                     </button>

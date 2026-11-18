@@ -23,23 +23,23 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-[#fbfbfb] font-sans antialiased">
+<body class="bg-page font-sans antialiased text-ink selection:bg-brand selection:text-white">
 <div class="flex h-screen overflow-hidden">
 
     {{-- ================= SIDEBAR ================= --}}
-    <aside class="hidden lg:flex w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-stone-200 bg-white px-4 py-6">
+    <aside class="hidden lg:flex w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-stone-200/90 bg-white px-4 py-6">
         <div>
-            {{-- Logo PNG --}}
+            {{-- Logo --}}
             <a href="{{ route('admin.dasbor') }}" class="flex items-center gap-3 px-2">
-                <img src="{{ asset('images/logo kost.in.png') }}" alt="Kost.in Logo" class="h-8 w-auto object-contain">
-                <span class="text-xl font-extrabold text-brand">Kost<span class="text-ink">.in</span></span>
+                <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in Logo" class="h-8 w-auto object-contain">
+                <span class="text-xl font-extrabold text-ink">Kost<span class="text-brand">.in</span></span>
             </a>
 
             {{-- Menu --}}
             <p class="mt-10 mb-3 px-3 text-xs font-semibold tracking-wide text-muted">MENU UTAMA</p>
             <nav class="space-y-1">
                 {{-- Menu 1: Dashboard --}}
-                <a href="{{ route('admin.dasbor') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.dasbor') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
+                <a href="{{ route('admin.dasbor') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.dasbor') ? 'bg-brand-soft font-bold text-brand' : 'font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
                     <span class="flex items-center gap-3">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/></svg>
                         Dashboard
@@ -50,7 +50,7 @@
                 </a>
 
                 {{-- Menu 2: Data Kos --}}
-                <a href="{{ route('admin.datakos') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.datakos*') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
+                <a href="{{ route('admin.datakos') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.datakos*') ? 'bg-brand-soft font-bold text-brand' : 'font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
                     <span class="flex items-center gap-3">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path stroke-linecap="round" d="M9 8h2m2 0h2M9 12h2m2 0h2M10 21v-4h4v4"/></svg>
                         Data Kos
@@ -61,7 +61,7 @@
                 </a>
 
                 {{-- Menu 3: Fasilitas --}}
-                <a href="{{ route('admin.fasilitas') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.fasilitas*') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
+                <a href="{{ route('admin.fasilitas') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.fasilitas*') ? 'bg-brand-soft font-bold text-brand' : 'font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
                     <span class="flex items-center gap-3">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>
                         Fasilitas
@@ -71,7 +71,7 @@
                     @endif
                 </a>
                 {{-- Menu 4: Jaringan Jalan --}}
-                <a href="{{ route('admin.jaringanJalan') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.jaringanJalan*') ? 'bg-brand-soft font-semibold text-brand-dark' : 'font-medium text-slate-600 hover:bg-stone-100' }}">
+                <a href="{{ route('admin.jaringanJalan') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.jaringanJalan*') ? 'bg-brand-soft font-bold text-brand' : 'font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
                     <span class="flex items-center gap-3">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 19h7.5a3.5 3.5 0 000-7h-7a3.5 3.5 0 010-7H16"/></svg>
                         Jaringan Jalan
@@ -84,17 +84,17 @@
         </div>
 
         {{-- Profil & keluar --}}
-        <div class="mt-8 rounded-2xl bg-page p-4">
+        <div class="mt-8 rounded-2xl bg-brand-soft/60 border border-[#E8DDD5] p-4">
             <div class="flex items-center gap-3">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white">{{ strtoupper(mb_substr(auth()->user()?->name ?? 'AD', 0, 2)) }}</span>
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-sm font-bold text-white shadow-xs">{{ strtoupper(mb_substr(auth()->user()?->name ?? 'AD', 0, 2)) }}</span>
                 <div class="min-w-0">
-                    <p class="truncate text-sm font-semibold">{{ auth()->user()?->name ?? 'Administrator' }}</p>
-                    <p class="truncate text-xs text-muted">{{ auth()->user()?->email }}</p>
+                    <p class="truncate text-sm font-bold text-ink">{{ auth()->user()?->name ?? 'Administrator' }}</p>
+                    <p class="truncate text-xs text-stone-500">{{ auth()->user()?->email }}</p>
                 </div>
             </div>
-            <form method="POST" action="{{ route('admin.logout') }}" class="mt-4">
+            <form method="POST" action="{{ route('admin.logout') }}" class="mt-3.5 pt-3 border-t border-stone-200/80">
                 @csrf
-                <button type="submit" class="flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-[#B46C54]">
+                <button type="submit" class="flex items-center gap-2 text-xs font-semibold text-stone-600 transition hover:text-brand">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg>
                     Keluar
                 </button>
@@ -103,14 +103,13 @@
     </aside>
 
     {{-- ================= KONTEN ================= --}}
-    {{-- PERBAIKAN: overflow-y-auto diubah menjadi overflow-y-scroll di sini --}}
     <div class="flex flex-1 flex-col overflow-y-scroll bg-page relative">
 
         {{-- Header --}}
-        <header class="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200 bg-white/80 px-6 py-4 backdrop-blur-md lg:px-8">
+        <header class="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200/90 bg-white/95 px-6 py-4 backdrop-blur-md lg:px-8">
             <div>
-                <h1 class="text-xl font-bold">@yield('page_title', 'Dashboard')</h1>
-                <p class="mt-0.5 text-xs text-muted">@yield('breadcrumb', 'Admin / Dashboard')</p>
+                <h1 class="text-xl font-extrabold text-ink">@yield('page_title', 'Dashboard')</h1>
+                <p class="mt-0.5 text-xs font-medium text-stone-500">@yield('breadcrumb', 'Admin / Dashboard')</p>
             </div>
             
             <div class="flex items-center gap-4">
@@ -239,16 +238,16 @@
 
                 <span class="hidden h-8 w-px bg-stone-200 sm:block"></span>
                 <div class="flex items-center gap-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-xs font-bold text-brand-dark">{{ strtoupper(mb_substr(auth()->user()?->name ?? 'AD', 0, 2)) }}</span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft border border-[#E8DDD5] text-xs font-bold text-brand">{{ strtoupper(mb_substr(auth()->user()?->name ?? 'AD', 0, 2)) }}</span>
                     <div class="hidden leading-tight sm:block">
-                        <p class="text-sm font-semibold">{{ auth()->user()?->name ?? 'Admin' }}</p>
-                        <p class="text-xs text-muted">Administrator</p>
+                        <p class="text-sm font-bold text-ink">{{ auth()->user()?->name ?? 'Admin' }}</p>
+                        <p class="text-xs font-medium text-stone-500">Administrator</p>
                     </div>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 space-y-6 p-6 lg:p-8">
+        <main class="flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
             {{-- Tempat menyuntikkan isi konten dari view lain --}}
             @yield('content')
         </main>

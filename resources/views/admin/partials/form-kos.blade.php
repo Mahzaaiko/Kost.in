@@ -14,7 +14,7 @@
         : collect();
     $utamaAwal = old('foto_utama', ($u = $fotoTersimpan->firstWhere('utama', true)) ? 'lama:'.$u['id'] : '');
     $kampus = \App\Support\Koordinat::kampus();
-    $inputClass = 'block w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-ink transition placeholder:text-slate-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]';
+    $inputClass = 'block w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-ink transition placeholder:text-slate-400 focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]';
 @endphp
 
 @if ($errors->any())
@@ -39,7 +39,7 @@
         {{-- 1. INFORMASI KOS --}}
         <div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
             <div class="mb-6 flex items-start gap-4">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#fbf5f3] text-sm font-extrabold text-[#B46C54]">01</span>
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F8EFEA] text-sm font-extrabold text-[#B8694C]">01</span>
                 <div>
                     <h3 class="text-base font-bold text-ink">Informasi Kos</h3>
                     <p class="text-xs text-slate-500">Informasi utama yang akan dilihat mahasiswa.</p>
@@ -66,7 +66,7 @@
                     <label for="alamat" class="mb-1.5 block text-sm font-semibold text-slate-700">Alamat <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <input type="text" id="alamat" name="alamat" maxlength="500" value="{{ old('alamat', $kos->alamat) }}" class="{{ $inputClass }} pr-32 @error('alamat') border-red-400 @else border-stone-200 @enderror" placeholder="Masukkan alamat lengkap">
-                        <button type="button" id="btn-cari-peta" class="absolute right-1.5 top-1.5 flex items-center gap-1.5 rounded-lg bg-[#fbf5f3] px-3 py-1.5 text-[11px] font-bold text-[#B46C54] transition hover:bg-[#B46C54] hover:text-white">
+                        <button type="button" id="btn-cari-peta" class="absolute right-1.5 top-1.5 flex items-center gap-1.5 rounded-lg bg-[#F8EFEA] px-3 py-1.5 text-[11px] font-bold text-[#B8694C] transition hover:bg-[#B8694C] hover:text-white">
                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
                             Cari di Peta
                         </button>
@@ -84,7 +84,7 @@
                                 @click="openTipe = !openTipe"
                                 @click.outside="openTipe = false"
                                 type="button"
-                                class="flex w-full items-center justify-between rounded-xl border bg-white px-4 py-2.5 text-sm transition focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54] @error('tipe_kos') border-red-400 @else border-stone-200 @enderror"
+                                class="flex w-full items-center justify-between rounded-xl border bg-white px-4 py-2.5 text-sm transition focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C] @error('tipe_kos') border-red-400 @else border-stone-200 @enderror"
                             >
                                 <span x-text="selectedTipe === '' ? 'Pilih tipe kos' : selectedTipe" :class="selectedTipe === '' ? 'text-slate-400' : 'text-ink'"></span>
                                 <svg class="h-4 w-4 text-slate-400 transition-transform duration-200" :class="openTipe ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -104,7 +104,7 @@
                             >
                                 <ul class="flex flex-col py-1">
                                     @foreach (\App\Enums\TipeKos::labels() as $tipe)
-                                        <li @click="selectedTipe = @js($tipe); openTipe = false" :class="selectedTipe === @js($tipe) ? 'bg-[#fbf5f3] font-bold text-[#B46C54]' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2.5 text-sm transition-colors">{{ $tipe }}</li>
+                                        <li @click="selectedTipe = @js($tipe); openTipe = false" :class="selectedTipe === @js($tipe) ? 'bg-[#F8EFEA] font-bold text-[#B8694C]' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2.5 text-sm transition-colors">{{ $tipe }}</li>
                                     @endforeach
                                 </ul>
                             </div>
@@ -121,7 +121,7 @@
                                 @click="openPeriode = !openPeriode"
                                 @click.outside="openPeriode = false"
                                 type="button"
-                                class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]"
+                                class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-ink transition focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]"
                             >
                                 <span x-text="selectedPeriode"></span>
                                 <svg class="h-4 w-4 text-slate-400 transition-transform duration-200" :class="openPeriode ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -141,7 +141,7 @@
                             >
                                 <ul class="flex flex-col py-1">
                                     @foreach (\App\Enums\PeriodeSewa::labels() as $periode)
-                                        <li @click="selectedPeriode = @js($periode); openPeriode = false" :class="selectedPeriode === @js($periode) ? 'bg-[#fbf5f3] font-bold text-[#B46C54]' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2.5 text-sm transition-colors">{{ $periode }}</li>
+                                        <li @click="selectedPeriode = @js($periode); openPeriode = false" :class="selectedPeriode === @js($periode) ? 'bg-[#F8EFEA] font-bold text-[#B8694C]' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2.5 text-sm transition-colors">{{ $periode }}</li>
                                     @endforeach
                                 </ul>
                             </div>
@@ -174,7 +174,7 @@
         {{-- 2. FASILITAS --}}
         <div x-data="{ selectedFasilitas: @js($fasilitasAwal) }" class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
             <div class="mb-6 flex items-start gap-4">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#fbf5f3] text-sm font-extrabold text-[#B46C54]">02</span>
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F8EFEA] text-sm font-extrabold text-[#B8694C]">02</span>
                 <div>
                     <h3 class="text-base font-bold text-ink">Fasilitas</h3>
                     <p class="text-xs text-slate-500">Pilih fasilitas yang tersedia di kos.</p>
@@ -186,12 +186,12 @@
                     @php $idFas = (string) $fas->id; @endphp
                     <label
                         class="flex cursor-pointer items-center gap-2.5 rounded-xl border py-2 pl-3 pr-4 text-sm font-medium transition-colors"
-                        :class="selectedFasilitas.includes(@js($idFas)) ? 'border-[#B46C54] bg-[#fbf5f3] text-[#B46C54]' : 'border-stone-200 bg-white text-slate-600 hover:bg-stone-50'"
+                        :class="selectedFasilitas.includes(@js($idFas)) ? 'border-[#B8694C] bg-[#F8EFEA] text-[#B8694C]' : 'border-stone-200 bg-white text-slate-600 hover:bg-stone-50'"
                     >
                         <input type="checkbox" name="fasilitas[]" value="{{ $idFas }}" x-model="selectedFasilitas" class="hidden">
 
                         <div class="flex h-4 w-4 items-center justify-center rounded-[4px] border transition-colors"
-                             :class="selectedFasilitas.includes(@js($idFas)) ? 'border-[#B46C54] bg-[#B46C54] text-white' : 'border-stone-300 bg-white'">
+                             :class="selectedFasilitas.includes(@js($idFas)) ? 'border-[#B8694C] bg-[#B8694C] text-white' : 'border-stone-300 bg-white'">
                             <svg x-show="selectedFasilitas.includes(@js($idFas))" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         </div>
                         {{ $fas->nama }}
@@ -254,7 +254,7 @@
             class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"
         >
             <div class="mb-6 flex items-start gap-4">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#fbf5f3] text-sm font-extrabold text-[#B46C54]">03</span>
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F8EFEA] text-sm font-extrabold text-[#B8694C]">03</span>
                 <div>
                     <h3 class="text-base font-bold text-ink">Foto Kos <span class="text-red-500">*</span></h3>
                     <p class="text-xs text-slate-500">Pilih beberapa foto, lalu tentukan satu sebagai Foto Utama (cuplikan). Minimal 1 foto agar kos bisa diaktifkan.</p>
@@ -272,9 +272,9 @@
             {{-- Dropzone Area --}}
             <div
                 @click="$refs.filePilih.click()"
-                class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 py-10 transition hover:border-[#fbf5f3] hover:bg-stone-100"
+                class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 py-10 transition hover:border-[#F8EFEA] hover:bg-stone-100"
             >
-                <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#fbf5f3] text-[#B46C54]">
+                <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#F8EFEA] text-[#B8694C]">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                 </span>
                 <span class="text-sm font-bold text-ink">Upload Foto Kos</span>
@@ -289,17 +289,17 @@
                 <template x-for="foto in tersimpan" :key="'l' + foto.id">
                     <div
                         class="group relative aspect-[4/3] overflow-hidden rounded-xl border bg-stone-100 transition-all"
-                        :class="hapus.includes(foto.id) ? 'border-stone-200 opacity-40' : (utama === 'lama:' + foto.id ? 'border-[#B46C54] ring-2 ring-[#B46C54] ring-offset-1' : 'border-stone-200')"
+                        :class="hapus.includes(foto.id) ? 'border-stone-200 opacity-40' : (utama === 'lama:' + foto.id ? 'border-[#B8694C] ring-2 ring-[#B8694C] ring-offset-1' : 'border-stone-200')"
                     >
                         <img :src="foto.url" class="h-full w-full object-cover" alt="">
                         <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
 
-                        <div x-show="utama === 'lama:' + foto.id && !hapus.includes(foto.id)" class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-[#B46C54] px-2 py-1 text-[10px] font-bold text-white shadow-sm">
+                        <div x-show="utama === 'lama:' + foto.id && !hapus.includes(foto.id)" class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-[#B8694C] px-2 py-1 text-[10px] font-bold text-white shadow-sm">
                             <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                             Foto Utama
                         </div>
                         <button type="button" x-show="utama !== 'lama:' + foto.id && !hapus.includes(foto.id)" @click="utama = 'lama:' + foto.id"
-                            class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 text-[10px] font-bold text-slate-700 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:text-[#B46C54] group-hover:opacity-100">
+                            class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 text-[10px] font-bold text-slate-700 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:text-[#B8694C] group-hover:opacity-100">
                             Jadikan Utama
                         </button>
 
@@ -317,18 +317,18 @@
                 <template x-for="(foto, index) in baru" :key="'b' + index + foto.url">
                     <div
                         class="group relative aspect-[4/3] overflow-hidden rounded-xl border bg-stone-100 transition-all"
-                        :class="utama === 'baru:' + index ? 'border-[#B46C54] ring-2 ring-[#B46C54] ring-offset-1' : 'border-stone-200'"
+                        :class="utama === 'baru:' + index ? 'border-[#B8694C] ring-2 ring-[#B8694C] ring-offset-1' : 'border-stone-200'"
                     >
                         <img :src="foto.url" class="h-full w-full object-cover" alt="">
                         <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
                         <span class="absolute bottom-2 left-2 rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">Baru</span>
 
-                        <div x-show="utama === 'baru:' + index" class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-[#B46C54] px-2 py-1 text-[10px] font-bold text-white shadow-sm">
+                        <div x-show="utama === 'baru:' + index" class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-[#B8694C] px-2 py-1 text-[10px] font-bold text-white shadow-sm">
                             <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                             Foto Utama
                         </div>
                         <button type="button" x-show="utama !== 'baru:' + index" @click="utama = 'baru:' + index"
-                            class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 text-[10px] font-bold text-slate-700 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:text-[#B46C54] group-hover:opacity-100">
+                            class="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 text-[10px] font-bold text-slate-700 opacity-0 shadow-sm backdrop-blur-sm transition-all hover:text-[#B8694C] group-hover:opacity-100">
                             Jadikan Utama
                         </button>
                         <button type="button" @click="hapusBaru(index)" aria-label="Hapus foto"
@@ -345,14 +345,14 @@
     <div class="lg:col-span-1">
         <div class="sticky top-24 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
             <div class="mb-6 flex items-start gap-4">
-                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#fbf5f3] text-sm font-extrabold text-[#B46C54]">04</span>
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F8EFEA] text-sm font-extrabold text-[#B8694C]">04</span>
                 <div>
                     <h3 class="text-base font-bold text-ink">Lokasi <span class="text-red-500">*</span></h3>
                     <p class="text-xs text-slate-500">Tentukan titik kos pada peta.</p>
                 </div>
             </div>
 
-            <button type="button" id="btn-lokasi-saya" class="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border border-[#B46C54] bg-white px-3 py-2 text-xs font-bold text-[#B46C54] transition hover:bg-[#B46C54] hover:text-white">
+            <button type="button" id="btn-lokasi-saya" class="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border border-[#B8694C] bg-white px-3 py-2 text-xs font-bold text-[#B8694C] transition hover:bg-[#B8694C] hover:text-white">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8a4 4 0 100 8 4 4 0 000-8zm0-6v3m0 14v3M2 12h3m14 0h3"/></svg>
                 <span id="btn-lokasi-saya-teks">Gunakan lokasi saya</span>
             </button>
@@ -365,8 +365,8 @@
             <div class="mb-4">
                 <label for="paste-koordinat" class="mb-1.5 block text-xs font-semibold text-slate-700">Tempel koordinat atau Plus Code dari Google Maps</label>
                 <div class="flex gap-2">
-                    <input type="text" id="paste-koordinat" class="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-ink transition placeholder:text-slate-400 focus:border-[#B46C54] focus:outline-none focus:ring-1 focus:ring-[#B46C54]" placeholder="-6.5975, 106.7995 atau CR66+V3">
-                    <button type="button" id="btn-pakai-koordinat" class="shrink-0 rounded-xl bg-[#fbf5f3] px-3 text-xs font-bold text-[#B46C54] transition hover:bg-[#B46C54] hover:text-white">Pakai</button>
+                    <input type="text" id="paste-koordinat" class="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm text-ink transition placeholder:text-slate-400 focus:border-[#B8694C] focus:outline-none focus:ring-1 focus:ring-[#B8694C]" placeholder="-6.5975, 106.7995 atau CR66+V3">
+                    <button type="button" id="btn-pakai-koordinat" class="shrink-0 rounded-xl bg-[#F8EFEA] px-3 text-xs font-bold text-[#B8694C] transition hover:bg-[#B8694C] hover:text-white">Pakai</button>
                 </div>
                 <p class="mt-1.5 text-[11px] leading-relaxed text-slate-500">Klik kanan titik kos di Google Maps lalu klik angka koordinat untuk menyalin, atau salin Plus Code-nya (contoh CR66+V3) dari panel info tempat. Tempel di sini.</p>
             </div>
@@ -385,9 +385,9 @@
                 <button type="button" id="btn-hapus-titik" class="hidden text-[11px] font-bold text-slate-500 underline hover:text-red-600">Kosongkan titik lokasi</button>
             </div>
 
-            <div class="mt-5 flex gap-3 rounded-xl border border-[#fbf5f3] bg-[#fbf5f3]/50 p-4">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-[#B46C54]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <p class="text-[11px] leading-relaxed text-[#B46C54]">Isi kolom Alamat lalu klik "Cari di Peta", atau klik langsung di peta. Geser pin kalau lokasinya belum tepat. Kotak hitam adalah titik kampus.</p>
+            <div class="mt-5 flex gap-3 rounded-xl border border-[#F8EFEA] bg-[#F8EFEA]/50 p-4">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-[#B8694C]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-[11px] leading-relaxed text-[#B8694C]">Isi kolom Alamat lalu klik "Cari di Peta", atau klik langsung di peta. Geser pin kalau lokasinya belum tepat. Kotak hitam adalah titik kampus.</p>
             </div>
         </div>
     </div>
@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function () {
         statusEl.textContent = msg || '';
         statusEl.classList.toggle('hidden', !msg);
         statusEl.classList.toggle('text-red-500', tone === 'error');
-        statusEl.classList.toggle('text-[#B46C54]', tone !== 'error');
+        statusEl.classList.toggle('text-[#B8694C]', tone !== 'error');
     }
     function pasangPin(latlng) {
         if (!markerKos) {

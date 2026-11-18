@@ -46,7 +46,7 @@
             {{-- Tombol Edit --}}
             <a 
                 href="{{ route('admin.datakos.edit', $kos) }}" 
-                class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#B46C54] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#955844] sm:w-auto"
+                class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#B8694C] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#955844] sm:w-auto"
             >
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 Edit Data
@@ -143,7 +143,7 @@
                     <div class="flex flex-wrap items-end justify-between gap-4">
                         <div>
                             <p class="text-xs font-semibold text-slate-500">Harga per bulan</p>
-                            <p class="mt-1 text-3xl font-extrabold text-[#c57b5f]">{{ \App\Support\Format::rupiah($kos->harga_per_bulan) }}</p>
+                            <p class="mt-1 text-3xl font-extrabold text-brand">{{ \App\Support\Format::rupiah($kos->harga_per_bulan) }}</p>
                         </div>
                         <dl class="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
                             <dt class="text-slate-500">Minimal sewa</dt><dd class="font-semibold text-ink">{{ $kos->labelPeriode() ?? '-' }}</dd>
@@ -182,7 +182,7 @@
                 <div class="flex flex-col gap-3">
                     @forelse ($kos->fasilitas as $fas)
                     <div class="flex items-center gap-4 rounded-xl bg-white px-1 py-1 transition">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#fbf5f3] text-[#c57b5f]">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
                             <x-ikon-fasilitas :ikon="$fas->ikon" />
                         </span>
                         <span class="text-sm font-bold text-slate-700">{{ $fas->nama }}</span>
@@ -298,13 +298,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }).addTo(peta);
 
     L.marker([KAMPUS.lat, KAMPUS.lng], {
-        icon: L.divIcon({ className: '', html: '<span style="display:flex;width:22px;height:22px;border-radius:6px;background:#1c1917;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(0,0,0,.4)"></span>', iconSize: [0, 0] }),
+        icon: L.divIcon({ className: '', html: '<span style="display:flex;width:22px;height:22px;border-radius:6px;background:#362C29;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(0,0,0,.4)"></span>', iconSize: [0, 0] }),
         interactive: false, keyboard: false
     }).addTo(peta).bindTooltip(KAMPUS.nama, { direction: 'top', offset: [0, -12] });
 
     if (KOS) {
         L.marker([KOS.lat, KOS.lng]).addTo(peta);
-        L.polyline([[KAMPUS.lat, KAMPUS.lng], [KOS.lat, KOS.lng]], { color: '#c57b5f', weight: 2, dashArray: '4 6' }).addTo(peta);
+        L.polyline([[KAMPUS.lat, KAMPUS.lng], [KOS.lat, KOS.lng]], { color: '#B8694C', weight: 2, dashArray: '4 6' }).addTo(peta);
         peta.fitBounds([[KAMPUS.lat, KAMPUS.lng], [KOS.lat, KOS.lng]], { padding: [30, 30], maxZoom: 17 });
     } else {
         peta.setView([KAMPUS.lat, KAMPUS.lng], 15);

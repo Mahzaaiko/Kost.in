@@ -64,7 +64,7 @@
             <h2 class="text-2xl font-bold text-ink">Data Kos</h2>
             <p class="mt-1 text-sm text-slate-500">Kelola informasi kos yang tersedia di sekitar Sekolah Vokasi IPB University.</p>
         </div>
-        <a href="{{ route('admin.datakos.tambah') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#B46C54] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#955844]">
+        <a href="{{ route('admin.datakos.tambah') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#B8694C] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#955844]">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             Tambah Kos
         </a>
@@ -238,7 +238,7 @@
                                 @if ($kos->fotoUtama)
                                     <img src="{{ $kos->fotoUtama->url() }}" alt="" class="h-12 w-12 shrink-0 rounded-lg object-cover shadow-sm">
                                 @else
-                                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#5d4a41] text-lg font-bold text-white shadow-sm">
+                                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-ink text-lg font-bold text-white shadow-sm">
                                         {{ mb_strtoupper(mb_substr($kos->nama, 0, 1)) }}
                                     </div>
                                 @endif
@@ -268,7 +268,7 @@
                         <td class="whitespace-nowrap px-6 py-4">
                             <div class="flex items-center justify-center gap-1.5">
                                 @if ($fasPertama)
-                                    <span class="rounded bg-[#fbf5f3] px-2 py-1 text-[11px] font-bold text-[#c57b5f]">{{ $fasPertama->nama }}</span>
+                                    <span class="rounded bg-brand-soft px-2 py-1 text-[11px] font-bold text-brand">{{ $fasPertama->nama }}</span>
                                     @if ($kos->fasilitas->count() > 1)
                                         <span class="text-xs font-medium text-slate-400">+{{ $kos->fasilitas->count() - 1 }}</span>
                                     @endif
