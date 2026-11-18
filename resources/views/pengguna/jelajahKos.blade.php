@@ -55,8 +55,15 @@
         </div>
     </div>
 
+    {{-- ========== TOMBOL MUNCULKAN PANEL KIRI (KETIKA DI-HIDE) ========== --}}
+    <button type="button" id="btn-tampilkan-kiri" class="fixed top-20 left-4 z-[400] hidden items-center gap-1.5 rounded-full border border-stone-200/90 bg-white/95 px-3.5 py-2 text-xs font-bold text-stone-800 shadow-md backdrop-blur-md transition hover:border-[#B8694C] hover:text-[#B8694C]">
+        <svg class="h-3.5 w-3.5 text-[#B8694C]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18l-7 8.5V19l-4 2v-8.5L3 4z"/></svg>
+        <span>Filter & Kos</span>
+        <svg class="h-3.5 w-3.5 text-stone-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </button>
+
     {{-- ========== KONTROL ZOOM & LOCATE (PINDAH KE SISI KIRI PETA) ========== --}}
-    <div id="kontrol-zoom" class="fixed top-24 left-4 sm:left-[355px] z-[400] flex flex-col gap-2 pointer-events-auto">
+    <div id="kontrol-zoom" class="fixed top-[126px] z-[400] flex flex-col gap-2 pointer-events-auto transition-all duration-300 ease-out" style="left: 355px;">
         {{-- Capsule Tombol Zoom + / - --}}
         <div class="flex flex-col items-center rounded-2xl border border-stone-200/90 bg-white/95 shadow-md backdrop-blur-md overflow-hidden">
             <button type="button" id="btn-zoom-in" aria-label="Perbesar peta" class="flex h-9 w-9 items-center justify-center text-sm font-bold text-stone-800 transition hover:bg-[#fbf5f3] hover:text-[#B8694C]">
@@ -75,7 +82,7 @@
     </div>
 
     {{-- ========== KONTROL BAWAH: LAYER PETA DI ATAS INFO PUTRA PUTRI CAMPUR ========== --}}
-    <div id="kontrol-bawah" class="fixed bottom-5 left-4 sm:left-[355px] z-[400] pointer-events-auto flex flex-col items-start gap-2">
+    <div id="kontrol-bawah" class="fixed bottom-5 z-[400] pointer-events-auto flex flex-col items-start gap-2 transition-all duration-300 ease-out" style="left: 355px;">
         {{-- 1. Opsi Layer Peta (Di Atas) --}}
         <div id="panel-layer" class="relative">
             <button id="tombol-layer" type="button" aria-expanded="false" aria-controls="isi-layer"
@@ -149,16 +156,22 @@
     </div>
 
     {{-- ========== PANEL KIRI MELAYANG: FILTER PENCARIAN & DAFTAR KOS (ROUNDED 3XL UTUH) ========== --}}
-    <aside id="panel-kiri" class="fixed top-20 bottom-4 left-4 z-[400] w-[320px] sm:w-[335px] max-w-[calc(100vw-2rem)] flex flex-col rounded-3xl border border-stone-200/90 bg-white/95 shadow-xl backdrop-blur-md overflow-hidden pointer-events-auto">
+    <aside id="panel-kiri" class="fixed top-20 bottom-4 left-4 z-[400] w-[320px] sm:w-[335px] max-w-[calc(100vw-2rem)] flex flex-col rounded-3xl border border-stone-200/90 bg-white/95 shadow-xl backdrop-blur-md overflow-hidden pointer-events-auto transition-transform duration-300 ease-out">
         {{-- Header Panel Kiri --}}
-        <div class="flex shrink-0 items-center justify-between border-b border-stone-100 bg-white/90 px-4 py-3 backdrop-blur-sm">
+        <div class="flex shrink-0 items-center justify-between border-b border-stone-100 bg-white/90 px-4 py-2.5 backdrop-blur-sm">
             <div class="flex items-center gap-2">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#fbf5f3] text-[#B8694C]">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18l-7 8.5V19l-4 2v-8.5L3 4z"/></svg>
                 </span>
                 <h2 class="text-xs sm:text-sm font-bold text-stone-900">Filter Pencarian</h2>
             </div>
-            <button type="button" id="btn-reset" class="text-[11px] font-bold text-[#B8694C] hover:underline" title="Reset filter">Reset</button>
+            <div class="flex items-center gap-1.5">
+                <button type="button" id="btn-reset" class="text-[11px] font-bold text-[#B8694C] hover:underline px-1 py-0.5" title="Reset filter">Reset</button>
+                <button type="button" id="btn-sembunyikan-kiri" class="flex items-center gap-1 rounded-lg border border-stone-200 bg-white px-2 py-1 text-[11px] font-semibold text-stone-600 transition hover:border-[#B8694C] hover:text-[#B8694C]" title="Sembunyikan filter pencarian">
+                    <span>Sembunyikan</span>
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+            </div>
         </div>
 
         {{-- Konten Scrollable di dalam Card (Bawah & Atas Selalu Mengikuti Rounded Card) --}}
@@ -406,7 +419,7 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        ['overlay-search', 'kontrol-zoom', 'kontrol-bawah', 'panel-kiri', 'panel-kanan'].forEach(id => {
+        ['overlay-search', 'kontrol-zoom', 'kontrol-bawah', 'panel-kiri', 'panel-kanan', 'btn-tampilkan-kiri', 'btn-tampilkan-kanan'].forEach(id => {
             const el = $(id);
             if (el) {
                 L.DomEvent.disableClickPropagation(el);
@@ -562,6 +575,35 @@
         const sudahDihitung = new Set();
         const markers = {};
         const layerKos = L.layerGroup().addTo(map);
+
+        // ---------- Kontrol Buka/Tutup Panel Kiri & Penyesuaian Zoom/Bawah ----------
+        function updatePosisiKontrolKiri(panelTerbuka) {
+            const leftVal = panelTerbuka ? (window.innerWidth >= 640 ? '355px' : '16px') : '16px';
+            $('kontrol-zoom').style.left = leftVal;
+            $('kontrol-bawah').style.left = leftVal;
+        }
+
+        function bukaPanelKiri() {
+            $('panel-kiri').classList.remove('-translate-x-[calc(100%+2rem)]', 'pointer-events-none');
+            $('btn-tampilkan-kiri').classList.add('hidden');
+            $('btn-tampilkan-kiri').classList.remove('flex');
+            updatePosisiKontrolKiri(true);
+        }
+
+        function tutupPanelKiri() {
+            $('panel-kiri').classList.add('-translate-x-[calc(100%+2rem)]', 'pointer-events-none');
+            $('btn-tampilkan-kiri').classList.remove('hidden');
+            $('btn-tampilkan-kiri').classList.add('flex');
+            updatePosisiKontrolKiri(false);
+        }
+
+        $('btn-sembunyikan-kiri').addEventListener('click', tutupPanelKiri);
+        $('btn-tampilkan-kiri').addEventListener('click', bukaPanelKiri);
+
+        window.addEventListener('resize', () => {
+            const panelTerbuka = !$('panel-kiri').classList.contains('-translate-x-[calc(100%+2rem)]');
+            updatePosisiKontrolKiri(panelTerbuka);
+        });
 
         // ---------- Kontrol Buka/Tutup Panel Kanan ----------
         function bukaPanelKanan() {
