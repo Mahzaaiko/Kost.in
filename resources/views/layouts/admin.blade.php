@@ -24,9 +24,117 @@
     </style>
 </head>
 <body class="bg-page font-sans antialiased text-ink selection:bg-brand selection:text-white">
-<div class="flex h-screen overflow-hidden">
+<div x-data="{ sidebarOpen: false }" class="flex h-screen overflow-hidden">
 
-    {{-- ================= SIDEBAR ================= --}}
+    {{-- ================= MOBILE SIDEBAR DRAWER (Layar < lg & Split-Screen) ================= --}}
+    <div 
+        x-show="sidebarOpen" 
+        x-cloak 
+        class="fixed inset-0 z-50 lg:hidden"
+        style="display: none;"
+    >
+        {{-- Backdrop --}}
+        <div 
+            x-show="sidebarOpen"
+            x-transition:enter="transition-opacity ease-linear duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-linear duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="sidebarOpen = false"
+            class="fixed inset-0 bg-stone-900/50 backdrop-blur-xs"
+        ></div>
+
+        {{-- Drawer Panel --}}
+        <div 
+            x-show="sidebarOpen"
+            x-transition:enter="transition ease-in-out duration-250 transform"
+            x-transition:enter-start="-translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in-out duration-200 transform"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="-translate-x-full"
+            class="relative flex w-72 max-w-[85vw] flex-1 flex-col justify-between overflow-y-auto bg-white px-5 py-6 shadow-2xl h-full"
+        >
+            <div>
+                {{-- Logo & Close Button --}}
+                <div class="flex items-center justify-between px-2">
+                    <a href="{{ route('admin.dasbor') }}" class="flex items-center gap-3">
+                        <img src="{{ asset('images/logo kost.in.svg') }}" alt="Kost.in Logo" class="h-8 w-auto object-contain">
+                        <span class="text-xl font-extrabold text-ink">Kost<span class="text-brand">.in</span></span>
+                    </a>
+                    <button @click="sidebarOpen = false" class="rounded-xl p-1.5 text-stone-400 hover:bg-stone-100 hover:text-stone-700">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                {{-- Menu Navigasi Mobile --}}
+                <p class="mt-8 mb-3 px-3 text-xs font-semibold tracking-wide text-muted">MENU UTAMA</p>
+                <nav class="space-y-1">
+                    <a href="{{ route('admin.dasbor') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.dasbor') ? 'bg-brand-soft font-bold text-brand' : 'font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/></svg>
+                            Dashboard
+                        </span>
+                        @if (request()->routeIs('admin.dasbor'))
+                            <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.datakos') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.datakos*') ? 'bg-brand-soft font-bold text-brand' : 'font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path stroke-linecap="round" d="M9 8h2m2 0h2M9 12h2m2 0h2M10 21v-4h4v4"/></svg>
+                            Data Kos
+                        </span>
+                        @if (request()->routeIs('admin.datakos*'))
+                            <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.fasilitas') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.fasilitas*') ? 'bg-brand-soft font-bold text-brand' : 'font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg>
+                            Fasilitas
+                        </span>
+                        @if (request()->routeIs('admin.fasilitas*'))
+                            <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.jaringanJalan') }}" class="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors {{ request()->routeIs('admin.jaringanJalan*') ? 'bg-brand-soft font-bold text-brand' : 'font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900' }}">
+                        <span class="flex items-center gap-3">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 19h7.5a3.5 3.5 0 000-7h-7a3.5 3.5 0 010-7H16"/></svg>
+                            Jaringan Jalan
+                        </span>
+                        @if (request()->routeIs('admin.jaringanJalan*'))
+                            <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
+                        @endif
+                    </a>
+                </nav>
+            </div>
+
+            {{-- Profil & keluar (Mobile Drawer) --}}
+            <div class="mt-8 rounded-2xl bg-brand-soft/60 border border-[#E8DDD5] p-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-sm font-bold text-white shadow-xs">{{ strtoupper(mb_substr(auth()->user()?->name ?? 'AD', 0, 2)) }}</span>
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-bold text-ink">{{ auth()->user()?->name ?? 'Administrator' }}</p>
+                        <p class="truncate text-xs text-stone-500">{{ auth()->user()?->email }}</p>
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('admin.logout') }}" class="mt-3.5 pt-3 border-t border-stone-200/80">
+                    @csrf
+                    <button type="submit" class="flex items-center gap-2 text-xs font-semibold text-stone-600 transition hover:text-brand">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg>
+                        Keluar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- ================= SIDEBAR DESKTOP ================= --}}
     <aside class="hidden lg:flex w-64 shrink-0 flex-col justify-between overflow-y-auto border-r border-stone-200/90 bg-white px-4 py-6">
         <div>
             {{-- Logo --}}
@@ -106,10 +214,22 @@
     <div class="flex flex-1 flex-col overflow-y-scroll bg-page relative">
 
         {{-- Header --}}
-        <header class="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200/90 bg-white/95 px-6 py-4 backdrop-blur-md lg:px-8">
-            <div>
-                <h1 class="text-xl font-extrabold text-ink">@yield('page_title', 'Dashboard')</h1>
-                <p class="mt-0.5 text-xs font-medium text-stone-500">@yield('breadcrumb', 'Admin / Dashboard')</p>
+        <header class="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200/90 bg-white/95 px-4 py-3.5 sm:px-6 sm:py-4 backdrop-blur-md lg:px-8">
+            <div class="flex items-center gap-3">
+                {{-- Hamburger Button (Muncul di layar < lg & split-screen) --}}
+                <button 
+                    @click="sidebarOpen = true" 
+                    type="button" 
+                    class="flex h-10 w-10 items-center justify-center rounded-xl border border-stone-200 bg-white text-stone-600 transition hover:bg-stone-50 hover:text-ink lg:hidden shadow-xs"
+                    aria-label="Buka menu navigasi"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+
+                <div>
+                    <h1 class="text-lg sm:text-xl font-extrabold text-ink leading-tight">@yield('page_title', 'Dashboard')</h1>
+                    <p class="mt-0.5 text-[11px] sm:text-xs font-medium text-stone-500">@yield('breadcrumb', 'Admin / Dashboard')</p>
+                </div>
             </div>
             
             <div class="flex items-center gap-4">

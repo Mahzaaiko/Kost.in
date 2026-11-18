@@ -20,7 +20,16 @@
     activeIkon: '',
     activeJumlah: 0,
     urlEdit: '',
-    urlHapus: ''
+    urlHapus: '',
+    items: [
+        @foreach ($dataFasilitas as $fas)
+        { id: {{ $fas->id }}, nama: @js(mb_strtolower($fas->nama)) },
+        @endforeach
+    ],
+    get totalFiltered() {
+        const q = this.searchQuery ? this.searchQuery.toLowerCase().trim() : '';
+        return this.items.filter(i => !q || i.nama.includes(q)).length;
+    }
 }">
 
     @if (session('success'))
@@ -61,7 +70,7 @@
                     placeholder="Cari fasilitas..."
                 >
             </div>
-            <span class="text-sm font-medium text-slate-500">{{ $dataFasilitas->count() }} fasilitas terdaftar</span>
+            <span class="text-sm font-semibold text-slate-500 whitespace-nowrap" x-text="totalFiltered + ' fasilitas terdaftar'"></span>
         </div>
 
         {{-- Daftar Fasilitas --}}
