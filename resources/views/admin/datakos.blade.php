@@ -8,7 +8,7 @@
 
 {{-- 
   WRAPPER ALPINE UTAMA 
-  Menyimpan semua state (Search, Filter, dan Delete Modal) dalam satu otak yang pintar.
+  Menyimpan semua state (Search, Filter, Pagination, dan Delete Modal) dalam satu otak yang pintar.
 --}}
 <div x-data="{ 
     isDeleteModalOpen: false, 
@@ -17,7 +17,85 @@
     isFilterOpen: false,
     searchQuery: '',
     filterTipe: '',
-    filterStatus: ''
+    filterStatus: '',
+    currentPage: 1,
+    perPage: 10,
+    items: [
+        @foreach ($dataKos as $kos)
+        {
+            id: {{ $kos->id }},
+            nama: @js(mb_strtolower($kos->nama)),
+            alamat: @js(mb_strtolower($kos->alamat ?? '')),
+            tipe: @js($kos->tipe?->label() ?? ''),
+            status: @js($kos->status->label()),
+        },
+        @endforeach
+    ],
+    init() {
+        this.$watch('searchQuery', () => { this.currentPage = 1; });
+        this.$watch('filterTipe', () => { this.currentPage = 1; });
+        this.$watch('filterStatus', () => { this.currentPage = 1; });
+    },
+    get filteredItems() {
+        const q = this.searchQuery ? this.searchQuery.toLowerCase().trim() : '';
+        return this.items.filter(item => {
+            const matchSearch = !q || item.nama.includes(q) || item.alamat.includes(q);
+            const matchTipe = !this.filterTipe || item.tipe === this.filterTipe;
+            const matchStatus = !this.filterStatus || item.status === this.filterStatus;
+            return matchSearch && matchTipe && matchStatus;
+        });
+    },
+    get totalFiltered() {
+        return this.filteredItems.length;
+    },
+    get totalPages() {
+        return Math.max(1, Math.ceil(this.totalFiltered / this.perPage));
+    },
+    get pagedItems() {
+        const start = (this.currentPage - 1) * this.perPage;
+        return this.filteredItems.slice(start, start + this.perPage);
+    },
+    get pagedIds() {
+        return new Set(this.pagedItems.map(i => i.id));
+    },
+    isRowVisible(id) {
+        return this.pagedIds.has(id);
+    },
+    get displayStart() {
+        return this.totalFiltered === 0 ? 0 : (this.currentPage - 1) * this.perPage + 1;
+    },
+    get displayEnd() {
+        return Math.min(this.currentPage * this.perPage, this.totalFiltered);
+    },
+    get paginationPages() {
+        const total = this.totalPages;
+        const current = this.currentPage;
+        if (total <= 7) {
+            return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        if (current <= 4) {
+            return [1, 2, 3, 4, 5, '...', total];
+        }
+        if (current >= total - 3) {
+            return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+        }
+        return [1, '...', current - 1, current, current + 1, '...', total];
+    },
+    goToPage(page) {
+        if (typeof page === 'number' && page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+        }
+    },
+    prevPage() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+        }
+    },
+    nextPage() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+        }
+    }
 }">
 
     {{-- ================= UI ALERT (dari session) ================= --}}
@@ -61,20 +139,20 @@
     {{-- ================= HEADER ================= --}}
     <div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-            <h2 class="text-2xl font-bold text-ink">Data Kos</h2>
+            <h2 class="text-2xl font-extrabold text-ink">Data Kos</h2>
             <p class="mt-1 text-sm text-slate-500">Kelola informasi kos yang tersedia di sekitar Sekolah Vokasi IPB University.</p>
         </div>
-        <a href="{{ route('admin.datakos.tambah') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#B8694C] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#955844]">
+        <a href="{{ route('admin.datakos.tambah') }}" class="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-brand-dark">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             Tambah Kos
         </a>
     </div>
 
-    {{-- ================= KOTAK UTAMA (TABEL + TOOLBAR) ================= --}}
-    <div class="rounded-2xl border border-stone-200 bg-white shadow-sm overflow-hidden">
+    {{-- ================= KOTAK UTAMA (TABEL + TOOLBAR + PAGINASI) ================= --}}
+    <div class="rounded-2xl border border-stone-200/90 bg-white shadow-sm overflow-hidden">
         
         {{-- Toolbar (Search & Filter) --}}
-        <div class="flex flex-col items-start justify-between gap-4 border-b border-stone-200 p-5 sm:flex-row sm:items-center">
+        <div class="flex flex-col items-start justify-between gap-4 border-b border-stone-100 p-4 sm:p-5 sm:flex-row sm:items-center">
             
             {{-- SEARCH INPUT --}}
             <div class="relative w-full max-w-md">
@@ -84,26 +162,28 @@
                 <input 
                     type="text" 
                     x-model="searchQuery"
-                    class="block w-full rounded-xl border border-stone-200 bg-white py-2.5 pl-11 pr-4 text-sm text-ink placeholder-slate-400 transition focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand shadow-sm" 
-                    placeholder="Cari nama kos..."
+                    class="block w-full rounded-xl border border-stone-200 bg-white py-2.5 pl-11 pr-4 text-sm text-ink placeholder-slate-400 transition focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand shadow-xs" 
+                    placeholder="Cari nama kos atau alamat..."
                 >
             </div>
             
-            <div class="relative flex w-full items-center justify-between gap-4 sm:w-auto">
+            <div class="relative flex w-full items-center justify-between gap-3 sm:w-auto">
                 
                 {{-- TOMBOL FILTER --}}
                 <button 
                     @click="isFilterOpen = !isFilterOpen"
                     :class="isFilterOpen ? 'bg-stone-100 border-stone-300' : 'bg-white border-stone-200 hover:bg-stone-50'"
-                    class="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors"
+                    class="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors shadow-xs"
                 >
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                    Filter
+                    <svg class="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    <span>Filter</span>
+                    <span x-show="filterTipe !== '' || filterStatus !== ''" class="flex h-2 w-2 rounded-full bg-brand" x-cloak></span>
                 </button>
                 
-                <span class="text-sm font-medium text-slate-500">{{ $dataKos->count() }} data kos</span>
+                {{-- COUNTER REAL-TIME SESUAI FILTER/PENCARIAN --}}
+                <span class="text-sm font-semibold text-slate-500 whitespace-nowrap" x-text="totalFiltered + ' data kos'"></span>
 
-                {{-- DROPDOWN MENU FILTER (Ditambah x-cloak) --}}
+                {{-- DROPDOWN MENU FILTER --}}
                 <div 
                     x-show="isFilterOpen" 
                     x-cloak
@@ -140,10 +220,10 @@
                                 class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg"
                             >
                                 <ul class="flex flex-col py-1">
-                                    <li @click="filterTipe = ''; openTipe = false" :class="filterTipe === '' ? 'bg-brand-soft font-bold text-brand-dark' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Semua tipe</li>
-                                    <li @click="filterTipe = 'Putri'; openTipe = false" :class="filterTipe === 'Putri' ? 'bg-brand-soft font-bold text-brand-dark' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Putri</li>
-                                    <li @click="filterTipe = 'Putra'; openTipe = false" :class="filterTipe === 'Putra' ? 'bg-brand-soft font-bold text-brand-dark' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Putra</li>
-                                    <li @click="filterTipe = 'Campur'; openTipe = false" :class="filterTipe === 'Campur' ? 'bg-brand-soft font-bold text-brand-dark' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Campur</li>
+                                    <li @click="filterTipe = ''; openTipe = false" :class="filterTipe === '' ? 'bg-brand-soft font-bold text-brand' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Semua tipe</li>
+                                    <li @click="filterTipe = 'Putri'; openTipe = false" :class="filterTipe === 'Putri' ? 'bg-brand-soft font-bold text-brand' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Putri</li>
+                                    <li @click="filterTipe = 'Putra'; openTipe = false" :class="filterTipe === 'Putra' ? 'bg-brand-soft font-bold text-brand' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Putra</li>
+                                    <li @click="filterTipe = 'Campur'; openTipe = false" :class="filterTipe === 'Campur' ? 'bg-brand-soft font-bold text-brand' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Campur</li>
                                 </ul>
                             </div>
                         </div>
@@ -170,9 +250,9 @@
                                 class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg"
                             >
                                 <ul class="flex flex-col py-1">
-                                    <li @click="filterStatus = ''; openStatus = false" :class="filterStatus === '' ? 'bg-brand-soft font-bold text-brand-dark' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Semua status</li>
-                                    <li @click="filterStatus = 'Aktif'; openStatus = false" :class="filterStatus === 'Aktif' ? 'bg-brand-soft font-bold text-brand-dark' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Aktif</li>
-                                    <li @click="filterStatus = 'Draft'; openStatus = false" :class="filterStatus === 'Draft' ? 'bg-brand-soft font-bold text-brand-dark' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Draft</li>
+                                    <li @click="filterStatus = ''; openStatus = false" :class="filterStatus === '' ? 'bg-brand-soft font-bold text-brand' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Semua status</li>
+                                    <li @click="filterStatus = 'Aktif'; openStatus = false" :class="filterStatus === 'Aktif' ? 'bg-brand-soft font-bold text-brand' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Aktif</li>
+                                    <li @click="filterStatus = 'Draft'; openStatus = false" :class="filterStatus === 'Draft' ? 'bg-brand-soft font-bold text-brand' : 'text-slate-600 hover:bg-stone-50'" class="cursor-pointer px-4 py-2 text-sm transition-colors">Draft</li>
                                 </ul>
                             </div>
                         </div>
@@ -207,18 +287,7 @@
                 </thead>
                 
                 {{-- TBODY DENGAN REAKTIVITAS ALPINE --}}
-                <tbody 
-                    class="divide-y divide-stone-100"
-                    x-data="{ hasVisibleRows: true }"
-                    x-effect="
-                        let trigger1 = searchQuery;
-                        let trigger2 = filterTipe;
-                        let trigger3 = filterStatus;
-                        $nextTick(() => {
-                            hasVisibleRows = [...$el.querySelectorAll('tr.data-row')].some(tr => tr.style.display !== 'none');
-                        });
-                    "
-                >
+                <tbody class="divide-y divide-stone-100">
                     @foreach ($dataKos as $kos)
                     @php
                         $tipeLabel = $kos->tipe?->label() ?? '';
@@ -226,11 +295,7 @@
                         $fasPertama = $kos->fasilitas->first();
                     @endphp
                     <tr class="data-row transition-colors hover:bg-stone-50/80"
-                        x-show="
-                            (@js(mb_strtolower($kos->nama)).includes(searchQuery.toLowerCase())) &&
-                            (filterTipe === '' || @js($tipeLabel) === filterTipe) &&
-                            (filterStatus === '' || @js($statusLabel) === filterStatus)
-                        "
+                        x-show="isRowVisible({{ $kos->id }})"
                     >
                         {{-- Kolom 1: Kos (Rata Kiri) --}}
                         <td class="whitespace-nowrap px-6 py-4">
@@ -301,7 +366,7 @@
                         {{-- Kolom 7: Aksi --}}
                         <td class="whitespace-nowrap px-6 py-4">
                             <div class="flex items-center justify-center gap-3 text-slate-400">
-                                <a href="{{ route('admin.datakos.detail', $kos) }}" class="transition-colors hover:text-brand-dark" title="Lihat">
+                                <a href="{{ route('admin.datakos.detail', $kos) }}" class="transition-colors hover:text-brand" title="Lihat">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
                                 <a href="{{ route('admin.datakos.edit', $kos) }}" class="transition-colors hover:text-blue-600" title="Edit">
@@ -326,8 +391,8 @@
                     </tr>
                     @endif
 
-                    {{-- Pesan Data Tidak Ditemukan (Ditambah x-cloak) --}}
-                    <tr x-show="!hasVisibleRows && {{ $dataKos->isNotEmpty() ? 'true' : 'false' }}" x-cloak style="display: none;">
+                    {{-- Pesan Data Tidak Ditemukan --}}
+                    <tr x-show="totalFiltered === 0 && items.length > 0" x-cloak style="display: none;">
                         <td colspan="7" class="py-16">
                             <div class="flex flex-col items-center justify-center text-center">
                                 <span class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-stone-50 text-slate-300">
@@ -342,18 +407,69 @@
             </table>
         </div>
 
-        {{-- Footer Tabel --}}
-        <div class="flex items-center justify-between bg-white px-6 py-4 border-t border-stone-100 rounded-b-2xl">
-            <p class="text-sm text-slate-500">
-                Total <span class="font-bold text-slate-700">{{ $dataKos->count() }}</span> data kos
-                (<span class="font-semibold text-emerald-600">{{ $dataKos->where('status', \App\Enums\StatusKos::Aktif)->count() }} aktif</span>,
-                <span class="font-semibold text-amber-600">{{ $dataKos->where('status', \App\Enums\StatusKos::Draft)->count() }} draft</span>)
-            </p>
+        {{-- ================= FOOTER TABEL (INFORMASI JUMLAH + SLIDER SECTION PAGINASI) ================= --}}
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white px-6 py-4 border-t border-stone-100 rounded-b-2xl">
+            <div class="flex items-center gap-2 text-xs sm:text-sm text-slate-500">
+                <span>
+                    Menampilkan 
+                    <span class="font-bold text-ink" x-text="displayStart"></span>&ndash;<span class="font-bold text-ink" x-text="displayEnd"></span> 
+                    dari 
+                    <span class="font-bold text-ink" x-text="totalFiltered"></span> data
+                </span>
+                <span x-show="totalFiltered !== items.length" class="text-xs text-slate-400 font-medium" x-cloak>
+                    (difilter dari {{ $dataKos->count() }} total)
+                </span>
+            </div>
+
+            {{-- Slider Section Paginasi --}}
+            <div class="flex items-center gap-1.5" x-show="totalPages > 1" x-cloak>
+                {{-- Tombol Prev (<) --}}
+                <button 
+                    type="button" 
+                    @click="prevPage()" 
+                    :disabled="currentPage === 1"
+                    :class="currentPage === 1 ? 'opacity-30 cursor-not-allowed border-stone-200 text-stone-300' : 'border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-ink shadow-xs'"
+                    class="flex h-9 w-9 items-center justify-center rounded-xl border bg-white transition"
+                    title="Halaman sebelumnya"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+
+                {{-- Angka-angka Halaman --}}
+                <template x-for="(p, index) in paginationPages" :key="index">
+                    <div class="flex items-center">
+                        <template x-if="p === '...'">
+                            <span class="flex h-9 w-7 items-center justify-center text-xs font-bold text-stone-400 select-none">...</span>
+                        </template>
+                        <template x-if="p !== '...'">
+                            <button 
+                                type="button" 
+                                @click="goToPage(p)"
+                                :class="currentPage === p ? 'bg-brand text-white font-bold shadow-xs' : 'bg-transparent text-stone-600 hover:bg-stone-100 font-semibold'"
+                                class="flex h-9 min-w-9 px-2 items-center justify-center rounded-xl text-xs sm:text-sm transition"
+                                x-text="p"
+                            ></button>
+                        </template>
+                    </div>
+                </template>
+
+                {{-- Tombol Next (>) --}}
+                <button 
+                    type="button" 
+                    @click="nextPage()" 
+                    :disabled="currentPage === totalPages"
+                    :class="currentPage === totalPages ? 'opacity-30 cursor-not-allowed border-stone-200 text-stone-300' : 'border-stone-200 text-stone-600 hover:bg-stone-50 hover:text-ink shadow-xs'"
+                    class="flex h-9 w-9 items-center justify-center rounded-xl border bg-white transition"
+                    title="Halaman berikutnya"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
         </div>
 
     </div>   {{-- END KOTAK UTAMA --}}
 
-    {{-- ================= MODAL HAPUS DATA (Ditambah x-cloak) ================= --}}
+    {{-- ================= MODAL HAPUS DATA ================= --}}
     <div 
         x-show="isDeleteModalOpen" 
         x-cloak
