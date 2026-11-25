@@ -19,13 +19,49 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Masking halus batas atas ilustrasi Hero khusus Mobile agar langit menyatu mulus */
+        /* Masking halus batas atas ilustrasi Hero & animasi awan/peta/daun khusus Mobile */
         @media (max-width: 767px) {
             .hero-scenery-stage {
-                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 16%);
-                mask-image: linear-gradient(to bottom, transparent 0%, black 16%);
+                -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%);
+                mask-image: linear-gradient(to bottom, transparent 0%, black 18%);
             }
         }
+
+        @keyframes mCloudDrift {
+            0%   { transform: translate3d(-140px, 0, 0); }
+            100% { transform: translate3d(calc(100vw + 140px), 0, 0); }
+        }
+        @keyframes mHeroMapFloat {
+            0%, 100% { transform: translate3d(0, 0, 0) rotate(-0.6deg); }
+            50%      { transform: translate3d(0, -7px, 0) rotate(0.6deg); }
+        }
+        @keyframes mHeroLeafSway {
+            0%, 100% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+            50%      { transform: translate3d(2px, -4px, 0) rotate(10deg); }
+        }
+        @keyframes mLeafFallTop {
+            0%   { transform: translate3d(0, -40px, 0); opacity: 0; }
+            10%  { opacity: 0.92; }
+            88%  { opacity: 0.92; }
+            100% { transform: translate3d(0, 540px, 0); opacity: 0; }
+        }
+        @keyframes mLeafFallBottom {
+            0%   { transform: translate3d(0, -40px, 0); opacity: 0; }
+            10%  { opacity: 0.92; }
+            90%  { opacity: 0.92; }
+            100% { transform: translate3d(0, 860px, 0); opacity: 0; }
+        }
+        @keyframes mLeafSway {
+            0%, 100% { transform: translateX(-12px) rotate(-18deg); }
+            50%      { transform: translateX(14px) rotate(22deg); }
+        }
+
+        .m-cloud { will-change: transform; animation: mCloudDrift linear infinite; }
+        .m-hero-map { will-change: transform; animation: mHeroMapFloat 4.6s ease-in-out infinite; }
+        .m-hero-leaf { will-change: transform; animation: mHeroLeafSway 3.6s ease-in-out infinite; }
+        .m-fall-top { will-change: transform, opacity; animation: mLeafFallTop linear infinite; }
+        .m-fall-bottom { will-change: transform, opacity; animation: mLeafFallBottom linear infinite; }
+        .m-sway { display: block; will-change: transform; animation: mLeafSway ease-in-out infinite; }
 
         /* ================= 4 CARDS INTERACTIVE TILTED FAN ANIMATION (PERSIS GAMBAR 8 FIGMA) ================= */
         .fanned-deck {
@@ -129,6 +165,24 @@
 
         <div class="relative flex flex-col md:block w-full md:aspect-[1280/1080] overflow-hidden select-none">
 
+            {{-- Layer Animasi Awan Langit Khusus Mobile (Meniru Awan Mengambang di Tampilan Web) --}}
+            <div class="pointer-events-none absolute inset-0 z-[5] overflow-hidden md:hidden" aria-hidden="true">
+                <svg class="m-cloud absolute top-[10%] left-0 w-24 h-auto opacity-90" style="animation-duration: 28s; animation-delay: -6s;" viewBox="0 0 165 90" fill="none">
+                    <path d="M134 86H24C11.8 86 2 76.2 2 64C2 52.8 10.3 43.6 21.1 42.2C25.3 25.4 40.5 13 58.6 13C75.5 13 89.9 23.8 95.1 39C99.1 37.1 103.6 36 108.4 36C125.5 36 139.5 49.4 140.4 66.3C150.2 68.2 157.5 76.8 157.5 86H134Z" fill="url(#mCloudGrad1)"/>
+                    <defs><linearGradient id="mCloudGrad1" x1="80" y1="13" x2="80" y2="86" gradientUnits="userSpaceOnUse"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#E2F3EC"/></linearGradient></defs>
+                </svg>
+                <svg class="m-cloud absolute top-[27%] left-0 w-20 h-auto opacity-80" style="animation-duration: 35s; animation-delay: -21s;" viewBox="0 0 165 90" fill="none">
+                    <path d="M134 86H24C11.8 86 2 76.2 2 64C2 52.8 10.3 43.6 21.1 42.2C25.3 25.4 40.5 13 58.6 13C75.5 13 89.9 23.8 95.1 39C99.1 37.1 103.6 36 108.4 36C125.5 36 139.5 49.4 140.4 66.3C150.2 68.2 157.5 76.8 157.5 86H134Z" fill="#FFFFFF"/>
+                </svg>
+                <svg class="m-cloud absolute top-[45%] left-0 w-28 h-auto opacity-90" style="animation-duration: 31s; animation-delay: -13s;" viewBox="0 0 165 90" fill="none">
+                    <path d="M134 86H24C11.8 86 2 76.2 2 64C2 52.8 10.3 43.6 21.1 42.2C25.3 25.4 40.5 13 58.6 13C75.5 13 89.9 23.8 95.1 39C99.1 37.1 103.6 36 108.4 36C125.5 36 139.5 49.4 140.4 66.3C150.2 68.2 157.5 76.8 157.5 86H134Z" fill="url(#mCloudGrad2)"/>
+                    <defs><linearGradient id="mCloudGrad2" x1="80" y1="13" x2="80" y2="86" gradientUnits="userSpaceOnUse"><stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#E4F4EE"/></linearGradient></defs>
+                </svg>
+                <svg class="m-cloud absolute top-[62%] left-0 w-22 h-auto opacity-85" style="animation-duration: 38s; animation-delay: -29s;" viewBox="0 0 165 90" fill="none">
+                    <path d="M134 86H24C11.8 86 2 76.2 2 64C2 52.8 10.3 43.6 21.1 42.2C25.3 25.4 40.5 13 58.6 13C75.5 13 89.9 23.8 95.1 39C99.1 37.1 103.6 36 108.4 36C125.5 36 139.5 49.4 140.4 66.3C150.2 68.2 157.5 76.8 157.5 86H134Z" fill="#FFFFFF"/>
+                </svg>
+            </div>
+
             {{-- Konten Teks & Search Hero (Urutan 1 di Mobile, Overlay Kiri di Tablet/Desktop) --}}
             <div class="order-1 relative md:absolute md:inset-0 z-10 mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8 pt-20 sm:pt-24 md:pt-28 lg:pt-32 xl:pt-36 md:pointer-events-none flex flex-col justify-start">
                 <div class="max-w-xl md:max-w-[52%] lg:max-w-[46%] xl:max-w-[48%] pointer-events-auto">
@@ -174,11 +228,22 @@
                         <span>kost terverifikasi</span>
                     </div>
 
+                    {{-- Ilustrasi Peta Mengambang + Daun Berayun Khusus Mobile (Bawaan Gaya Web dalam Ukuran Proporsional) --}}
+                    <div class="relative mx-auto mt-4 mb-1 w-[195px] sm:w-[230px] pointer-events-none md:hidden" aria-hidden="true">
+                        <div class="m-hero-map relative">
+                            <img src="{{ asset('images/map_3d_header.svg') }}" alt="" class="w-full h-auto drop-shadow-md">
+                            <img src="{{ asset('images/daun_1.svg') }}" alt="" class="m-hero-leaf absolute -left-3 top-3 w-5 h-5" style="animation-delay: -0.4s;">
+                            <img src="{{ asset('images/daun_2.svg') }}" alt="" class="m-hero-leaf absolute -right-2.5 -top-2 w-5 h-5" style="animation-delay: -1.7s;">
+                            <img src="{{ asset('images/daun_1.svg') }}" alt="" class="m-hero-leaf absolute left-10 -bottom-2.5 w-4.5 h-4.5 rotate-45" style="animation-delay: -2.5s;">
+                            <img src="{{ asset('images/daun_2.svg') }}" alt="" class="m-hero-leaf absolute -right-2 bottom-1 w-4.5 h-4.5 -rotate-12" style="animation-delay: -1.1s;">
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
             {{-- Panggung Ilustrasi Pemandangan (Urutan 2 di Mobile Memperlihatkan Panorama Kota & Bukit, Full Background di Web) --}}
-            <div class="hero-scenery-stage order-2 relative -mt-2 h-[195px] sm:h-[240px] w-full overflow-hidden pointer-events-none md:mt-0 md:absolute md:inset-0 md:h-full">
+            <div class="hero-scenery-stage order-2 relative -mt-4 h-[175px] sm:h-[225px] w-full overflow-hidden pointer-events-none md:mt-0 md:absolute md:inset-0 md:h-full">
                 <div class="max-md:absolute max-md:bottom-0 max-md:left-1/2 max-md:-translate-x-1/2 max-md:w-[155%] max-md:aspect-[1280/1080] md:relative md:w-full md:h-full">
                     {{-- Container Bodymovin Lottie Hero --}}
                     <div id="hero-lottie-container" class="absolute inset-0 w-full h-full pointer-events-none"></div>
@@ -202,8 +267,43 @@
     {{-- Posisi daun di atas kartu & teks (z-20) sehingga tidak hilang di belakang kartu --}}
     <div id="falling-leaves-wrapper" class="relative overflow-hidden bg-[#DDEDC4] -mt-1 sm:-mt-2">
         
-        {{-- Animasi Lottie Daun Jatuh murni dari landing 4.json menggunakan Bodymovin Lottie --}}
-        <div id="leaves-lottie-container" class="pointer-events-none absolute inset-0 overflow-hidden z-20" aria-hidden="true"></div>
+        {{-- Animasi Lottie Daun Jatuh murni dari landing 4.json (Aktif di Tablet & Desktop) --}}
+        <div id="leaves-lottie-container" class="hidden md:block pointer-events-none absolute inset-0 overflow-hidden z-20" aria-hidden="true"></div>
+
+        {{-- Animasi Daun Jatuh Proporsional Khusus Mobile (Menggunakan aset asli daun_1.svg & daun_2.svg agar tidak terpotong rasio layar HP) --}}
+        <div id="mobile-falling-leaves" class="md:hidden pointer-events-none absolute inset-0 overflow-hidden z-20" aria-hidden="true">
+            {{-- Zona Atas: Seksi Tentang Kost.in --}}
+            <div class="absolute inset-x-0 top-0 h-[540px] overflow-hidden">
+                <div class="m-fall-top absolute left-[7%] top-0" style="animation-duration: 11s; animation-delay: -2s;">
+                    <img src="{{ asset('images/daun_1.svg') }}" alt="" class="m-sway w-5 h-5" style="animation-duration: 3.4s;">
+                </div>
+                <div class="m-fall-top absolute left-[31%] top-0" style="animation-duration: 13.5s; animation-delay: -7.5s;">
+                    <img src="{{ asset('images/daun_2.svg') }}" alt="" class="m-sway w-4.5 h-4.5" style="animation-duration: 4.1s; animation-delay: -1.2s;">
+                </div>
+                <div class="m-fall-top absolute left-[64%] top-0" style="animation-duration: 12s; animation-delay: -4.8s;">
+                    <img src="{{ asset('images/daun_1.svg') }}" alt="" class="m-sway w-4 h-4" style="animation-duration: 3.8s; animation-delay: -2.1s;">
+                </div>
+                <div class="m-fall-top absolute left-[86%] top-0" style="animation-duration: 10.5s; animation-delay: -9s;">
+                    <img src="{{ asset('images/daun_2.svg') }}" alt="" class="m-sway w-5 h-5" style="animation-duration: 3.2s; animation-delay: -0.6s;">
+                </div>
+            </div>
+
+            {{-- Zona Bawah: Seksi Peta Timbul, Pepohonan, hingga Footer --}}
+            <div class="absolute inset-x-0 bottom-0 h-[860px] overflow-hidden">
+                <div class="m-fall-bottom absolute left-[8%] top-0" style="animation-duration: 13s; animation-delay: -3s;">
+                    <img src="{{ asset('images/daun_2.svg') }}" alt="" class="m-sway w-5 h-5" style="animation-duration: 3.9s;">
+                </div>
+                <div class="m-fall-bottom absolute left-[28%] top-0" style="animation-duration: 15s; animation-delay: -10s;">
+                    <img src="{{ asset('images/daun_1.svg') }}" alt="" class="m-sway w-4.5 h-4.5" style="animation-duration: 4.3s; animation-delay: -1.8s;">
+                </div>
+                <div class="m-fall-bottom absolute left-[58%] top-0" style="animation-duration: 12.5s; animation-delay: -6.2s;">
+                    <img src="{{ asset('images/daun_2.svg') }}" alt="" class="m-sway w-4 h-4" style="animation-duration: 3.5s; animation-delay: -2.4s;">
+                </div>
+                <div class="m-fall-bottom absolute left-[84%] top-0" style="animation-duration: 14s; animation-delay: -1.5s;">
+                    <img src="{{ asset('images/daun_1.svg') }}" alt="" class="m-sway w-5 h-5" style="animation-duration: 3.7s; animation-delay: -0.9s;">
+                </div>
+            </div>
+        </div>
 
         {{-- ================= SECTION 2: TENTANG KOST.IN (#DDEDC4) ================= --}}
         <section id="tentang" class="relative bg-[#DDEDC4] pt-6 pb-0 sm:pt-12 lg:pt-16">
@@ -596,7 +696,7 @@
             }
         }
 
-        // 2. Inisialisasi Bodymovin Lottie Daun Jatuh (landing 4.json)
+        // 2. Inisialisasi Bodymovin Lottie Daun Jatuh (landing 4.json untuk Tablet & Desktop)
         const leavesContainer = document.getElementById('leaves-lottie-container');
         if (leavesContainer && typeof lottie !== 'undefined') {
             lottie.loadAnimation({
@@ -606,7 +706,7 @@
                 autoplay: true,
                 path: "{{ asset('images/landing 4.json') }}",
                 rendererSettings: {
-                    preserveAspectRatio: 'xMidYTop slice'
+                    preserveAspectRatio: 'xMidYMin slice'
                 }
             });
         }
