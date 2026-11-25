@@ -33,7 +33,7 @@ class SalinFoto extends Command
                 $hilang[] = $foto->path;
                 continue;
             }
-            if (! $this->option('timpa') && $tujuan->exists($foto->path)) {
+            if (! $this->option('timpa') && $tujuan->fileExists($foto->path)) {
                 $dilewati++;
                 continue;
             }
