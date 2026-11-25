@@ -55,7 +55,8 @@
         }
 
         /* Transisi mulus tinggi bottom sheet saat tidak sedang di-drag jari */
-        #m-bottom-sheet.sheet-anim {
+        #m-bottom-sheet.sheet-anim,
+        #m-filter-panel.sheet-anim {
             transition: height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
         }
         #m-map-tools.tools-anim {
@@ -544,26 +545,35 @@
         </div>
     </section>
 
-    {{-- D. MOBILE FILTER BOTTOM SHEET MODAL --}}
-    <div id="m-filter-modal" class="fixed inset-0 z-[650] hidden items-end bg-black/45 backdrop-blur-xs lg:hidden" role="dialog" aria-modal="true">
-        <div id="m-filter-panel" class="flex max-h-[84vh] w-full flex-col rounded-t-[28px] bg-white shadow-2xl">
-            <div class="flex shrink-0 items-center justify-between border-b border-stone-100 px-5 py-3.5">
-                <div class="flex items-center gap-2">
-                    <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-[#fbf5f3] text-[#B8694C]">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18l-7 8.5V19l-4 2v-8.5L3 4z"/></svg>
-                    </span>
-                    <h2 class="text-sm font-extrabold text-stone-900">Filter Pencarian</h2>
+    {{-- D. MOBILE FILTER BOTTOM SHEET MODAL (SAMA TINGGI AWAL 44vh & BISA DITARIK / ADJUST) --}}
+    <div id="m-filter-modal" class="fixed inset-0 z-[650] hidden items-end bg-black/20 lg:hidden" role="dialog" aria-modal="true">
+        <div id="m-filter-panel" class="sheet-anim flex w-full flex-col rounded-t-[28px] border-t border-stone-200/90 bg-white shadow-[0_-10px_32px_rgba(0,0,0,0.16)] overflow-hidden" style="height: 44vh;">
+            {{-- Area Drag Strip + Header Filter --}}
+            <div id="m-filter-drag-zone" data-lenis-prevent class="shrink-0 cursor-grab touch-none border-b border-stone-100 select-none active:cursor-grabbing">
+                <div id="m-filter-handle" class="flex flex-col items-center pt-2.5 pb-1.5">
+                    <span class="h-1.5 w-10 rounded-full bg-stone-300"></span>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button type="button" id="m-btn-reset" class="rounded-full px-2.5 py-1 text-xs font-bold text-[#B8694C] hover:bg-[#fbf5f3]">Reset</button>
-                    <button type="button" id="m-filter-tutup" aria-label="Tutup filter" class="flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 text-stone-600">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
+                <div class="flex items-center justify-between px-4 pb-2.5 pt-0.5">
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-[#fbf5f3] text-[#B8694C]">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18l-7 8.5V19l-4 2v-8.5L3 4z"/></svg>
+                        </span>
+                        <div>
+                            <h2 class="text-xs font-extrabold leading-tight text-stone-900">Filter Pencarian</h2>
+                            <p id="m-filter-hint" class="text-[10px] font-medium text-stone-400">Tarik strip ke atas untuk memperluas</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" id="m-btn-reset" class="rounded-full px-2.5 py-1 text-[11px] font-bold text-[#B8694C] hover:bg-[#fbf5f3]">Reset</button>
+                        <button type="button" id="m-filter-tutup" aria-label="Tutup filter" class="flex h-7 w-7 items-center justify-center rounded-full bg-stone-100 text-stone-600 transition active:scale-95">
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div data-lenis-scroll class="scroll-thin min-h-0 flex-1 overflow-y-auto">
-                <div data-lenis-content class="space-y-4 p-4">
+            <div id="m-filter-scroll" data-lenis-scroll class="scroll-thin min-h-0 flex-1 overflow-y-auto">
+                <div data-lenis-content class="space-y-3.5 p-3.5">
                     {{-- Harga Mobile --}}
                     <div class="rounded-2xl border border-stone-200/80 bg-[#fbf5f3]/40 p-3.5">
                         <div class="flex items-center justify-between text-xs">
@@ -613,8 +623,8 @@
                 </div>
             </div>
 
-            <div class="shrink-0 border-t border-stone-100 bg-white p-4">
-                <button type="button" id="m-btn-terapkan" class="w-full rounded-full bg-[#B8694C] py-3 text-xs font-extrabold text-white shadow-md transition active:scale-[0.99]">
+            <div class="shrink-0 border-t border-stone-100 bg-white px-4 py-2.5">
+                <button type="button" id="m-btn-terapkan" class="w-full rounded-full bg-[#B8694C] py-2.5 text-xs font-extrabold text-white shadow-md transition active:scale-[0.99]">
                     Terapkan Filter
                 </button>
             </div>
@@ -1028,7 +1038,7 @@
             if (window.kostinResizeLenis) window.kostinResizeLenis();
         }
 
-        // Interaksi Drag Sentuh pada Handle Bottom Sheet Mobile
+        // Interaksi Drag Sentuh & Mouse pada Handle Bottom Sheet Mobile (Daftar & Detail)
         (function initMobileSheetDrag() {
             const handle = $('m-sheet-handle');
             let startY = 0;
@@ -1036,18 +1046,20 @@
             let dragging = false;
             let moved = false;
 
-            handle.addEventListener('touchstart', e => {
+            handle.addEventListener('pointerdown', e => {
+                if (e.button !== undefined && e.button !== 0) return;
                 dragging = true;
                 moved = false;
-                startY = e.touches[0].clientY;
+                startY = e.clientY;
                 startH = mSheet.getBoundingClientRect().height;
                 mSheet.classList.remove('sheet-anim');
                 mTools.classList.remove('tools-anim');
-            }, { passive: true });
+                if (handle.setPointerCapture) handle.setPointerCapture(e.pointerId);
+            });
 
-            window.addEventListener('touchmove', e => {
+            handle.addEventListener('pointermove', e => {
                 if (!dragging) return;
-                const dy = startY - e.touches[0].clientY;
+                const dy = startY - e.clientY;
                 if (Math.abs(dy) > 5) moved = true;
                 const minH = 70;
                 const maxH = Math.round(window.innerHeight * 0.88);
@@ -1059,13 +1071,15 @@
                 } else {
                     mTools.style.opacity = '0';
                 }
-            }, { passive: true });
+            });
 
-            window.addEventListener('touchend', () => {
+            function finishSheetDrag(e) {
                 if (!dragging) return;
                 dragging = false;
+                if (e && handle.releasePointerCapture && handle.hasPointerCapture?.(e.pointerId)) {
+                    handle.releasePointerCapture(e.pointerId);
+                }
                 if (!moved) {
-                    // Tap pada handle: putar siklus peek -> half -> full -> half
                     setSheetSnap(sheetSnap === 'peek' ? 'half' : (sheetSnap === 'half' ? 'full' : 'half'));
                     return;
                 }
@@ -1074,7 +1088,10 @@
                 if (curH < vh * 0.24) setSheetSnap('peek');
                 else if (curH > vh * 0.64) setSheetSnap('full');
                 else setSheetSnap('half');
-            });
+            }
+
+            handle.addEventListener('pointerup', finishSheetDrag);
+            handle.addEventListener('pointercancel', finishSheetDrag);
 
             // Klik area judul daftar saat peek -> buka half
             $('m-toggle-sheet-daftar').addEventListener('click', () => {
@@ -1156,15 +1173,91 @@
         $('m-layer-tutup').addEventListener('click', () => bukaModalLayer(false));
         $('m-layer-modal').addEventListener('click', e => { if (e.target === $('m-layer-modal')) bukaModalLayer(false); });
 
-        // Modal Filter Mobile
+        // Modal Filter Mobile (Tinggi Awal Sama 44vh & Bisa Di-adjust Bebas dengan Strip)
+        const mFilterPanel = $('m-filter-panel');
+        let filterHeightPx = null;
+
+        function setFilterHeight(px, anim) {
+            const vh = window.innerHeight;
+            const minH = Math.max(210, Math.round(vh * 0.30));
+            const maxH = Math.round(vh * 0.88);
+            const clamped = Math.max(minH, Math.min(maxH, px));
+            filterHeightPx = clamped;
+            mFilterPanel.classList.toggle('sheet-anim', !!anim);
+            mFilterPanel.style.height = clamped + 'px';
+            $('m-filter-hint').textContent = clamped > vh * 0.66
+                ? 'Tarik ke bawah untuk mengecilkan'
+                : 'Tarik strip ke atas untuk memperluas';
+            if (window.kostinResizeLenis) {
+                setTimeout(() => window.kostinResizeLenis(), anim ? 330 : 0);
+            }
+        }
+
         function bukaModalFilter(v) {
             $('m-filter-modal').classList.toggle('hidden', !v);
             $('m-filter-modal').classList.toggle('flex', v);
-            if (v && window.kostinResizeLenis) window.kostinResizeLenis();
+            if (v) {
+                // Buka tepat setinggi panel daftar tengah (44vh) agar tidak ketinggian
+                setFilterHeight(ukuranSnapPx('half'), true);
+            }
         }
         $('m-btn-filter').addEventListener('click', () => bukaModalFilter(true));
         $('m-filter-tutup').addEventListener('click', () => bukaModalFilter(false));
         $('m-filter-modal').addEventListener('click', e => { if (e.target === $('m-filter-modal')) bukaModalFilter(false); });
+
+        (function initMobileFilterDrag() {
+            const dragZone = $('m-filter-drag-zone');
+            let startY = 0;
+            let startH = 0;
+            let dragging = false;
+            let moved = false;
+
+            dragZone.addEventListener('pointerdown', e => {
+                if (e.target.closest('button')) return;
+                if (e.button !== undefined && e.button !== 0) return;
+                dragging = true;
+                moved = false;
+                startY = e.clientY;
+                startH = mFilterPanel.getBoundingClientRect().height;
+                mFilterPanel.classList.remove('sheet-anim');
+                if (dragZone.setPointerCapture) dragZone.setPointerCapture(e.pointerId);
+            });
+
+            dragZone.addEventListener('pointermove', e => {
+                if (!dragging) return;
+                const dy = startY - e.clientY;
+                if (Math.abs(dy) > 5) moved = true;
+                const maxH = Math.round(window.innerHeight * 0.88);
+                const nextH = Math.max(120, Math.min(maxH, startH + dy));
+                mFilterPanel.style.height = nextH + 'px';
+            });
+
+            function finishFilterDrag(e) {
+                if (!dragging) return;
+                dragging = false;
+                if (e && dragZone.releasePointerCapture && dragZone.hasPointerCapture?.(e.pointerId)) {
+                    dragZone.releasePointerCapture(e.pointerId);
+                }
+                const vh = window.innerHeight;
+                const curH = mFilterPanel.getBoundingClientRect().height;
+                if (!moved) {
+                    // Ketuk strip: toggle antara tinggi tengah (44vh) dan tinggi penuh (84vh)
+                    const isTall = curH > vh * 0.62;
+                    setFilterHeight(isTall ? ukuranSnapPx('half') : Math.round(vh * 0.84), true);
+                    return;
+                }
+                // Tarik jauh ke bawah -> tutup filter
+                if (curH < vh * 0.24) {
+                    bukaModalFilter(false);
+                    return;
+                }
+                // Pertahankan di posisi tinggi sesuai tarikan user (adjustable bebas)
+                setFilterHeight(curH, true);
+            }
+
+            dragZone.addEventListener('pointerup', finishFilterDrag);
+            dragZone.addEventListener('pointercancel', finishFilterDrag);
+        })();
 
         const cariKos = id => daftar.find(x => x.id === id);
 
