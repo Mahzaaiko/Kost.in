@@ -53,6 +53,9 @@ class KosService
                 $idFotoBaru = [];
                 foreach (array_values($fotoBaru) as $i => $file) {
                     $path = $file->store("kos/{$kos->id}", FotoKos::disk());
+                    if ($path === false) {
+                        throw new \RuntimeException('Foto gagal diunggah ke penyimpanan ('.FotoKos::disk().').');
+                    }
                     $fileTersimpan[] = $path;
                     $foto = $kos->foto()->create(['path' => $path, 'urutan' => ++$urutan]);
                     $idFotoBaru[$i] = $foto->id;
