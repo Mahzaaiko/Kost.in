@@ -211,7 +211,8 @@
     </aside>
 
     {{-- ================= KONTEN ================= --}}
-    <div class="flex flex-1 flex-col overflow-y-scroll bg-page relative">
+    <div id="admin-main-scroll" data-lenis-scroll class="min-w-0 flex-1 overflow-y-auto bg-page relative">
+    <div data-lenis-content class="flex min-h-full flex-col">
 
         {{-- Header --}}
         <header class="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200/90 bg-white/95 px-4 py-3.5 sm:px-6 sm:py-4 backdrop-blur-md lg:px-8">
@@ -371,6 +372,7 @@
             {{-- Tempat menyuntikkan isi konten dari view lain --}}
             @yield('content')
         </main>
+    </div>
     </div>
 </div>
 </body>

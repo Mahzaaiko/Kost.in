@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +33,7 @@
     @endphp
 
     {{-- NAVBAR UTAMA: Floating Pill Navbar Konsisten untuk Semua Halaman (Beranda, Jelajah Kos, dll) --}}
-    <header class="fixed top-0 left-0 right-0 z-[2000] pt-3 sm:pt-4 pb-2 px-4 pointer-events-none bg-transparent transition-all">
+    <header class="fixed top-0 left-0 right-0 z-[2000] pt-3 sm:pt-4 pb-2 px-4 pointer-events-none bg-transparent transition-all @yield('header_class')">
         <nav class="pointer-events-auto mx-auto flex max-w-5xl items-center justify-between rounded-full bg-white px-5 sm:px-6 py-2 sm:py-2.5 shadow-md border border-emerald-100/60">
             {{-- Logo --}}
             <a href="{{ route('pengguna.beranda') }}" class="flex items-center gap-2">
@@ -101,14 +101,23 @@
             // Logika Menu Mobile
             const btn = document.getElementById('nav-toggle');
             const panel = document.getElementById('nav-mobile');
+            function setMenuMobile(buka) {
+                if (!panel) return;
+                panel.classList.toggle('hidden', !buka);
+                const bukaIkon = document.getElementById('nav-ikon-buka');
+                const tutupIkon = document.getElementById('nav-ikon-tutup');
+                if (bukaIkon) bukaIkon.classList.toggle('hidden', buka);
+                if (tutupIkon) tutupIkon.classList.toggle('hidden', !buka);
+            }
             if (btn && panel) {
-                btn.addEventListener('click', () => {
-                    const buka = panel.classList.contains('hidden');
-                    panel.classList.toggle('hidden', !buka);
-                    const bukaIkon = document.getElementById('nav-ikon-buka');
-                    const tutupIkon = document.getElementById('nav-ikon-tutup');
-                    if (bukaIkon) bukaIkon.classList.toggle('hidden', buka);
-                    if (tutupIkon) tutupIkon.classList.toggle('hidden', !buka);
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setMenuMobile(panel.classList.contains('hidden'));
+                });
+                document.addEventListener('click', (e) => {
+                    if (!panel.classList.contains('hidden') && !panel.contains(e.target) && !btn.contains(e.target)) {
+                        setMenuMobile(false);
+                    }
                 });
             }
 

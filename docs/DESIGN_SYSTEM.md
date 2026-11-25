@@ -19,7 +19,7 @@ Panduan palet warna, tipografi, dan struktur *section* untuk halaman beranda **K
 | **Emerald Brand** | `#0E7A4D` | `text-[#0E7A4D]` | Highlight teks Hero (*"Sekolah Vokasi IPB University!"*) |
 | **Body Forest** | `#244B35` | `text-[#244B35]` | Teks paragraf/subjudul di atas latar hijau muda |
 | **Forest Footer** | `#24593C` | `bg-[#24593C]` | Background utama **Footer** |
-| **Leaf Green** | `#71A857` | `bg-[#71A857]` | Background **Section Kost Populer** |
+| **Leaf Green** | `#C1E6A7` | `bg-[#C1E6A7]` | Background **Section Kost Populer** |
 | **Sage Mint** | `#CDE7C1` | `bg-[#CDE7C1]` | Background **Section Tentang** & **Section Peta** |
 | **Hero Sky Top** | `#D5EEE0` | `from-[#D5EEE0]` | Gradasi langit atas **Hero Header** (area belakang navbar) |
 | **Hero Sky Mid** | `#DFF2E6` | `via-[#DFF2E6]` | Gradasi langit tengah **Hero Header** |

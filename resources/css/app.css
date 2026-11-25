@@ -1,4 +1,10 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+html.lenis,
+html.lenis body {
+    scroll-behavior: auto !important;
+}
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

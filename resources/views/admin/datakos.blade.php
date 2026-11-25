@@ -94,16 +94,19 @@
     goToPage(page) {
         if (typeof page === 'number' && page >= 1 && page <= this.totalPages) {
             this.currentPage = page;
+            if (window.kostinResizeLenis) window.kostinResizeLenis();
         }
     },
     prevPage() {
         if (this.currentPage > 1) {
             this.currentPage--;
+            if (window.kostinResizeLenis) window.kostinResizeLenis();
         }
     },
     nextPage() {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
+            if (window.kostinResizeLenis) window.kostinResizeLenis();
         }
     }
 }">

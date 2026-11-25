@@ -85,8 +85,8 @@
 <div class="flex h-screen w-full flex-col lg:flex-row overflow-hidden">
     
     {{-- ================= PANEL KIRI (WARM DARK CHOCOLATE + MAP PREVIEW, BISA DI-SCROLL MANDIRI) ================= --}}
-    <div class="panel-kiri-scroll relative hidden w-full lg:w-1/2 h-full flex-col bg-[#362C29] text-white lg:flex overflow-y-auto">
-        <div class="relative z-10 flex min-h-full flex-col justify-between p-8 xl:p-12 pb-14 xl:pb-16 space-y-8">
+    <div data-lenis-scroll class="panel-kiri-scroll relative hidden w-full lg:w-1/2 h-full flex-col bg-[#362C29] text-white lg:flex overflow-y-auto">
+        <div data-lenis-content class="relative z-10 flex min-h-full flex-col justify-between p-8 xl:p-12 pb-14 xl:pb-16 space-y-8">
             
             {{-- Header Logo --}}
             <div class="flex items-center justify-between shrink-0">
