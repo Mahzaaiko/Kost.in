@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class FotoKos extends Model
 {
@@ -24,12 +25,23 @@ class FotoKos extends Model
         return $this->belongsTo(Kos::class, 'kos_id');
     }
 
+    /** Disk penyimpanan foto: "public" di lokal, "s3" (Neon Object Storage) di server. */
+    public static function disk(): string
+    {
+        return config('kostin.foto_disk', 'public');
+    }
+
     /**
-     * URL publik file foto (disk "public", butuh php artisan storage:link).
-     * Pakai asset() supaya mengikuti host yang sedang dibuka, bukan APP_URL.
+     * URL publik file foto.
+     * Disk "public": pakai asset() supaya mengikuti host yang sedang dibuka (butuh storage:link).
+     * Disk lain (s3): URL dari konfigurasi disk (AWS_URL).
      */
     public function url(): string
     {
-        return asset('storage/'.$this->path);
+        if (self::disk() === 'public') {
+            return asset('storage/'.$this->path);
+        }
+
+        return Storage::disk(self::disk())->url($this->path);
     }
 }

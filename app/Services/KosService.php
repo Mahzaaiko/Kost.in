@@ -13,7 +13,6 @@ use Illuminate\Validation\ValidationException;
 /** Logika simpan, hapus, dan ubah status data kos dari panel admin. */
 class KosService
 {
-    private const DISK = 'public';
 
     /**
      * Simpan kos baru atau perubahan kos lama beserta fasilitas dan fotonya.
@@ -53,7 +52,7 @@ class KosService
                 $urutan = (int) $kos->foto()->max('urutan');
                 $idFotoBaru = [];
                 foreach (array_values($fotoBaru) as $i => $file) {
-                    $path = $file->store("kos/{$kos->id}", self::DISK);
+                    $path = $file->store("kos/{$kos->id}", FotoKos::disk());
                     $fileTersimpan[] = $path;
                     $foto = $kos->foto()->create(['path' => $path, 'urutan' => ++$urutan]);
                     $idFotoBaru[$i] = $foto->id;
@@ -70,11 +69,11 @@ class KosService
             });
         } catch (\Throwable $e) {
             // Transaksi batal: buang file yang terlanjur diupload.
-            Storage::disk(self::DISK)->delete($fileTersimpan);
+            Storage::disk(FotoKos::disk())->delete($fileTersimpan);
             throw $e;
         }
 
-        Storage::disk(self::DISK)->delete($fileDihapus);
+        Storage::disk(FotoKos::disk())->delete($fileDihapus);
 
         return $kos->refresh();
     }
@@ -83,7 +82,7 @@ class KosService
     {
         $id = $kos->id;
         $kos->delete(); // foto_kos dan fasilitas_kos ikut terhapus lewat cascade
-        Storage::disk(self::DISK)->deleteDirectory("kos/{$id}");
+        Storage::disk(FotoKos::disk())->deleteDirectory("kos/{$id}");
     }
 
     /**

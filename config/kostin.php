@@ -17,6 +17,9 @@ return [
         'lng' => (float) env('KOSTIN_KAMPUS_LNG', 106.8067344),
     ],
 
+    // Disk penyimpanan foto kos. Lokal: public. Server (Vercel): s3 (Neon Object Storage).
+    'foto_disk' => env('KOSTIN_FOTO_DISK', 'public'),
+
     // Koordinat kos yang lebih jauh dari ini dari kampus dianggap salah input
     // (misalnya lat/lng tertukar).
     'radius_validasi_km' => 15,

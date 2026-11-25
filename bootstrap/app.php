@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Di Vercel aplikasi berada di belakang proxy: percayai header X-Forwarded-* supaya URL memakai https.
+        $middleware->trustProxies(at: '*');
+
         // Satu-satunya peran yang login adalah admin.
         $middleware->redirectGuestsTo(fn () => route('admin.login'));
         $middleware->redirectUsersTo(fn () => route('admin.dasbor'));
