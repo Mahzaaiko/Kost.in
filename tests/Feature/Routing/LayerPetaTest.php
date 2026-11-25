@@ -177,7 +177,7 @@ class LayerPetaTest extends TestCase
 
     public function test_halaman_jelajah_memuat_kontrol_layer(): void
     {
-        $this->get('/pengguna/jelajah-kos')
+        $this->get('/jelajah')
             ->assertOk()
             ->assertSee(json_encode(route('api.peta.jangkauan')), false)
             ->assertSee(json_encode(route('api.peta.jaringanJalan')), false)

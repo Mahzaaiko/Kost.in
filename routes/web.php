@@ -10,15 +10,15 @@ use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\JelajahController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+// PENGGUNA (tanpa prefix; nama route tetap pengguna.*)
+Route::name('pengguna.')->group(function () {
+    Route::get('/', BerandaController::class)->name('beranda');
+    Route::get('/jelajah', JelajahController::class)->name('jelajahKos');
 });
 
-// PENGGUNA
-Route::prefix('pengguna')->name('pengguna.')->group(function () {
-    Route::get('/beranda', BerandaController::class)->name('beranda');
-    Route::get('/jelajah-kos', JelajahController::class)->name('jelajahKos');
-});
+// URL lama tetap jalan, diarahkan permanen ke URL baru (query ikut terbawa).
+Route::get('/pengguna/beranda', fn () => redirect()->route('pengguna.beranda', request()->query(), 301));
+Route::get('/pengguna/jelajah-kos', fn () => redirect()->route('pengguna.jelajahKos', request()->query(), 301));
 
 // ADMIN
 Route::prefix('admin')->name('admin.')->group(function () {

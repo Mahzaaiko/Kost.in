@@ -46,7 +46,7 @@ class HalamanPenggunaTest extends TestCase
         $this->kosAktif('Kos Paling Sepi', 0, 600_000);
         Kos::create(['nama' => 'Kos Draft Rahasia']);
 
-        $response = $this->get('/pengguna/beranda')->assertOk();
+        $response = $this->get('/')->assertOk();
 
         $this->assertSame(['Kos Ramai', 'Kos Lumayan', 'Kos Sepi'], $response->viewData('kosKartu')->pluck('nama')->all());
         $this->assertCount(4, $response->viewData('kosList'));
@@ -59,7 +59,7 @@ class HalamanPenggunaTest extends TestCase
 
     public function test_beranda_tanpa_kos_aktif_tidak_error(): void
     {
-        $this->get('/pengguna/beranda')->assertOk()->assertSee('Belum ada kos yang ditampilkan');
+        $this->get('/')->assertOk()->assertSee('Belum ada kos yang ditampilkan');
     }
 
     public function test_jelajah_menampilkan_filter_dari_data_asli(): void
@@ -68,7 +68,7 @@ class HalamanPenggunaTest extends TestCase
         $draft = Kos::create(['nama' => 'Kos Draft']);
         $draft->fasilitas()->attach(Fasilitas::where('nama', 'Mushola')->value('id'));
 
-        $response = $this->get('/pengguna/jelajah-kos?q=sancang&kos=5')->assertOk();
+        $response = $this->get('/jelajah?q=sancang&kos=5')->assertOk();
 
         $this->assertSame(['AC', 'WiFi'], $response->viewData('fasilitasFilter')->pluck('nama')->all(), 'Fasilitas yang hanya dimiliki kos draft tidak ditampilkan');
         $this->assertSame(1_300_000, $response->viewData('hargaMax'));
@@ -80,6 +80,6 @@ class HalamanPenggunaTest extends TestCase
 
     public function test_jelajah_kosong_tetap_terbuka(): void
     {
-        $this->get('/pengguna/jelajah-kos')->assertOk()->assertSee('Belum ada data fasilitas');
+        $this->get('/jelajah')->assertOk()->assertSee('Belum ada data fasilitas');
     }
 }
