@@ -28,7 +28,7 @@ class FasilitasTest extends TestCase
 
         $this->get('/admin/fasilitas')
             ->assertOk()
-            ->assertSee('24 fasilitas terdaftar')
+            ->assertViewHas('dataFasilitas', fn ($d) => $d->count() === 24)
             ->assertSee('Digunakan pada 3 data kos')
             ->assertSee('Water Heater')
             ->assertDontSee('Keamanan 24 Jam');

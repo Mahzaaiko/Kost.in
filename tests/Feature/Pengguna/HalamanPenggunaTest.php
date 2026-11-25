@@ -50,16 +50,15 @@ class HalamanPenggunaTest extends TestCase
 
         $this->assertSame(['Kos Ramai', 'Kos Lumayan', 'Kos Sepi'], $response->viewData('kosKartu')->pluck('nama')->all());
         $this->assertCount(4, $response->viewData('kosList'));
-        $response->assertSee('4 Kos Terdaftar')
-            ->assertSee('Rp900.000')
-            ->assertSee('jelajah-kos?kos=', false)
+        $response->assertSee('Rp900.000')
+            ->assertSee('/jelajah?kos=', false)
             ->assertDontSee('Kos Draft Rahasia')
             ->assertDontSee('Kos Putri Melati');
     }
 
     public function test_beranda_tanpa_kos_aktif_tidak_error(): void
     {
-        $this->get('/')->assertOk()->assertSee('Belum ada kos yang ditampilkan');
+        $this->get('/')->assertOk()->assertSee('Belum ada data kos yang ditampilkan');
     }
 
     public function test_jelajah_menampilkan_filter_dari_data_asli(): void

@@ -78,7 +78,7 @@ class KosCrudTest extends TestCase
             ->assertSee('Rp700.000')
             ->assertSee('300 m')
             ->assertSee('Kos Tanpa Titik')
-            ->assertSee('2 data kos')
+            ->assertViewHas('dataKos', fn ($d) => $d->count() === 2)
             ->assertDontSee('Kos Putri Melati');
     }
 
